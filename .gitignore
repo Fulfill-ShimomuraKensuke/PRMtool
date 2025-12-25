@@ -1,0 +1,61 @@
+# ===== Build artifacts (do not commit) =====
+HELP.md
+target/
+**/target/
+.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+### VS Code ###
+.vscode/
+
+### 環境変数ファイル（機密情報） ###
+.env
+.env.local
+.env.production
+.env.*.local
+
+### application.yml（本番用設定） ###
+application-prod.yml
+application-local.yml
+**/application-prod.yml
+**/application-local.yml
+
+### ログファイル ###
+*.log
+logs/
+
+### OS固有ファイル ###
+.DS_Store
+Thumbs.db
+
+### データベースファイル ###
+*.db
+*.sqlite
+
+### 一時ファイル ###
+*.tmp
+*.bak
+*.swp
+*~

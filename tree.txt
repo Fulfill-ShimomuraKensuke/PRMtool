@@ -1,0 +1,106 @@
+PRMtool
+├─ .mvn
+│  └─ wrapper
+│     └─ maven-wrapper.properties
+├─ backend
+│  ├─ src
+│  │  ├─ main
+│  │  │  ├─ java
+│  │  │  │  └─ com
+│  │  │  │     └─ example
+│  │  │  │        └─ prmtool
+│  │  │  │           ├─ config
+│  │  │  │           │  ├─ CorsConfig.java
+│  │  │  │           │  ├─ CustomUserDetailsService.java
+│  │  │  │           │  ├─ JwtRequestFilter.java
+│  │  │  │           │  ├─ JwtUtil.java
+│  │  │  │           │  └─ SecurityConfig.java
+│  │  │  │           ├─ controller
+│  │  │  │           │  ├─ AuthController.java
+│  │  │  │           │  ├─ HealthController.java
+│  │  │  │           │  ├─ PartnerController.java
+│  │  │  │           │  ├─ ProjectController.java
+│  │  │  │           │  └─ RootController.java
+│  │  │  │           ├─ dto
+│  │  │  │           │  ├─ AuthResponse.java
+│  │  │  │           │  ├─ LoginRequest.java
+│  │  │  │           │  ├─ PartnerRequest.java
+│  │  │  │           │  ├─ PartnerResponse.java
+│  │  │  │           │  ├─ ProjectRequest.java
+│  │  │  │           │  ├─ ProjectResponse.java
+│  │  │  │           │  └─ RegisterRequest.java
+│  │  │  │           ├─ entity
+│  │  │  │           │  ├─ Partner.java
+│  │  │  │           │  ├─ Project.java
+│  │  │  │           │  └─ User.java
+│  │  │  │           ├─ repository
+│  │  │  │           │  ├─ PartnerRepository.java
+│  │  │  │           │  ├─ ProjectRepository.java
+│  │  │  │           │  └─ UserRepository.java
+│  │  │  │           ├─ service
+│  │  │  │           │  ├─ AuthService.java
+│  │  │  │           │  ├─ PartnerService.java
+│  │  │  │           │  └─ ProjectService.java
+│  │  │  │           └─ PrmtoolApplication.java
+│  │  │  └─ resources
+│  │  │     ├─ static
+│  │  │     ├─ templates
+│  │  │     └─ application.yml
+│  │  └─ test
+│  │     └─ java
+│  │        └─ com
+│  │           └─ example
+│  │              └─ prmtool
+│  │                 ├─ application-test.yml
+│  │                 └─ PrmtoolApplicationTests.java
+│  ├─ Dockerfile
+│  └─ pom.xml
+├─ frontend
+│  ├─ public
+│  │  ├─ favicon.ico
+│  │  ├─ index.html
+│  │  ├─ logo192.png
+│  │  ├─ logo512.png
+│  │  ├─ manifest.json
+│  │  └─ robots.txt
+│  ├─ src
+│  │  ├─ components
+│  │  │  ├─ Navbar.css
+│  │  │  ├─ Navbar.js
+│  │  │  └─ PrivateRoute.js
+│  │  ├─ context
+│  │  │  └─ AuthContext.js
+│  │  ├─ pages
+│  │  │  ├─ Auth.css
+│  │  │  ├─ Dashboard.css
+│  │  │  ├─ Dashboard.js
+│  │  │  ├─ Login.js
+│  │  │  ├─ Partners.css
+│  │  │  ├─ Partners.js
+│  │  │  ├─ Projects.css
+│  │  │  ├─ Projects.js
+│  │  │  └─ Register.js
+│  │  ├─ services
+│  │  │  ├─ api.js
+│  │  │  ├─ authService.js
+│  │  │  ├─ partnerService.js
+│  │  │  └─ projectService.js
+│  │  ├─ App.css
+│  │  ├─ App.js
+│  │  ├─ index.css
+│  │  ├─ index.js
+│  │  └─ logo.svg
+│  ├─ .gitignore
+│  ├─ package-lock.json
+│  └─ package.json
+├─ scripts
+│  └─ print-tree.mjs
+├─ .env.example
+├─ .gitattributes
+├─ .gitignore
+├─ docker-compose.yml
+├─ mvnw
+├─ mvnw.cmd
+├─ README.md
+├─ tree.txt
+└─ 要件定義書.md
