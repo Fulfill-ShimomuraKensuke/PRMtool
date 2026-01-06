@@ -6,10 +6,17 @@ spring:
   application:
     name: prmtool
   
-  # デフォルトプロファイル
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
 
+# ↓ これを先頭の共通設定として配置（重要！）
+app:
+  initial-admin-key: ${INITIAL_ADMIN_KEY:dev-bootstrap-secret}
+
+initial-admin:
+    enabled: ${INITIAL_ADMIN_ENABLED:true}  # 自動作成を有効化
+    email: ${INITIAL_ADMIN_EMAIL:admin@example.com}
+    password: ${INITIAL_ADMIN_PASSWORD:StrongPassword123!}
 ---
 # ==========================================
 # 開発環境設定（PostgreSQL使用）
@@ -32,7 +39,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update  # 開発環境: テーブル自動作成・更新
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -52,7 +59,7 @@ spring:
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/prmdb}
     username: ${DB_USERNAME:prmuser}
-    password: ${DB_PASSWORD}  # 必須: 環境変数から取得
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 20
@@ -64,7 +71,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: validate  # 本番: DDL変更禁止
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:
@@ -76,7 +83,7 @@ spring:
 
 ---
 # ==========================================
-# ローカルテスト環境設定（H2使用 - オプション）
+# ローカルテスト環境設定（H2使用）
 # ==========================================
 spring:
   config:
@@ -108,7 +115,7 @@ spring:
 # JWT設定
 jwt:
   secret: ${JWT_SECRET:mySecretKeyForJwtTokenGenerationAndValidationPurpose12345678901234567890}
-  expiration: ${JWT_EXPIRATION:86400000}  # 24時間
+  expiration: ${JWT_EXPIRATION:86400000}
 
 # サーバー設定
 server:

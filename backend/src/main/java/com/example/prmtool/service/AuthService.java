@@ -5,82 +5,100 @@ import com.example.prmtool.dto.AuthResponse;
 import com.example.prmtool.dto.LoginRequest;
 import com.example.prmtool.dto.RegisterRequest;
 import com.example.prmtool.entity.User;
+import com.example.prmtool.entity.User.UserRole;
 import com.example.prmtool.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Objects;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 public class AuthService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
-    private final AuthenticationManager authenticationManager;
+        private final UserRepository userRepository;
+        private final PasswordEncoder passwordEncoder;
+        private final JwtUtil jwtUtil;
+        private final AuthenticationManager authenticationManager;
 
-    public AuthService(UserRepository userRepository,
-                      PasswordEncoder passwordEncoder,
-                      JwtUtil jwtUtil,
-                      AuthenticationManager authenticationManager) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtUtil = jwtUtil;
-        this.authenticationManager = authenticationManager;
-    }
+        @Value("${app.initial-admin-key}")
+        private String initialAdminKey;
 
-    @Transactional
-    public AuthResponse register(RegisterRequest request) {
-        // メールアドレスの重複チェック
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("このメールアドレスは既に登録されています");
+        public AuthService(UserRepository userRepository,
+                        PasswordEncoder passwordEncoder,
+                        JwtUtil jwtUtil,
+                        AuthenticationManager authenticationManager) {
+                this.userRepository = userRepository;
+                this.passwordEncoder = passwordEncoder;
+                this.jwtUtil = jwtUtil;
+                this.authenticationManager = authenticationManager;
         }
 
-        // ユーザー作成
-        User user = User.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
-                .build();
+        public AuthResponse register(RegisterRequest request) {
+                throw new UnsupportedOperationException(
+                                "Direct registration is disabled. Use bootstrap registration.");
+        }
 
-        User savedUser = userRepository.save(
-                Objects.requireNonNull(user)
-        );
+        public AuthResponse login(LoginRequest request) {
+                // 認証
+                authenticationManager.authenticate(
+                                new UsernamePasswordAuthenticationToken(
+                                                request.getEmail(),
+                                                request.getPassword()));
 
-        // JWTトークン生成
-        String token = jwtUtil.generateToken(savedUser.getEmail());
+                // ユーザー取得
+                User user = userRepository.findByEmail(request.getEmail())
+                                .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません"));
 
-        return AuthResponse.builder()
-                .token(token)
-                .userId(savedUser.getId())
-                .email(savedUser.getEmail())
-                .role(savedUser.getRole())
-                .build();
-    }
+                // JWTトークン生成
+                String token = jwtUtil.generateToken(user.getEmail());
 
-    public AuthResponse login(LoginRequest request) {
-        // 認証
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
+                return AuthResponse.builder()
+                                .token(token)
+                                .userId(user.getId())
+                                .email(user.getEmail())
+                                .role(user.getRole())
+                                .build();
+        }
 
-        // ユーザー取得
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません"));
+        @Transactional
+        public AuthResponse bootstrapRegister(RegisterRequest request, String secret) {
 
-        // JWTトークン生成
-        String token = jwtUtil.generateToken(user.getEmail());
+                // ① Secretチェック
+                if (!initialAdminKey.equals(secret)) {
+                        throw new RuntimeException("Invalid initial admin key");
+                }
 
-        return AuthResponse.builder()
-                .token(token)
-                .userId(user.getId())
-                .email(user.getEmail())
-                .role(user.getRole())
-                .build();
-    }
+                // ② ADMIN が既に存在したら終了
+                long adminCount = userRepository.countByRoleForUpdate(UserRole.ADMIN);
+                if (adminCount > 0) {
+                        throw new RuntimeException("Admin already exists");
+                }
+
+                // ③ メール重複チェック
+                if (userRepository.existsByEmail(request.getEmail())) {
+                        throw new RuntimeException("このメールアドレスは既に登録されています");
+                }
+
+                // ④ 初期管理者作成
+                User admin = User.builder()
+                                .email(request.getEmail())
+                                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                                .role(UserRole.ADMIN)
+                                .createdBy("SYSTEM")
+                                .build();
+
+                User savedUser = userRepository.save(admin);
+
+                // ⑤ JWT 発行
+                String token = jwtUtil.generateToken(savedUser.getEmail());
+
+                return AuthResponse.builder()
+                                .token(token)
+                                .userId(savedUser.getId())
+                                .email(savedUser.getEmail())
+                                .role(savedUser.getRole())
+                                .build();
+        }
 }

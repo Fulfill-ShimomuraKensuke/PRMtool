@@ -55,9 +55,18 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 認証不要のエンドポイント
-                        .requestMatchers("/", "/api/health", "/error", "/favicon.ico").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // ===== 認証不要 =====
+                        .requestMatchers(
+                                "/",
+                                "/api/health",
+                                "/error",
+                                "/favicon.ico",
+                                "/api/auth/login",
+                                "/api/admin/bootstrap")
+                        .permitAll()
+
+                        // CORS Preflight
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // CORS Preflight（OPTIONS）は全て許可
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

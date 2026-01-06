@@ -27,7 +27,7 @@ public class User {
     private String email;
 
     @Column(nullable = false)
-    private String password;
+    private String passwordHash;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -35,6 +35,7 @@ public class User {
 
     @Column(nullable = false)
     private String createdBy;
+
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
