@@ -1,20 +1,24 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import './Auth.css';
+import './Login.css';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const [formData, setFormData] = useState({
+    loginId: '',
+    password: '',
+  });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { login } = useAuth();
-  const navigate = useNavigate();
-
-  React.useEffect(() => {
-    document.title = 'ログイン - PRM Tool';
-  }, []);
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,34 +26,34 @@ const Login = () => {
     setLoading(true);
 
     try {
-      await login(email, password);
+      await login(formData.loginId, formData.password);
       navigate('/dashboard');
     } catch (err) {
-      setError('ログインに失敗しました。メールアドレスとパスワードを確認してください。');
-      console.error('Login error:', err);
+      setError(err.response?.data?.message || 'ログインに失敗しました');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <h2 className="auth-title">ログイン</h2>
+    <div className="login-container">
+      <div className="login-card">
+        <h1 className="login-title">PRM Tool</h1>
+        <p className="login-subtitle">ログイン</p>
 
-        {error && <div className="auth-error">{error}</div>}
+        {error && <div className="error-message">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
-            <label htmlFor="email">メールアドレス</label>
+            <label htmlFor="loginId">ログインID</label>
             <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              id="loginId"
+              name="loginId"
+              value={formData.loginId}
+              onChange={handleChange}
               required
-              className="form-input"
-              placeholder="your@email.com"
+              autoComplete="username"
             />
           </div>
 
@@ -58,29 +62,18 @@ const Login = () => {
             <input
               type="password"
               id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
               required
-              className="form-input"
-              placeholder="••••••••"
+              autoComplete="current-password"
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="auth-button"
-          >
+          <button type="submit" className="login-button" disabled={loading}>
             {loading ? 'ログイン中...' : 'ログイン'}
           </button>
         </form>
-
-        <p className="auth-link-text">
-          アカウントをお持ちでない方は{' '}
-          <Link to="/register" className="auth-link">
-            新規登録
-          </Link>
-        </p>
       </div>
     </div>
   );

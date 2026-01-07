@@ -27,11 +27,18 @@ const Navbar = () => {
           </li>
 
           {isAdmin && (
-            <li className="navbar-item">
-              <Link to="/partners" className="navbar-link">
-                パートナー管理
-              </Link>
-            </li>
+            <>
+              <li className="navbar-item">
+                <Link to="/partners" className="navbar-link">
+                  パートナー管理
+                </Link>
+              </li>
+              <li className="navbar-item">
+                <Link to="/accounts" className="navbar-link">
+                  アカウント管理
+                </Link>
+              </li>
+            </>
           )}
 
           <li className="navbar-item">
@@ -42,7 +49,7 @@ const Navbar = () => {
         </ul>
 
         <div className="navbar-user">
-          <span className="navbar-user-email">{user?.email}</span>
+          <span className="navbar-user-name">{user?.name || user?.loginId}</span>
           <span className="navbar-user-role">
             ({user?.role === 'ADMIN' ? '管理者' : '担当者'})
           </span>

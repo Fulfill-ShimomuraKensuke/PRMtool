@@ -3,10 +3,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import Login from './pages/Login';
-import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Partners from './pages/Partners';
 import Projects from './pages/Projects';
+import Accounts from './pages/Accounts';
 import './App.css';
 
 function App() {
@@ -17,7 +17,6 @@ function App() {
           <Routes>
             {/* 公開ルート */}
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
 
             {/* 認証必要ルート */}
             <Route
@@ -45,6 +44,16 @@ function App() {
               element={
                 <PrivateRoute>
                   <Projects />
+                </PrivateRoute>
+              }
+            />
+
+            {/* 管理者のみルート - アカウント管理 */}
+            <Route
+              path="/accounts"
+              element={
+                <PrivateRoute adminOnly={true}>
+                  <Accounts />
                 </PrivateRoute>
               }
             />

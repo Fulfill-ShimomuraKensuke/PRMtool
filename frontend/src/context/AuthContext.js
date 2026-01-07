@@ -8,7 +8,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 期限切れチェック（tokenが切れていたら強制ログアウト）
     if (authService.isTokenExpired && authService.isTokenExpired()) {
       authService.logout();
       setUser(null);
@@ -21,14 +20,8 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (email, password) => {
-    const userData = await authService.login(email, password);
-    setUser(userData);
-    return userData;
-  };
-
-  const register = async (email, password, role) => {
-    const userData = await authService.register(email, password, role);
+  const login = async (loginId, password) => {
+    const userData = await authService.login(loginId, password);
     setUser(userData);
     return userData;
   };
@@ -41,7 +34,6 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     login,
-    register,
     logout,
     isAuthenticated: authService.isAuthenticated,
     isAdmin: user?.role === 'ADMIN',
