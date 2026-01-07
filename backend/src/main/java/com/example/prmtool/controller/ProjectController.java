@@ -42,12 +42,13 @@ public class ProjectController {
             Authentication authentication) {
 
         try {
-            // 🔥 修正: メールアドレスを正規化
-            String email = authentication.getName().trim().toLowerCase();
-            System.out.println("🔍 Auth email: [" + email + "]");
-            
-            User me = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + email));
+            // 🔥 修正: loginIdを使用してユーザーを検索
+            String loginId = authentication.getName().trim();
+            System.out.println("🔍 Auth loginId: [" + loginId + "]");
+
+            // emailではなくloginIdで検索
+            User me = userRepository.findByLoginId(loginId)
+                    .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + loginId));
             System.out.println("✅ User found: " + me.getId());
 
             boolean isAdmin = me.getRole() == User.UserRole.ADMIN;
@@ -63,10 +64,10 @@ public class ProjectController {
                 System.out.println("📋 Fetching visible projects for partner");
                 projects = projectService.getVisibleProjectsForPartner(me.getId());
             }
-            
+
             System.out.println("✅ Projects count: " + projects.size());
             return ResponseEntity.ok(projects);
-            
+
         } catch (Exception e) {
             System.err.println("❌ Error in getAllProjects: " + e.getMessage());
             e.printStackTrace();
@@ -76,9 +77,8 @@ public class ProjectController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ProjectResponse> getProjectById(@PathVariable UUID id, Authentication authentication) {
-        // 🔥 ここも同様に修正
-        String email = authentication.getName().trim().toLowerCase();
-        ProjectResponse response = projectService.getProjectByIdWithAccessControl(id, email);
+        String loginId = authentication.getName().trim();
+        ProjectResponse response = projectService.getProjectByIdWithAccessControl(id, loginId);
         return ResponseEntity.ok(response);
     }
 
@@ -87,9 +87,8 @@ public class ProjectController {
             @PathVariable UUID id,
             @Valid @RequestBody ProjectRequest request,
             Authentication authentication) {
-        // 🔥 ここも同様に修正
-        String email = authentication.getName().trim().toLowerCase();
-        ProjectResponse response = projectService.updateProject(id, request, email);
+        String loginId = authentication.getName().trim();
+        ProjectResponse response = projectService.updateProject(id, request, loginId);
         return ResponseEntity.ok(response);
     }
 

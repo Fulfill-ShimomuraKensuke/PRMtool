@@ -81,15 +81,16 @@ public class ProjectService {
         }
 
         @Transactional
-        public ProjectResponse updateProject(UUID id, ProjectRequest request, String editorEmail) {
+        public ProjectResponse updateProject(UUID id, ProjectRequest request, String loginId) {
                 Project project = projectRepository.findById(Objects.requireNonNull(id))
                                 .orElseThrow(() -> new RuntimeException("案件が見つかりません: " + id));
 
                 Partner partner = partnerRepository.findById(Objects.requireNonNull(request.getPartnerId()))
                                 .orElseThrow(() -> new RuntimeException("パートナーが見つかりません: " + request.getPartnerId()));
 
-                User editor = userRepository.findByEmail(editorEmail)
-                                .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + editorEmail));
+                // 🔥 修正: findByLoginId を使用
+                User editor = userRepository.findByLoginId(loginId)
+                                .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + loginId));
 
                 project.setName(request.getName());
                 project.setStatus(request.getStatus());
@@ -103,10 +104,9 @@ public class ProjectService {
         }
 
         @Transactional(readOnly = true)
-        public ProjectResponse getProjectByIdWithAccessControl(UUID id, String email) {
-                User me = userRepository.findByEmail(email)
-                                .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + email));
-
+        public ProjectResponse getProjectByIdWithAccessControl(UUID id, String loginId) {
+                User me = userRepository.findByLoginId(loginId)
+                                .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + loginId));
                 Project project = projectRepository.findById(Objects.requireNonNull(id))
                                 .orElseThrow(() -> new RuntimeException("案件が見つかりません: " + id));
 
