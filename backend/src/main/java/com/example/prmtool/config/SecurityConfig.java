@@ -51,11 +51,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // CORS設定
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // ===== 認証不要 =====
+                        // 認証不要
                         .requestMatchers(
                                 "/",
                                 "/api/health",
@@ -68,23 +67,19 @@ public class SecurityConfig {
                         // CORS Preflight
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // CORS Preflight（OPTIONS）は全て許可
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // ユーザー管理（管理者のみ） ← 追加
+                        .requestMatchers("/api/users", "/api/users/**").hasRole("ADMIN")
 
                         // パートナー管理
-                        // GET（一覧・詳細）は認証済みなら誰でもOK
                         .requestMatchers(HttpMethod.GET, "/api/partners", "/api/partners/*").authenticated()
-                        // POST/PUT/DELETE（作成・更新・削除）は管理者のみ
                         .requestMatchers(HttpMethod.POST, "/api/partners").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/partners/*").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/partners/*").hasRole("ADMIN")
 
                         // 案件管理
-                        // GET/POST/PUT（一覧・作成・更新）は認証済みなら誰でもOK
                         .requestMatchers(HttpMethod.GET, "/api/projects", "/api/projects/*").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/projects").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/projects/*").authenticated()
-                        // DELETE（削除）は管理者のみ
                         .requestMatchers(HttpMethod.DELETE, "/api/projects/*").hasRole("ADMIN")
 
                         .anyRequest().authenticated())

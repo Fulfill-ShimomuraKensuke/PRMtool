@@ -31,28 +31,31 @@ public class AdminBootstrapService {
             throw new RuntimeException("Initial admin already exists");
         }
 
-        // メールアドレスの重複チェック
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("このメールアドレスは既に登録されています");
+        // loginIdの重複チェック
+        if (userRepository.existsByLoginId(request.getLoginId())) {
+            throw new RuntimeException("このログインIDは既に登録されています");
         }
 
         // 初期管理者を作成（roleは常にADMIN）
         User admin = User.builder()
-                .email(request.getEmail())
+                .name(request.getName() != null ? request.getName() : "Admin")  // name追加
+                .loginId(request.getLoginId())  // loginId追加
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .email(request.getEmail())  // emailは任意項目に変更
                 .role(User.UserRole.ADMIN)
                 .createdBy("bootstrap")
                 .build();
 
         User savedAdmin = userRepository.save(admin);
 
-        // JWTトークン生成
-        String token = jwtUtil.generateToken(savedAdmin.getEmail());
+        // JWTトークン生成（loginIdを使用）
+        String token = jwtUtil.generateToken(savedAdmin.getLoginId());
 
         return AuthResponse.builder()
                 .token(token)
                 .userId(savedAdmin.getId())
-                .email(savedAdmin.getEmail())
+                .loginId(savedAdmin.getLoginId())  // loginId追加
+                .name(savedAdmin.getName())        // name追加
                 .role(savedAdmin.getRole())
                 .build();
     }

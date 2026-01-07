@@ -23,19 +23,33 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
+    @Column(nullable = false)
+    private String name;  // 名前（必須）
+
     @Column(nullable = false, unique = true)
-    private String email;
+    private String loginId;  // ログインID（必須・ユニーク）
 
     @Column(nullable = false)
-    private String passwordHash;
+    private String passwordHash;  // パスワード（必須）
+
+    @Column
+    private String email;  // メールアドレス（任意）
+
+    @Column
+    private String phone;  // 電話番号（任意）
+
+    @Column
+    private String address;  // 住所（任意）
+
+    @Column
+    private String position;  // 役職（任意）
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private UserRole role;
+    private UserRole role;  // 役割（必須）
 
     @Column(nullable = false)
     private String createdBy;
-
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

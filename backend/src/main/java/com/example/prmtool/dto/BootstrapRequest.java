@@ -1,6 +1,5 @@
 package com.example.prmtool.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,10 +12,13 @@ import lombok.NoArgsConstructor;
 @Builder
 public class BootstrapRequest {
 
-    @NotBlank(message = "メールアドレスは必須です")
-    @Email(message = "有効なメールアドレスを入力してください")
-    private String email;
+    private String name;  // 名前（任意、デフォルト"Admin"）
+
+    @NotBlank(message = "ログインIDは必須です")
+    private String loginId;  // ログインID（必須）
 
     @NotBlank(message = "パスワードは必須です")
-    private String password;
+    private String password;  // パスワード（必須）
+
+    private String email;  // メールアドレス（任意）
 }

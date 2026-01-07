@@ -1,6 +1,5 @@
 package com.example.prmtool.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,9 +12,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class LoginRequest {
 
-    @NotBlank(message = "メールアドレスは必須です")
-    @Email(message = "有効なメールアドレスを入力してください")
-    private String email;
+    @NotBlank(message = "ログインIDは必須です")
+    private String loginId;  // emailからloginIdに変更
 
     @NotBlank(message = "パスワードは必須です")
     private String password;

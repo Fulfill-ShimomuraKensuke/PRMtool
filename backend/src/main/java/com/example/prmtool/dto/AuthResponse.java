@@ -16,6 +16,7 @@ public class AuthResponse {
 
     private String token;
     private UUID userId;
-    private String email;
+    private String loginId;  // emailの代わりにloginId
+    private String name;     // 名前追加
     private User.UserRole role;
 }

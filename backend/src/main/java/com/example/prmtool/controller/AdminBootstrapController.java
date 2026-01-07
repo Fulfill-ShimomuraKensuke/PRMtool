@@ -41,8 +41,7 @@ public class AdminBootstrapController {
             AuthResponse response = adminBootstrapService.createInitialAdmin(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ErrorResponse(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(e.getMessage()));
         }
     }
 
