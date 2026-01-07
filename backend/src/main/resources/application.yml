@@ -9,14 +9,18 @@ spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
 
-# ↓ これを先頭の共通設定として配置（重要！）
+# Bootstrap用の管理者キー
 app:
   initial-admin-key: ${INITIAL_ADMIN_KEY:dev-bootstrap-secret}
-
-initial-admin:
-    enabled: ${INITIAL_ADMIN_ENABLED:true}  # 自動作成を有効化
+  
+  # 初期管理者の自動作成設定
+  initial-admin:
+    enabled: ${INITIAL_ADMIN_ENABLED:true}
+    name: ${INITIAL_ADMIN_NAME:管理者}
+    loginId: ${INITIAL_ADMIN_LOGIN_ID:admin}
     email: ${INITIAL_ADMIN_EMAIL:admin@example.com}
-    password: ${INITIAL_ADMIN_PASSWORD:StrongPassword123!}
+    password: ${INITIAL_ADMIN_PASSWORD:AdminPass123!}
+
 ---
 # ==========================================
 # 開発環境設定（PostgreSQL使用）

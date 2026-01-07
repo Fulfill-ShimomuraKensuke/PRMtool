@@ -18,6 +18,12 @@ public class DataInitializer {
     @Value("${app.initial-admin.enabled:true}")
     private boolean initialAdminEnabled;
 
+    @Value("${app.initial-admin.name:Admin}")
+    private String initialAdminName;
+
+    @Value("${app.initial-admin.loginId:admin}")
+    private String initialAdminLoginId;
+
     @Value("${app.initial-admin.email:admin@example.com}")
     private String initialAdminEmail;
 
@@ -41,8 +47,10 @@ public class DataInitializer {
 
             // 初期管理者を作成
             User admin = User.builder()
-                    .email(initialAdminEmail)
+                    .name(initialAdminName)
+                    .loginId(initialAdminLoginId)
                     .passwordHash(passwordEncoder.encode(initialAdminPassword))
+                    .email(initialAdminEmail)
                     .role(User.UserRole.ADMIN)
                     .createdBy("system-init")
                     .build();
@@ -51,6 +59,8 @@ public class DataInitializer {
 
             log.info("=================================================");
             log.info("初期管理者が作成されました");
+            log.info("名前: {}", initialAdminName);
+            log.info("ログインID: {}", initialAdminLoginId);
             log.info("メールアドレス: {}", initialAdminEmail);
             log.info("パスワード: {}", initialAdminPassword);
             log.info("=================================================");
