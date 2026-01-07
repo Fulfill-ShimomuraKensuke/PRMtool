@@ -53,6 +53,7 @@ public class DataInitializer {
                     .email(initialAdminEmail)
                     .role(User.UserRole.ADMIN)
                     .createdBy("system-init")
+                    .isSystemProtected(true)
                     .build();
 
             userRepository.save(admin);

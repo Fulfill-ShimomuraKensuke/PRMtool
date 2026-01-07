@@ -23,6 +23,7 @@ public class UserResponse {
     private String address;
     private String position;
     private User.UserRole role;
+    private Boolean isSystemProtected;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -36,6 +37,7 @@ public class UserResponse {
                 .address(user.getAddress())
                 .position(user.getPosition())
                 .role(user.getRole())
+                .isSystemProtected(user.getIsSystemProtected())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();

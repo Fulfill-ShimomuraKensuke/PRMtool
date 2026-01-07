@@ -51,6 +51,11 @@ public class User {
     @Column(nullable = false)
     private String createdBy;
 
+    // システム保護フラグ（初回管理者を削除・編集不可にする）
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean isSystemProtected = false;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

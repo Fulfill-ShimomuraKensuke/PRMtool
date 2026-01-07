@@ -82,16 +82,21 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + id));
 
+        // 🆕 システム保護されたユーザーは編集不可
+        if (Boolean.TRUE.equals(user.getIsSystemProtected())) {
+            throw new RuntimeException("初回管理者アカウントは編集できません");
+        }
+
         // ログインIDの変更がある場合は重複チェック
         if (!user.getLoginId().equals(request.getLoginId())) {
             if (userRepository.existsByLoginId(request.getLoginId())) {
                 throw new RuntimeException("このログインIDは既に使用されています: " + request.getLoginId());
             }
-            user.setLoginId(request.getLoginId());
         }
 
         // 基本情報の更新
         user.setName(request.getName());
+        user.setLoginId(request.getLoginId());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
         user.setAddress(request.getAddress());
@@ -112,9 +117,14 @@ public class UserService {
      */
     @Transactional
     public void deleteUser(UUID id) {
-        if (!userRepository.existsById(id)) {
-            throw new RuntimeException("ユーザーが見つかりません: " + id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + id));
+
+        // 🆕 システム保護されたユーザーは削除不可
+        if (Boolean.TRUE.equals(user.getIsSystemProtected())) {
+            throw new RuntimeException("初回管理者アカウントは削除できません");
         }
+
         userRepository.deleteById(id);
     }
 }

@@ -131,48 +131,57 @@ const Accounts = () => {
 
                 {loading ? (
                     <div className="loading">読み込み中...</div>
+                ) : users.length === 0 ? (
+                    <p className="no-data">アカウントがありません</p>
                 ) : (
-                    <div className="accounts-table-container">
-                        <table className="accounts-table">
-                            <thead>
-                                <tr>
-                                    <th>名前</th>
-                                    <th>ログインID</th>
-                                    <th>メール</th>
-                                    <th>電話番号</th>
-                                    <th>役職</th>
-                                    <th>役割</th>
-                                    <th>操作</th>
+                    <table className="accounts-table">
+                        <thead>
+                            <tr>
+                                <th>名前</th>
+                                <th>ログインID</th>
+                                <th>メールアドレス</th>
+                                <th>電話番号</th>
+                                <th>役職</th>
+                                <th>ロール</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {users.map((user) => (
+                                <tr key={user.id}>
+                                    <td>{user.name}</td>
+                                    <td>{user.loginId}</td>
+                                    <td>{user.email || 'N/A'}</td>
+                                    <td>{user.phone || 'N/A'}</td>
+                                    <td>{user.position || 'N/A'}</td>
+                                    <td>{getRoleLabel(user.role)}</td>
+                                    <td>
+                                        <div className="table-actions">
+                                            {/* 🆕 システム保護フラグをチェック */}
+                                            {user.isSystemProtected ? (
+                                                <span className="protected-badge">保護されたアカウント</span>
+                                            ) : (
+                                                <>
+                                                    <button
+                                                        onClick={() => handleOpenModal(user)}
+                                                        className="btn-edit-small"
+                                                    >
+                                                        編集
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(user.id)}
+                                                        className="btn-delete-small"
+                                                    >
+                                                        削除
+                                                    </button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {users.map((user) => (
-                                    <tr key={user.id}>
-                                        <td>{user.name}</td>
-                                        <td>{user.loginId}</td>
-                                        <td>{user.email || '-'}</td>
-                                        <td>{user.phone || '-'}</td>
-                                        <td>{user.position || '-'}</td>
-                                        <td>
-                                            <span className={`role-badge role-${user.role.toLowerCase()}`}>
-                                                {getRoleLabel(user.role)}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div className="account-actions">
-                                                <button className="btn-edit" onClick={() => handleOpenModal(user)}>
-                                                    編集
-                                                </button>
-                                                <button className="btn-delete" onClick={() => handleDelete(user.id)}>
-                                                    削除
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                            ))}
+                        </tbody>
+                    </table>
                 )}
 
                 {showModal && (
