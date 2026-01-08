@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';  // 🆕 追加
+import { useNavigate } from 'react-router-dom';
 import projectService from '../services/projectService';
 import partnerService from '../services/partnerService';
 import Navbar from '../components/Navbar';
@@ -8,8 +8,9 @@ import './Projects.css';
 
 const Projects = () => {
     const { user } = useAuth();
-    const navigate = useNavigate();  // 🆕 追加
+    const navigate = useNavigate();
     const [projects, setProjects] = useState([]);
+    const [filteredProjects, setFilteredProjects] = useState([]);  // 🆕 追加
     const [partners, setPartners] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -22,15 +23,22 @@ const Projects = () => {
         ownerId: ''
     });
 
+    // 🆕 検索・フィルター用のstate
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('ALL');
+    const [partnerFilter, setPartnerFilter] = useState('ALL');
+    const [assignedToMe, setAssignedToMe] = useState(false);
+
     const isAdmin = user?.role === 'ADMIN';
 
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
-            const projectsData = await projectService.getAll(isAdmin ? null : user?.userId);
+            const projectsData = await projectService.getAll(isAdmin ? null : user?.id);
             setProjects(projectsData);
+            setFilteredProjects(projectsData);  // 🆕 追加
 
-            const partnersData = await partnerService.getAll(isAdmin ? null : user?.userId);
+            const partnersData = await partnerService.getAll(isAdmin ? null : user?.id);
             setPartners(partnersData);
 
             setError('');
@@ -47,7 +55,40 @@ const Projects = () => {
         fetchData();
     }, [fetchData]);
 
-    // 🆕 案件カードをクリックで詳細画面へ遷移
+    // 🆕 検索・フィルター処理
+    useEffect(() => {
+        let filtered = [...projects];
+
+        // 案件名で検索
+        if (searchTerm) {
+            const searchLower = searchTerm.toLowerCase();
+            filtered = filtered.filter(project =>
+                project.name.toLowerCase().includes(searchLower) ||
+                project.partnerName.toLowerCase().includes(searchLower) ||
+                project.ownerName.toLowerCase().includes(searchLower)
+            );
+        }
+
+        // ステータスでフィルター
+        if (statusFilter !== 'ALL') {
+            filtered = filtered.filter(project => project.status === statusFilter);
+        }
+
+        // パートナーでフィルター
+        if (partnerFilter !== 'ALL') {
+            filtered = filtered.filter(project => project.partnerId === partnerFilter);
+        }
+
+        // 自分が担当している案件でフィルター
+        if (assignedToMe) {
+            filtered = filtered.filter(project =>
+                project.assignments && project.assignments.some(a => a.userId === user?.id)
+            );
+        }
+
+        setFilteredProjects(filtered);
+    }, [searchTerm, statusFilter, partnerFilter, assignedToMe, projects, user]);
+
     const handleProjectClick = (projectId) => {
         navigate(`/projects/${projectId}`);
     };
@@ -59,7 +100,7 @@ const Projects = () => {
                 name: project.name,
                 status: project.status,
                 partnerId: project.partnerId || '',
-                ownerId: project.ownerId || user?.id  // 🔧 修正
+                ownerId: project.ownerId || user?.id
             });
         } else {
             setEditingProject(null);
@@ -67,7 +108,7 @@ const Projects = () => {
                 name: '',
                 status: 'NEW',
                 partnerId: '',
-                ownerId: user?.id  // 🔧 修正
+                ownerId: user?.id
             });
         }
         setShowModal(true);
@@ -83,11 +124,13 @@ const Projects = () => {
         e.preventDefault();
         try {
             const payload = {
-                ...formData,
+                name: formData.name,
+                status: formData.status,
+                partnerId: formData.partnerId,
                 ownerId: user?.id,
+                assignedUserIds: [],
+                tableDataJson: null
             };
-
-            console.log('送信するpayload:', payload);  // 🔍 デバッグ用
 
             if (editingProject) {
                 await projectService.update(editingProject.id, payload);
@@ -97,9 +140,7 @@ const Projects = () => {
             fetchData();
             handleCloseModal();
         } catch (err) {
-            console.error('Full error:', err);  // 🔍 詳細なエラー
-            console.error('Error response:', err.response?.data);  // 🔍 バックエンドからのエラーメッセージ
-            setError('案件の保存に失敗しました');
+            setError(err.response?.data?.message || '案件の保存に失敗しました');
             console.error('Save project error:', err);
         }
     };
@@ -117,6 +158,17 @@ const Projects = () => {
         return `status-badge status-${status.toLowerCase()}`;
     };
 
+    // 🆕 フィルタークリア
+    const handleClearFilters = () => {
+        setSearchTerm('');
+        setStatusFilter('ALL');
+        setPartnerFilter('ALL');
+        setAssignedToMe(false);
+    };
+
+    // 🆕 フィルターが適用されているかチェック
+    const hasActiveFilters = searchTerm || statusFilter !== 'ALL' || partnerFilter !== 'ALL' || assignedToMe;
+
     return (
         <>
             <Navbar />
@@ -128,20 +180,85 @@ const Projects = () => {
                     </button>
                 </div>
 
+                {/* 🆕 検索・フィルターエリア */}
+                <div className="filter-section">
+                    {/* 検索バー */}
+                    <div className="search-bar">
+                        <input
+                            type="text"
+                            placeholder="案件名、パートナー名、オーナー名で検索..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="search-input"
+                        />
+                    </div>
+
+                    {/* フィルター */}
+                    <div className="filters">
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="filter-select"
+                        >
+                            <option value="ALL">全てのステータス</option>
+                            <option value="NEW">新規</option>
+                            <option value="IN_PROGRESS">進行中</option>
+                            <option value="DONE">完了</option>
+                        </select>
+
+                        <select
+                            value={partnerFilter}
+                            onChange={(e) => setPartnerFilter(e.target.value)}
+                            className="filter-select"
+                        >
+                            <option value="ALL">全てのパートナー</option>
+                            {partners.map(partner => (
+                                <option key={partner.id} value={partner.id}>
+                                    {partner.name}
+                                </option>
+                            ))}
+                        </select>
+
+                        <label className="filter-checkbox">
+                            <input
+                                type="checkbox"
+                                checked={assignedToMe}
+                                onChange={(e) => setAssignedToMe(e.target.checked)}
+                            />
+                            <span>自分が担当している案件のみ</span>
+                        </label>
+
+                        {hasActiveFilters && (
+                            <button onClick={handleClearFilters} className="btn-clear-filters">
+                                フィルターをクリア
+                            </button>
+                        )}
+                    </div>
+
+                    {/* 検索結果の件数表示 */}
+                    {hasActiveFilters && (
+                        <div className="search-results-info">
+                            {filteredProjects.length}件の案件が見つかりました
+                        </div>
+                    )}
+                </div>
+
                 {error && <div className="error-message">{error}</div>}
 
                 {loading ? (
                     <div className="loading">読み込み中...</div>
                 ) : (
                     <div className="projects-grid">
-                        {projects.length === 0 ? (
-                            <p className="no-data">案件がありません</p>
+                        {filteredProjects.length === 0 ? (
+                            <p className="no-data">
+                                {hasActiveFilters ? '検索条件に一致する案件がありません' : '案件がありません'}
+                            </p>
                         ) : (
-                            projects.map((project) => (
+                            filteredProjects.map((project) => (
                                 <div
                                     key={project.id}
                                     className="project-card"
-                                    onClick={() => handleProjectClick(project.id)}  // 🆕 クリックで詳細へ
+                                    onClick={() => handleProjectClick(project.id)}
                                 >
                                     <h3>{project.name}</h3>
                                     <div className={getStatusClass(project.status)}>
@@ -153,7 +270,6 @@ const Projects = () => {
                                     <p className="project-owner">
                                         <strong>オーナー:</strong> {project.ownerName}
                                     </p>
-                                    {/* 🆕 担当者数を表示 */}
                                     <p className="project-assignments">
                                         <strong>担当者:</strong> {project.assignments ? project.assignments.length : 0}名
                                     </p>

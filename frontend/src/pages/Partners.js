@@ -5,12 +5,13 @@ import './Partners.css';
 
 const Partners = () => {
   const [partners, setPartners] = useState([]);
+  const [filteredPartners, setFilteredPartners] = useState([]);  // 🆕 追加
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [showDetailModal, setShowDetailModal] = useState(false);  // 詳細モーダル
-  const [showEditModal, setShowEditModal] = useState(false);      // 編集モーダル
-  const [selectedPartner, setSelectedPartner] = useState(null);   // 選択中のパートナー
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [editingPartner, setEditingPartner] = useState(null);
+  const [selectedPartner, setSelectedPartner] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -18,53 +19,48 @@ const Partners = () => {
     contacts: [{ contactName: '', contactInfo: '' }]
   });
 
+  // 🆕 検索フィルター用のstate
+  const [searchTerm, setSearchTerm] = useState('');
+
   useEffect(() => {
-    document.title = 'パートナー管理 - PRM Tool';
     fetchPartners();
   }, []);
+
+  // 🆕 検索フィルター処理
+  useEffect(() => {
+    if (!searchTerm) {
+      setFilteredPartners(partners);
+    } else {
+      const filtered = partners.filter(partner => {
+        const searchLower = searchTerm.toLowerCase();
+        // パートナー名で検索
+        const nameMatch = partner.name.toLowerCase().includes(searchLower);
+        // 担当者名で検索
+        const contactMatch = partner.contacts.some(contact =>
+          contact.contactName.toLowerCase().includes(searchLower) ||
+          contact.contactInfo.toLowerCase().includes(searchLower)
+        );
+        return nameMatch || contactMatch;
+      });
+      setFilteredPartners(filtered);
+    }
+  }, [searchTerm, partners]);
 
   const fetchPartners = async () => {
     try {
       setLoading(true);
       const data = await partnerService.getAll();
       setPartners(data);
+      setFilteredPartners(data);  // 🆕 追加
       setError('');
     } catch (err) {
-      setError('パートナーの取得に失敗しました');
+      setError('パートナー一覧の取得に失敗しました');
       console.error('Fetch partners error:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  // 詳細モーダルを開く
-  const handleOpenDetailModal = (partner) => {
-    setSelectedPartner(partner);
-    setShowDetailModal(true);
-  };
-
-  // 詳細モーダルを閉じる
-  const handleCloseDetailModal = () => {
-    setShowDetailModal(false);
-    setSelectedPartner(null);
-  };
-
-  // 編集モーダルを開く（詳細モーダルから）
-  const handleOpenEditModal = (partner) => {
-    setEditingPartner(partner);
-    setFormData({
-      name: partner.name,
-      phone: partner.phone || '',
-      address: partner.address || '',
-      contacts: partner.contacts && partner.contacts.length > 0
-        ? partner.contacts
-        : [{ contactName: '', contactInfo: '' }]
-    });
-    setShowDetailModal(false);  // 詳細モーダルを閉じる
-    setShowEditModal(true);     // 編集モーダルを開く
-  };
-
-  // 新規作成モーダルを開く
   const handleOpenCreateModal = () => {
     setEditingPartner(null);
     setFormData({
@@ -76,28 +72,43 @@ const Partners = () => {
     setShowEditModal(true);
   };
 
-  // 編集モーダルを閉じる
+  const handleOpenEditModal = (partner) => {
+    setEditingPartner(partner);
+    setFormData({
+      name: partner.name,
+      phone: partner.phone || '',
+      address: partner.address || '',
+      contacts: partner.contacts.length > 0
+        ? partner.contacts.map(c => ({ contactName: c.contactName, contactInfo: c.contactInfo }))
+        : [{ contactName: '', contactInfo: '' }]
+    });
+    setShowEditModal(true);
+  };
+
   const handleCloseEditModal = () => {
     setShowEditModal(false);
     setEditingPartner(null);
-    setFormData({
-      name: '',
-      phone: '',
-      address: '',
-      contacts: [{ contactName: '', contactInfo: '' }]
-    });
+    setError('');
   };
 
-  // 担当者を追加
-  const handleAddContact = () => {
+  const handleOpenDetailModal = (partner) => {
+    setSelectedPartner(partner);
+    setShowDetailModal(true);
+  };
+
+  const handleCloseDetailModal = () => {
+    setShowDetailModal(false);
+    setSelectedPartner(null);
+  };
+
+  const addContact = () => {
     setFormData({
       ...formData,
       contacts: [...formData.contacts, { contactName: '', contactInfo: '' }]
     });
   };
 
-  // 担当者を削除
-  const handleRemoveContact = (index) => {
+  const removeContact = (index) => {
     const newContacts = formData.contacts.filter((_, i) => i !== index);
     setFormData({
       ...formData,
@@ -105,7 +116,6 @@ const Partners = () => {
     });
   };
 
-  // 担当者情報を更新
   const handleContactChange = (index, field, value) => {
     const newContacts = [...formData.contacts];
     newContacts[index][field] = value;
@@ -118,7 +128,6 @@ const Partners = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // バリデーション: 最低1人の担当者が必要
     const validContacts = formData.contacts.filter(
       c => c.contactName.trim() && c.contactInfo.trim()
     );
@@ -147,7 +156,6 @@ const Partners = () => {
     }
   };
 
-  // 削除処理（詳細モーダルから）
   const handleDelete = async (id) => {
     if (window.confirm('このパートナーを削除してもよろしいですか？')) {
       try {
@@ -161,12 +169,16 @@ const Partners = () => {
     }
   };
 
-  // 担当者人数のみ表示（カード用）
   const renderContactsCount = (contacts) => {
     if (!contacts || contacts.length === 0) {
       return <p>登録なし</p>;
     }
     return <p>{contacts.length}名</p>;
+  };
+
+  // 🆕 検索クリア
+  const handleClearSearch = () => {
+    setSearchTerm('');
   };
 
   return (
@@ -180,34 +192,51 @@ const Partners = () => {
           </button>
         </div>
 
+        {/* 🆕 検索バー */}
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="パートナー名または担当者名で検索..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+          {searchTerm && (
+            <button onClick={handleClearSearch} className="btn-clear">
+              クリア
+            </button>
+          )}
+        </div>
+
         {error && <div className="error-message">{error}</div>}
 
         {loading ? (
           <div className="loading">読み込み中...</div>
         ) : (
-          <div className="partners-grid">
-            {partners.length === 0 ? (
-              <p className="no-data">パートナーがありません</p>
-            ) : (
-              partners.map((partner) => (
-                <div
-                  key={partner.id}
-                  className="partner-card"
-                  onDoubleClick={() => handleOpenDetailModal(partner)}  // ダブルクリック
-                >
-                  <h3>{partner.name}</h3>
-                  <div className="partner-info">
+          <>
+            {/* 🆕 検索結果の件数表示 */}
+            {searchTerm && (
+              <div className="search-results-info">
+                {filteredPartners.length}件のパートナーが見つかりました
+              </div>
+            )}
+
+            <div className="partners-grid">
+              {filteredPartners.length === 0 ? (
+                <p className="no-data">
+                  {searchTerm ? '検索条件に一致するパートナーがありません' : 'パートナーがありません'}
+                </p>
+              ) : (
+                filteredPartners.map((partner) => (
+                  <div
+                    key={partner.id}
+                    className="partner-card"
+                    onDoubleClick={() => handleOpenDetailModal(partner)}
+                  >
+                    <h3>{partner.name}</h3>
                     <p><strong>代表電話:</strong> {partner.phone || '登録なし'}</p>
                     <p><strong>住所:</strong> {partner.address || '登録なし'}</p>
-                  </div>
-
-                  <div className="partner-contacts">
-                    <strong>担当者: </strong>
-                    {renderContactsCount(partner.contacts)}
-                  </div>
-
-                  {/* 詳細ボタン */}
-                  <div className="partner-actions">
+                    <p><strong>担当者:</strong> {renderContactsCount(partner.contacts)}</p>
                     <button
                       onClick={() => handleOpenDetailModal(partner)}
                       className="btn-detail"
@@ -215,77 +244,58 @@ const Partners = () => {
                       詳細
                     </button>
                   </div>
-                </div>
-              ))
-            )}
-          </div>
+                ))
+              )}
+            </div>
+          </>
         )}
 
         {/* 詳細モーダル */}
         {showDetailModal && selectedPartner && (
           <div className="modal-overlay" onClick={handleCloseDetailModal}>
-            <div className="modal-content modal-detail" onClick={(e) => e.stopPropagation()}>
-              <h2>パートナー詳細</h2>
+            <div className="modal-content modal-large" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>{selectedPartner.name}</h2>
+                <button onClick={handleCloseDetailModal} className="btn-close">×</button>
+              </div>
 
-              <div className="detail-section">
-                <div className="detail-item">
-                  <label>企業名</label>
-                  <p>{selectedPartner.name}</p>
+              <div className="partner-detail-content">
+                <div className="detail-section">
+                  <h3>基本情報</h3>
+                  <p><strong>代表電話:</strong> {selectedPartner.phone || '登録なし'}</p>
+                  <p><strong>住所:</strong> {selectedPartner.address || '登録なし'}</p>
                 </div>
 
-                <div className="detail-item">
-                  <label>代表電話</label>
-                  <p>{selectedPartner.phone || '登録なし'}</p>
-                </div>
-
-                <div className="detail-item">
-                  <label>住所</label>
-                  <p>{selectedPartner.address || '登録なし'}</p>
-                </div>
-
-                <div className="detail-item">
-                  <label>担当者</label>
+                <div className="detail-section">
+                  <h3>担当者一覧</h3>
                   {selectedPartner.contacts && selectedPartner.contacts.length > 0 ? (
-                    <div className="detail-contacts-grid">
-                      {selectedPartner.contacts.map((contact, index) => (
-                        <div key={contact.id || index} className="contact-grid-item">
-                          <div className="contact-field">
-                            <span className="contact-label">氏名：</span>
-                            <span className="contact-value">{contact.contactName}</span>
-                          </div>
-                          <div className="contact-field">
-                            <span className="contact-label">Mアドレス：</span>
-                            <span className="contact-value">{contact.contactInfo}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <table className="contacts-table">
+                      <thead>
+                        <tr>
+                          <th>氏名</th>
+                          <th>連絡先</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedPartner.contacts.map((contact, index) => (
+                          <tr key={index}>
+                            <td>{contact.contactName}</td>
+                            <td>{contact.contactInfo}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   ) : (
-                    <p>登録なし</p>
+                    <p>担当者が登録されていません</p>
                   )}
                 </div>
               </div>
 
               <div className="modal-actions">
-                <button
-                  type="button"
-                  onClick={handleCloseDetailModal}
-                  className="btn-cancel"
-                >
-                  閉じる
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOpenEditModal(selectedPartner)}
-                  className="btn-edit-modal"
-                >
+                <button onClick={() => handleOpenEditModal(selectedPartner)} className="btn-edit">
                   編集
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(selectedPartner.id)}
-                  className="btn-delete-modal"
-                >
+                <button onClick={() => handleDelete(selectedPartner.id)} className="btn-delete">
                   削除
                 </button>
               </div>
@@ -293,14 +303,12 @@ const Partners = () => {
           </div>
         )}
 
-        {/* 編集/新規作成モーダル */}
+        {/* 編集モーダル */}
         {showEditModal && (
-          <div className="modal-overlay" >
+          <div className="modal-overlay">
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <h2>{editingPartner ? 'パートナー編集' : '新規パートナー'}</h2>
-
               {error && <div className="error-message">{error}</div>}
-
               <form onSubmit={handleSubmit}>
                 <div className="form-group">
                   <label>企業名 *</label>
@@ -312,7 +320,6 @@ const Partners = () => {
                     className="form-input"
                   />
                 </div>
-
                 <div className="form-group">
                   <label>代表電話</label>
                   <input
@@ -322,7 +329,6 @@ const Partners = () => {
                     className="form-input"
                   />
                 </div>
-
                 <div className="form-group">
                   <label>住所</label>
                   <input
@@ -332,7 +338,6 @@ const Partners = () => {
                     className="form-input"
                   />
                 </div>
-
                 <div className="form-group">
                   <label>担当者 *</label>
                   <div className="contacts-list">
@@ -355,8 +360,8 @@ const Partners = () => {
                         {formData.contacts.length > 1 && (
                           <button
                             type="button"
-                            onClick={() => handleRemoveContact(index)}
-                            className="btn-remove-contact"
+                            onClick={() => removeContact(index)}
+                            className="btn-remove"
                           >
                             削除
                           </button>
@@ -364,15 +369,10 @@ const Partners = () => {
                       </div>
                     ))}
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleAddContact}
-                    className="btn-add-contact"
-                  >
+                  <button type="button" onClick={addContact} className="btn-add-contact">
                     + 担当者を追加
                   </button>
                 </div>
-
                 <div className="modal-actions">
                   <button type="button" onClick={handleCloseEditModal} className="btn-cancel">
                     キャンセル

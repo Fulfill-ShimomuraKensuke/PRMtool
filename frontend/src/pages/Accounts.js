@@ -5,6 +5,7 @@ import './Accounts.css';
 
 const Accounts = () => {
     const [users, setUsers] = useState([]);
+    const [filteredUsers, setFilteredUsers] = useState([]);  // 🆕 追加
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showModal, setShowModal] = useState(false);
@@ -20,15 +21,44 @@ const Accounts = () => {
         role: 'REP',
     });
 
+    // 🆕 検索・フィルター用のstate
+    const [searchTerm, setSearchTerm] = useState('');
+    const [roleFilter, setRoleFilter] = useState('ALL');
+
     useEffect(() => {
         fetchUsers();
     }, []);
+
+    // 🆕 検索・フィルター処理
+    useEffect(() => {
+        let filtered = [...users];
+
+        // 検索処理
+        if (searchTerm) {
+            const searchLower = searchTerm.toLowerCase();
+            filtered = filtered.filter(user =>
+                user.name.toLowerCase().includes(searchLower) ||
+                user.loginId.toLowerCase().includes(searchLower) ||
+                (user.email && user.email.toLowerCase().includes(searchLower)) ||
+                (user.phone && user.phone.toLowerCase().includes(searchLower)) ||
+                (user.position && user.position.toLowerCase().includes(searchLower))
+            );
+        }
+
+        // ロールでフィルター
+        if (roleFilter !== 'ALL') {
+            filtered = filtered.filter(user => user.role === roleFilter);
+        }
+
+        setFilteredUsers(filtered);
+    }, [searchTerm, roleFilter, users]);
 
     const fetchUsers = async () => {
         try {
             setLoading(true);
             const data = await userService.getAll();
             setUsers(data);
+            setFilteredUsers(data);  // 🆕 追加
         } catch (err) {
             setError('アカウント一覧の取得に失敗しました');
             console.error(err);
@@ -116,6 +146,15 @@ const Accounts = () => {
         return role === 'ADMIN' ? '管理者' : '担当者';
     };
 
+    // 🆕 フィルタークリア
+    const handleClearFilters = () => {
+        setSearchTerm('');
+        setRoleFilter('ALL');
+    };
+
+    // 🆕 フィルターが適用されているかチェック
+    const hasActiveFilters = searchTerm || roleFilter !== 'ALL';
+
     return (
         <>
             <Navbar />
@@ -127,12 +166,54 @@ const Accounts = () => {
                     </button>
                 </div>
 
+                {/* 🆕 検索・フィルターエリア */}
+                <div className="filter-section">
+                    {/* 検索バー */}
+                    <div className="search-bar">
+                        <input
+                            type="text"
+                            placeholder="名前、ログインID、メールアドレス、電話番号、役職で検索..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="search-input"
+                        />
+                    </div>
+
+                    {/* フィルター */}
+                    <div className="filters">
+                        <select
+                            value={roleFilter}
+                            onChange={(e) => setRoleFilter(e.target.value)}
+                            className="filter-select"
+                        >
+                            <option value="ALL">全てのロール</option>
+                            <option value="ADMIN">管理者</option>
+                            <option value="REP">担当者</option>
+                        </select>
+
+                        {hasActiveFilters && (
+                            <button onClick={handleClearFilters} className="btn-clear-filters">
+                                フィルターをクリア
+                            </button>
+                        )}
+                    </div>
+
+                    {/* 検索結果の件数表示 */}
+                    {hasActiveFilters && (
+                        <div className="search-results-info">
+                            {filteredUsers.length}件のアカウントが見つかりました
+                        </div>
+                    )}
+                </div>
+
                 {error && <div className="error-message">{error}</div>}
 
                 {loading ? (
                     <div className="loading">読み込み中...</div>
-                ) : users.length === 0 ? (
-                    <p className="no-data">アカウントがありません</p>
+                ) : filteredUsers.length === 0 ? (
+                    <p className="no-data">
+                        {hasActiveFilters ? '検索条件に一致するアカウントがありません' : 'アカウントがありません'}
+                    </p>
                 ) : (
                     <table className="accounts-table">
                         <thead>
@@ -147,7 +228,7 @@ const Accounts = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {users.map((user) => (
+                            {filteredUsers.map((user) => (
                                 <tr key={user.id}>
                                     <td>{user.name}</td>
                                     <td>{user.loginId}</td>
