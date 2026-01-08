@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';  // 🆕 追加
 import projectService from '../services/projectService';
 import partnerService from '../services/partnerService';
 import Navbar from '../components/Navbar';
+import { useAuth } from '../context/AuthContext';
 import './Projects.css';
 
 const Projects = () => {
-    const { user, isAdmin } = useAuth();
+    const { user } = useAuth();
+    const navigate = useNavigate();  // 🆕 追加
     const [projects, setProjects] = useState([]);
     const [partners, setPartners] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -20,12 +22,11 @@ const Projects = () => {
         ownerId: ''
     });
 
-    const fetchData = React.useCallback(async () => {
-        try {
-            if (!isAdmin && !user?.userId) return;
-            setLoading(true);
+    const isAdmin = user?.role === 'ADMIN';
 
-            // まず案件だけ取得（これが本体）
+    const fetchData = useCallback(async () => {
+        try {
+            setLoading(true);
             const projectsData = await projectService.getAll(isAdmin ? null : user?.userId);
             setProjects(projectsData);
 
@@ -41,12 +42,15 @@ const Projects = () => {
         }
     }, [user, isAdmin]);
 
-
     useEffect(() => {
         document.title = '案件管理 - PRM Tool';
         fetchData();
     }, [fetchData]);
 
+    // 🆕 案件カードをクリックで詳細画面へ遷移
+    const handleProjectClick = (projectId) => {
+        navigate(`/projects/${projectId}`);
+    };
 
     const handleOpenModal = (project = null) => {
         if (project) {
@@ -80,7 +84,6 @@ const Projects = () => {
         try {
             const payload = {
                 ...formData,
-                // 編集時は担当者を編集者にする
                 ownerId: user?.userId,
             };
             if (editingProject) {
@@ -137,53 +140,32 @@ const Projects = () => {
                 {loading ? (
                     <div className="loading">読み込み中...</div>
                 ) : (
-                    <div className="projects-table-container">
+                    <div className="projects-grid">
                         {projects.length === 0 ? (
                             <p className="no-data">案件がありません</p>
                         ) : (
-                            <table className="projects-table">
-                                <thead>
-                                    <tr>
-                                        <th>案件名</th>
-                                        <th>ステータス</th>
-                                        <th>パートナー</th>
-                                        <th>担当者</th>
-                                        <th>操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {projects.map((project) => (
-                                        <tr key={project.id}>
-                                            <td>{project.name}</td>
-                                            <td>
-                                                <span className={getStatusClass(project.status)}>
-                                                    {getStatusLabel(project.status)}
-                                                </span>
-                                            </td>
-                                            <td>{project.partnerName || 'N/A'}</td>
-                                            <td>{project.ownerEmail || 'N/A'}</td>
-                                            <td>
-                                                <div className="table-actions">
-                                                    <button
-                                                        onClick={() => handleOpenModal(project)}
-                                                        className="btn-edit-small"
-                                                    >
-                                                        編集
-                                                    </button>
-                                                    {isAdmin && (
-                                                        <button
-                                                            onClick={() => handleDelete(project.id)}
-                                                            className="btn-delete-small"
-                                                        >
-                                                            削除
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                            projects.map((project) => (
+                                <div
+                                    key={project.id}
+                                    className="project-card"
+                                    onClick={() => handleProjectClick(project.id)}  // 🆕 クリックで詳細へ
+                                >
+                                    <h3>{project.name}</h3>
+                                    <div className={getStatusClass(project.status)}>
+                                        {getStatusLabel(project.status)}
+                                    </div>
+                                    <p className="project-partner">
+                                        <strong>パートナー:</strong> {project.partnerName}
+                                    </p>
+                                    <p className="project-owner">
+                                        <strong>オーナー:</strong> {project.ownerName}
+                                    </p>
+                                    {/* 🆕 担当者数を表示 */}
+                                    <p className="project-assignments">
+                                        <strong>担当者:</strong> {project.assignments ? project.assignments.length : 0}名
+                                    </p>
+                                </div>
+                            ))
                         )}
                     </div>
                 )}
@@ -208,7 +190,8 @@ const Projects = () => {
                                     <select
                                         value={formData.status}
                                         onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                                        className="form-select"
+                                        required
+                                        className="form-input"
                                     >
                                         <option value="NEW">新規</option>
                                         <option value="IN_PROGRESS">進行中</option>
@@ -221,10 +204,10 @@ const Projects = () => {
                                         value={formData.partnerId}
                                         onChange={(e) => setFormData({ ...formData, partnerId: e.target.value })}
                                         required
-                                        className="form-select"
+                                        className="form-input"
                                     >
                                         <option value="">選択してください</option>
-                                        {partners.map((partner) => (
+                                        {partners.map(partner => (
                                             <option key={partner.id} value={partner.id}>
                                                 {partner.name}
                                             </option>
