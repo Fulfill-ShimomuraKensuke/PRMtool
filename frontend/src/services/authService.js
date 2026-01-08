@@ -29,12 +29,24 @@ const authService = {
   // ログイン（loginIdに変更）
   login: async (loginId, password) => {
     const response = await api.post('/api/auth/login', {
-      loginId,  // emailからloginIdに変更
+      loginId,
       password,
     });
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data));
+
+      // 🔧 userオブジェクトを整形してから保存
+      const user = {
+        id: response.data.userId,        // 🆕 id プロパティを追加
+        userId: response.data.userId,    // 互換性のため残す
+        email: response.data.email,
+        role: response.data.role,
+        name: response.data.name,
+        loginId: response.data.loginId
+      };
+
+      localStorage.setItem('user', JSON.stringify(user));
+      return user;  // 🔧 整形したuserを返す
     }
     return response.data;
   },
@@ -48,8 +60,18 @@ const authService = {
   // 現在のユーザーを取得
   getCurrentUser: () => {
     const userStr = localStorage.getItem('user');
-    if (userStr) return JSON.parse(userStr);
-    return null;
+    if (!userStr) return null;
+
+    const user = JSON.parse(userStr);
+
+    // 🔧 古いデータとの互換性のため、idがない場合は追加
+    if (user && !user.id && user.userId) {
+      user.id = user.userId;
+      // 更新して保存し直す
+      localStorage.setItem('user', JSON.stringify(user));
+    }
+
+    return user;
   },
 
   // トークンを取得

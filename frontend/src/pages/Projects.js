@@ -59,7 +59,7 @@ const Projects = () => {
                 name: project.name,
                 status: project.status,
                 partnerId: project.partnerId || '',
-                ownerId: project.ownerId || user?.userId
+                ownerId: project.ownerId || user?.id  // 🔧 修正
             });
         } else {
             setEditingProject(null);
@@ -67,7 +67,7 @@ const Projects = () => {
                 name: '',
                 status: 'NEW',
                 partnerId: '',
-                ownerId: user?.userId
+                ownerId: user?.id  // 🔧 修正
             });
         }
         setShowModal(true);
@@ -84,8 +84,11 @@ const Projects = () => {
         try {
             const payload = {
                 ...formData,
-                ownerId: user?.userId,
+                ownerId: user?.id,
             };
+
+            console.log('送信するpayload:', payload);  // 🔍 デバッグ用
+
             if (editingProject) {
                 await projectService.update(editingProject.id, payload);
             } else {
@@ -94,6 +97,8 @@ const Projects = () => {
             fetchData();
             handleCloseModal();
         } catch (err) {
+            console.error('Full error:', err);  // 🔍 詳細なエラー
+            console.error('Error response:', err.response?.data);  // 🔍 バックエンドからのエラーメッセージ
             setError('案件の保存に失敗しました');
             console.error('Save project error:', err);
         }
