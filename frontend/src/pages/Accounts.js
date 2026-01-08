@@ -157,7 +157,7 @@ const Accounts = () => {
                                     <td>{getRoleLabel(user.role)}</td>
                                     <td>
                                         <div className="table-actions">
-                                            {/* 🆕 システム保護フラグをチェック */}
+                                            {/* システム保護フラグをチェック */}
                                             {user.isSystemProtected ? (
                                                 <span className="protected-badge">保護されたアカウント</span>
                                             ) : (

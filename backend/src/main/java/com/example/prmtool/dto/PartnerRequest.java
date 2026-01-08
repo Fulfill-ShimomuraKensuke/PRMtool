@@ -22,7 +22,7 @@ public class PartnerRequest {
 
     private String address;  // 住所（任意）
 
-    // 🆕 追加: 担当者リスト（最低1人必須）
+    // 追加: 担当者リスト（最低1人必須）
     @NotEmpty(message = "担当者は最低1人必要です")
     private List<PartnerContactDTO> contacts;
 }

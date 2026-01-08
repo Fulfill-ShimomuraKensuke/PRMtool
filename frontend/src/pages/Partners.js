@@ -7,9 +7,9 @@ const Partners = () => {
   const [partners, setPartners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [showDetailModal, setShowDetailModal] = useState(false);  // 🆕 詳細モーダル
-  const [showEditModal, setShowEditModal] = useState(false);      // 🆕 編集モーダル
-  const [selectedPartner, setSelectedPartner] = useState(null);   // 🆕 選択中のパートナー
+  const [showDetailModal, setShowDetailModal] = useState(false);  // 詳細モーダル
+  const [showEditModal, setShowEditModal] = useState(false);      // 編集モーダル
+  const [selectedPartner, setSelectedPartner] = useState(null);   // 選択中のパートナー
   const [editingPartner, setEditingPartner] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -37,19 +37,19 @@ const Partners = () => {
     }
   };
 
-  // 🆕 詳細モーダルを開く
+  // 詳細モーダルを開く
   const handleOpenDetailModal = (partner) => {
     setSelectedPartner(partner);
     setShowDetailModal(true);
   };
 
-  // 🆕 詳細モーダルを閉じる
+  // 詳細モーダルを閉じる
   const handleCloseDetailModal = () => {
     setShowDetailModal(false);
     setSelectedPartner(null);
   };
 
-  // 🆕 編集モーダルを開く（詳細モーダルから）
+  // 編集モーダルを開く（詳細モーダルから）
   const handleOpenEditModal = (partner) => {
     setEditingPartner(partner);
     setFormData({
@@ -64,7 +64,7 @@ const Partners = () => {
     setShowEditModal(true);     // 編集モーダルを開く
   };
 
-  // 🆕 新規作成モーダルを開く
+  // 新規作成モーダルを開く
   const handleOpenCreateModal = () => {
     setEditingPartner(null);
     setFormData({
@@ -76,7 +76,7 @@ const Partners = () => {
     setShowEditModal(true);
   };
 
-  // 🆕 編集モーダルを閉じる
+  // 編集モーダルを閉じる
   const handleCloseEditModal = () => {
     setShowEditModal(false);
     setEditingPartner(null);
@@ -147,7 +147,7 @@ const Partners = () => {
     }
   };
 
-  // 🆕 削除処理（詳細モーダルから）
+  // 削除処理（詳細モーダルから）
   const handleDelete = async (id) => {
     if (window.confirm('このパートナーを削除してもよろしいですか？')) {
       try {
@@ -161,7 +161,7 @@ const Partners = () => {
     }
   };
 
-  // 🆕 担当者人数のみ表示（カード用）
+  // 担当者人数のみ表示（カード用）
   const renderContactsCount = (contacts) => {
     if (!contacts || contacts.length === 0) {
       return <p>登録なし</p>;
@@ -193,7 +193,7 @@ const Partners = () => {
                 <div
                   key={partner.id}
                   className="partner-card"
-                  onDoubleClick={() => handleOpenDetailModal(partner)}  // 🆕 ダブルクリック
+                  onDoubleClick={() => handleOpenDetailModal(partner)}  // ダブルクリック
                 >
                   <h3>{partner.name}</h3>
                   <div className="partner-info">
@@ -206,7 +206,7 @@ const Partners = () => {
                     {renderContactsCount(partner.contacts)}
                   </div>
 
-                  {/* 🆕 詳細ボタン */}
+                  {/* 詳細ボタン */}
                   <div className="partner-actions">
                     <button
                       onClick={() => handleOpenDetailModal(partner)}
@@ -221,7 +221,7 @@ const Partners = () => {
           </div>
         )}
 
-        {/* 🆕 詳細モーダル */}
+        {/* 詳細モーダル */}
         {showDetailModal && selectedPartner && (
           <div className="modal-overlay" onClick={handleCloseDetailModal}>
             <div className="modal-content modal-detail" onClick={(e) => e.stopPropagation()}>

@@ -82,7 +82,7 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + id));
 
-        // 🆕 システム保護されたユーザーは編集不可
+        // システム保護されたユーザーは編集不可
         if (Boolean.TRUE.equals(user.getIsSystemProtected())) {
             throw new RuntimeException("初回管理者アカウントは編集できません");
         }
@@ -120,7 +120,7 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + id));
 
-        // 🆕 システム保護されたユーザーは削除不可
+        // システム保護されたユーザーは削除不可
         if (Boolean.TRUE.equals(user.getIsSystemProtected())) {
             throw new RuntimeException("初回管理者アカウントは削除できません");
         }

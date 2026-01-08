@@ -34,7 +34,7 @@ public class Partner {
     @Column
     private String address;  // 住所（任意）
 
-    // 🆕 追加: 複数の担当者
+    // 追加: 複数の担当者
     @OneToMany(mappedBy = "partner", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<PartnerContact> contacts = new ArrayList<>();
@@ -47,13 +47,13 @@ public class Partner {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    // 🆕 追加: 担当者を追加するヘルパーメソッド
+    // 追加: 担当者を追加するヘルパーメソッド
     public void addContact(PartnerContact contact) {
         contacts.add(contact);
         contact.setPartner(this);
     }
 
-    // 🆕 追加: 担当者を削除するヘルパーメソッド
+    // 追加: 担当者を削除するヘルパーメソッド
     public void removeContact(PartnerContact contact) {
         contacts.remove(contact);
         contact.setPartner(null);
