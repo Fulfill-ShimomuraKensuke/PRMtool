@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import projectService from '../services/projectService';
+import partnerService from '../services/partnerService';
 import userService from '../services/userService';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
@@ -12,10 +13,17 @@ const ProjectDetail = () => {
     const { user } = useAuth();
     const [project, setProject] = useState(null);
     const [allUsers, setAllUsers] = useState([]);
+    const [partners, setPartners] = useState([]);  // 🆕 追加
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showAssignModal, setShowAssignModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);  // 🆕 追加
     const [selectedUsers, setSelectedUsers] = useState([]);
+    const [editFormData, setEditFormData] = useState({  // 🆕 追加
+        name: '',
+        status: 'NEW',
+        partnerId: ''
+    });
 
     const isAdmin = user?.role === 'ADMIN';
 
@@ -35,6 +43,10 @@ const ProjectDetail = () => {
                     setAllUsers(users);
                 }
 
+                // 🆕 パートナー一覧を取得
+                const partnersData = await partnerService.getAll();
+                setPartners(partnersData);
+
                 setError('');
             } catch (err) {
                 setError('案件の取得に失敗しました');
@@ -47,7 +59,7 @@ const ProjectDetail = () => {
         loadProjectData();
     }, [id, isAdmin]);
 
-    // 案件詳細を再取得（担当者保存後に使用）
+    // 案件詳細を再取得
     const fetchProjectDetail = async () => {
         try {
             setLoading(true);
@@ -63,7 +75,39 @@ const ProjectDetail = () => {
         }
     };
 
-    // 🔥 削除: fetchAllUsers（未使用のため）
+    // 🆕 編集モーダルを開く
+    const handleOpenEditModal = () => {
+        setEditFormData({
+            name: project.name,
+            status: project.status,
+            partnerId: project.partnerId
+        });
+        setShowEditModal(true);
+    };
+
+    // 🆕 編集モーダルを閉じる
+    const handleCloseEditModal = () => {
+        setShowEditModal(false);
+    };
+
+    // 🆕 基本情報の保存
+    const handleSaveBasicInfo = async () => {
+        try {
+            const payload = {
+                name: editFormData.name,
+                status: editFormData.status,
+                partnerId: editFormData.partnerId,
+                ownerId: project.ownerId,
+                assignedUserIds: selectedUsers
+            };
+            await projectService.update(id, payload);
+            await fetchProjectDetail();
+            handleCloseEditModal();
+        } catch (err) {
+            setError('案件の更新に失敗しました');
+            console.error('Update project error:', err);
+        }
+    };
 
     const handleOpenAssignModal = () => {
         setShowAssignModal(true);
@@ -91,7 +135,7 @@ const ProjectDetail = () => {
                 assignedUserIds: selectedUsers
             };
             await projectService.update(id, payload);
-            await fetchProjectDetail();  // ← ここで使用
+            await fetchProjectDetail();
             handleCloseAssignModal();
         } catch (err) {
             setError('担当者の更新に失敗しました');
@@ -154,11 +198,17 @@ const ProjectDetail = () => {
                     <button onClick={() => navigate('/projects')} className="btn-back">
                         ← 戻る
                     </button>
-                    {isAdmin && (
-                        <button onClick={handleDelete} className="btn-delete">
-                            削除
+                    <div className="header-actions">
+                        {/* 🆕 編集ボタン */}
+                        <button onClick={handleOpenEditModal} className="btn-edit-header">
+                            編集
                         </button>
-                    )}
+                        {isAdmin && (
+                            <button onClick={handleDelete} className="btn-delete">
+                                削除
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {error && <div className="error-message">{error}</div>}
@@ -211,6 +261,63 @@ const ProjectDetail = () => {
                         </p>
                     </div>
                 </div>
+
+                {/* 🆕 基本情報編集モーダル */}
+                {showEditModal && (
+                    <div className="modal-overlay">
+                        <div className="modal-content">
+                            <h2>案件情報の編集</h2>
+                            <form onSubmit={(e) => { e.preventDefault(); handleSaveBasicInfo(); }}>
+                                <div className="form-group">
+                                    <label>案件名 *</label>
+                                    <input
+                                        type="text"
+                                        value={editFormData.name}
+                                        onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                                        required
+                                        className="form-input"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>ステータス *</label>
+                                    <select
+                                        value={editFormData.status}
+                                        onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                                        required
+                                        className="form-input"
+                                    >
+                                        <option value="NEW">新規</option>
+                                        <option value="IN_PROGRESS">進行中</option>
+                                        <option value="DONE">完了</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>パートナー *</label>
+                                    <select
+                                        value={editFormData.partnerId}
+                                        onChange={(e) => setEditFormData({ ...editFormData, partnerId: e.target.value })}
+                                        required
+                                        className="form-input"
+                                    >
+                                        {partners.map(partner => (
+                                            <option key={partner.id} value={partner.id}>
+                                                {partner.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="modal-actions">
+                                    <button type="button" onClick={handleCloseEditModal} className="btn-cancel">
+                                        キャンセル
+                                    </button>
+                                    <button type="submit" className="btn-submit">
+                                        保存
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
 
                 {/* 担当者編集モーダル */}
                 {showAssignModal && (
