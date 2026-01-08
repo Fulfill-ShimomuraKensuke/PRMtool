@@ -151,27 +151,20 @@ const Accounts = () => {
                                 <tr key={user.id}>
                                     <td>{user.name}</td>
                                     <td>{user.loginId}</td>
-                                    <td>{user.email || 'N/A'}</td>
-                                    <td>{user.phone || 'N/A'}</td>
-                                    <td>{user.position || 'N/A'}</td>
+                                    <td>{user.email || '登録なし'}</td>
+                                    <td>{user.phone || '登録なし'}</td>
+                                    <td>{user.position || '登録なし'}</td>
                                     <td>{getRoleLabel(user.role)}</td>
                                     <td>
                                         <div className="table-actions">
-                                            {/* システム保護フラグをチェック */}
                                             {user.isSystemProtected ? (
                                                 <span className="protected-badge">保護されたアカウント</span>
                                             ) : (
                                                 <>
-                                                    <button
-                                                        onClick={() => handleOpenModal(user)}
-                                                        className="btn-edit-small"
-                                                    >
+                                                    <button onClick={() => handleOpenModal(user)} className="btn-edit">
                                                         編集
                                                     </button>
-                                                    <button
-                                                        onClick={() => handleDelete(user.id)}
-                                                        className="btn-delete-small"
-                                                    >
+                                                    <button onClick={() => handleDelete(user.id)} className="btn-delete-small">
                                                         削除
                                                     </button>
                                                 </>
@@ -188,84 +181,36 @@ const Accounts = () => {
                     <div className="modal-overlay" onClick={handleCloseModal}>
                         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                             <h2>{editingUser ? 'アカウント編集' : '新規アカウント作成'}</h2>
-
                             {error && <div className="error-message">{error}</div>}
-
                             <form onSubmit={handleSubmit}>
                                 <div className="form-group">
                                     <label>名前 *</label>
-                                    <input
-                                        type="text"
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={handleChange}
-                                        required
-                                    />
+                                    <input type="text" name="name" value={formData.name} onChange={handleChange} required />
                                 </div>
-
                                 <div className="form-group">
                                     <label>ログインID *</label>
-                                    <input
-                                        type="text"
-                                        name="loginId"
-                                        value={formData.loginId}
-                                        onChange={handleChange}
-                                        required
-                                    />
+                                    <input type="text" name="loginId" value={formData.loginId} onChange={handleChange} required disabled={editingUser !== null} />
                                 </div>
-
                                 <div className="form-group">
                                     <label>パスワード {editingUser ? '' : '*'}</label>
-                                    <input
-                                        type="password"
-                                        name="password"
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        required={!editingUser}
-                                        placeholder={editingUser ? '変更する場合のみ入力' : ''}
-                                    />
+                                    <input type="password" name="password" value={formData.password} onChange={handleChange} required={!editingUser} placeholder={editingUser ? '変更する場合のみ入力' : ''} />
                                 </div>
-
                                 <div className="form-group">
-                                    <label>メールアドレス</label>
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleChange}
-                                    />
+                                    <label>メールアドレス *</label>
+                                    <input type="email" name="email" value={formData.email} onChange={handleChange} required placeholder="example@example.com" />
                                 </div>
-
                                 <div className="form-group">
                                     <label>電話番号</label>
-                                    <input
-                                        type="tel"
-                                        name="phone"
-                                        value={formData.phone}
-                                        onChange={handleChange}
-                                    />
+                                    <input type="tel" name="phone" value={formData.phone} onChange={handleChange} />
                                 </div>
-
                                 <div className="form-group">
                                     <label>住所</label>
-                                    <input
-                                        type="text"
-                                        name="address"
-                                        value={formData.address}
-                                        onChange={handleChange}
-                                    />
+                                    <input type="text" name="address" value={formData.address} onChange={handleChange} />
                                 </div>
-
                                 <div className="form-group">
                                     <label>役職</label>
-                                    <input
-                                        type="text"
-                                        name="position"
-                                        value={formData.position}
-                                        onChange={handleChange}
-                                    />
+                                    <input type="text" name="position" value={formData.position} onChange={handleChange} />
                                 </div>
-
                                 <div className="form-group">
                                     <label>役割 *</label>
                                     <select name="role" value={formData.role} onChange={handleChange} required>
@@ -273,7 +218,6 @@ const Accounts = () => {
                                         <option value="ADMIN">管理者</option>
                                     </select>
                                 </div>
-
                                 <div className="modal-actions">
                                     <button type="button" className="btn-cancel" onClick={handleCloseModal}>
                                         キャンセル

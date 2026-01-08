@@ -24,53 +24,45 @@ public class User {
     private UUID id;
 
     @Column(nullable = false)
-    private String name;  // 名前（必須）
+    private String name;
 
     @Column(nullable = false, unique = true)
-    private String loginId;  // ログインID（必須・ユニーク）
+    private String loginId;
 
     @Column(nullable = false)
-    private String passwordHash;  // パスワード（必須）
+    private String passwordHash;
 
-    @Column
-    private String email;  // メールアドレス（任意）
+    @Column(nullable = false) // 🔧 nullable = false に変更（必須化）
+    private String email;
 
-    @Column
-    private String phone;  // 電話番号（任意）
-
-    @Column
-    private String address;  // 住所（任意）
-
-    @Column
-    private String position;  // 役職（任意）
+    private String phone;
+    private String address;
+    private String position;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private UserRole role;  // 役割（必須）
+    private UserRole role;
 
     @Column(nullable = false)
-    private String createdBy;
-
-    // システム保護フラグ（初回管理者を削除・編集不可にする）
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean isSystemProtected = false;
+    private Boolean isSystemProtected;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
+    private String createdBy;
+
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    /**
-     * ユーザーロールの定義
-     * ADMIN: 管理者
-     * REP: 担当者
-     */
+    // ヘルパーメソッド：システム保護されているかチェック
+    public boolean isSystemProtected() {
+        return this.isSystemProtected != null && this.isSystemProtected;
+    }
+
     public enum UserRole {
-        ADMIN,
-        REP
+        ADMIN, REP
     }
 }
