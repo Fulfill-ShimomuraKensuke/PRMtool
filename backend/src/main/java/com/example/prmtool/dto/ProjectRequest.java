@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -25,6 +26,12 @@ public class ProjectRequest {
     @NotNull(message = "パートナーIDは必須です")
     private UUID partnerId;
 
-    @NotNull(message = "担当者IDは必須です")
+    @NotNull(message = "オーナーIDは必須です")
     private UUID ownerId;
+
+    // 担当者のIDリスト（任意）
+    private List<UUID> assignedUserIds;
+
+    // テーブルデータ（JSON文字列、任意）
+    private String tableDataJson;
 }

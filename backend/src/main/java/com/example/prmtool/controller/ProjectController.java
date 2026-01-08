@@ -2,9 +2,9 @@ package com.example.prmtool.controller;
 
 import com.example.prmtool.dto.ProjectRequest;
 import com.example.prmtool.dto.ProjectResponse;
+import com.example.prmtool.entity.User;
 import com.example.prmtool.repository.UserRepository;
 import com.example.prmtool.service.ProjectService;
-import com.example.prmtool.entity.User;
 
 import jakarta.validation.Valid;
 
@@ -30,23 +30,28 @@ public class ProjectController {
         this.userRepository = userRepository;
     }
 
+    /**
+     * 案件作成
+     */
     @PostMapping
     public ResponseEntity<ProjectResponse> createProject(@Valid @RequestBody ProjectRequest request) {
         ProjectResponse response = projectService.createProject(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /**
+     * 案件一覧取得（ロール別の表示制御）
+     */
     @GetMapping
     public ResponseEntity<List<ProjectResponse>> getAllProjects(
             @RequestParam(required = false) UUID ownerId,
             Authentication authentication) {
 
         try {
-            // 🔥 修正: loginIdを使用してユーザーを検索
+            // ログインIDを使用してユーザーを検索
             String loginId = authentication.getName().trim();
             System.out.println("🔍 Auth loginId: [" + loginId + "]");
 
-            // emailではなくloginIdで検索
             User me = userRepository.findByLoginId(loginId)
                     .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + loginId));
             System.out.println("✅ User found: " + me.getId());
@@ -57,11 +62,13 @@ public class ProjectController {
             List<ProjectResponse> projects;
             if (isAdmin) {
                 System.out.println("📋 Fetching projects (admin mode)");
+                // 管理者: 全件 or オーナー指定で絞り込み
                 projects = (ownerId != null)
                         ? projectService.getProjectsByOwner(ownerId)
                         : projectService.getAllProjects();
             } else {
                 System.out.println("📋 Fetching visible projects for partner");
+                // 担当者: NEW または 自分が担当している案件のみ
                 projects = projectService.getVisibleProjectsForPartner(me.getId());
             }
 
@@ -75,13 +82,24 @@ public class ProjectController {
         }
     }
 
+    /**
+     * 案件詳細取得（アクセス制御付き）
+     */
     @GetMapping("/{id}")
-    public ResponseEntity<ProjectResponse> getProjectById(@PathVariable UUID id, Authentication authentication) {
+    public ResponseEntity<ProjectResponse> getProjectById(
+            @PathVariable UUID id, 
+            Authentication authentication) {
         String loginId = authentication.getName().trim();
         ProjectResponse response = projectService.getProjectByIdWithAccessControl(id, loginId);
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * 案件更新
+     * - 基本情報: 全員が更新可能
+     * - 担当者: 管理者のみ更新可能（ProjectServiceで制御）
+     * - テーブルデータ: 全員が更新可能
+     */
     @PutMapping("/{id}")
     public ResponseEntity<ProjectResponse> updateProject(
             @PathVariable UUID id,
@@ -92,6 +110,9 @@ public class ProjectController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * 案件削除（管理者のみ）
+     */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteProject(@PathVariable UUID id) {
