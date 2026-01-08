@@ -9,6 +9,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -24,13 +26,18 @@ public class Partner {
     private UUID id;
 
     @Column(nullable = false)
-    private String name;
+    private String name;  // 企業名（必須）
 
     @Column
-    private String address;
+    private String phone;  // 代表電話（任意）
 
     @Column
-    private String phone;
+    private String address;  // 住所（任意）
+
+    // 🆕 追加: 複数の担当者
+    @OneToMany(mappedBy = "partner", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<PartnerContact> contacts = new ArrayList<>();
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -39,4 +46,16 @@ public class Partner {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    // 🆕 追加: 担当者を追加するヘルパーメソッド
+    public void addContact(PartnerContact contact) {
+        contacts.add(contact);
+        contact.setPartner(this);
+    }
+
+    // 🆕 追加: 担当者を削除するヘルパーメソッド
+    public void removeContact(PartnerContact contact) {
+        contacts.remove(contact);
+        contact.setPartner(null);
+    }
 }
