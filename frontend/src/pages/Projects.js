@@ -99,18 +99,6 @@ const Projects = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('この案件を削除してもよろしいですか？')) {
-            try {
-                await projectService.delete(id);
-                fetchData();
-            } catch (err) {
-                setError('案件の削除に失敗しました');
-                console.error('Delete project error:', err);
-            }
-        }
-    };
-
     const getStatusLabel = (status) => {
         const labels = {
             NEW: '新規',

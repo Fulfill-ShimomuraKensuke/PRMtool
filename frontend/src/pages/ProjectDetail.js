@@ -20,12 +20,34 @@ const ProjectDetail = () => {
     const isAdmin = user?.role === 'ADMIN';
 
     useEffect(() => {
-        fetchProjectDetail();
-        if (isAdmin) {
-            fetchAllUsers();
-        }
-    }, [id]);
+        const loadProjectData = async () => {
+            try {
+                setLoading(true);
 
+                // 案件詳細を取得
+                const data = await projectService.getById(id);
+                setProject(data);
+                setSelectedUsers(data.assignments ? data.assignments.map(a => a.userId) : []);
+
+                // 管理者の場合はユーザー一覧も取得
+                if (isAdmin) {
+                    const users = await userService.getAll();
+                    setAllUsers(users);
+                }
+
+                setError('');
+            } catch (err) {
+                setError('案件の取得に失敗しました');
+                console.error('Fetch project error:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadProjectData();
+    }, [id, isAdmin]);
+
+    // 案件詳細を再取得（担当者保存後に使用）
     const fetchProjectDetail = async () => {
         try {
             setLoading(true);
@@ -41,14 +63,7 @@ const ProjectDetail = () => {
         }
     };
 
-    const fetchAllUsers = async () => {
-        try {
-            const users = await userService.getAll();
-            setAllUsers(users);
-        } catch (err) {
-            console.error('Fetch users error:', err);
-        }
-    };
+    // 🔥 削除: fetchAllUsers（未使用のため）
 
     const handleOpenAssignModal = () => {
         setShowAssignModal(true);
@@ -76,7 +91,7 @@ const ProjectDetail = () => {
                 assignedUserIds: selectedUsers
             };
             await projectService.update(id, payload);
-            await fetchProjectDetail();
+            await fetchProjectDetail();  // ← ここで使用
             handleCloseAssignModal();
         } catch (err) {
             setError('担当者の更新に失敗しました');
