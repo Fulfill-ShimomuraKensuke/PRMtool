@@ -1,393 +1,234 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';  // 🆕 追加
+import projectService from '../services/projectService';
 import partnerService from '../services/partnerService';
 import Navbar from '../components/Navbar';
-import './Partners.css';
+import { useAuth } from '../context/AuthContext';
+import './Projects.css';
 
-const Partners = () => {
-  const [partners, setPartners] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [showDetailModal, setShowDetailModal] = useState(false);  // 詳細モーダル
-  const [showEditModal, setShowEditModal] = useState(false);      // 編集モーダル
-  const [selectedPartner, setSelectedPartner] = useState(null);   // 選択中のパートナー
-  const [editingPartner, setEditingPartner] = useState(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    address: '',
-    contacts: [{ contactName: '', contactInfo: '' }]
-  });
-
-  useEffect(() => {
-    document.title = 'パートナー管理 - PRM Tool';
-    fetchPartners();
-  }, []);
-
-  const fetchPartners = async () => {
-    try {
-      setLoading(true);
-      const data = await partnerService.getAll();
-      setPartners(data);
-      setError('');
-    } catch (err) {
-      setError('パートナーの取得に失敗しました');
-      console.error('Fetch partners error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 詳細モーダルを開く
-  const handleOpenDetailModal = (partner) => {
-    setSelectedPartner(partner);
-    setShowDetailModal(true);
-  };
-
-  // 詳細モーダルを閉じる
-  const handleCloseDetailModal = () => {
-    setShowDetailModal(false);
-    setSelectedPartner(null);
-  };
-
-  // 編集モーダルを開く（詳細モーダルから）
-  const handleOpenEditModal = (partner) => {
-    setEditingPartner(partner);
-    setFormData({
-      name: partner.name,
-      phone: partner.phone || '',
-      address: partner.address || '',
-      contacts: partner.contacts && partner.contacts.length > 0
-        ? partner.contacts
-        : [{ contactName: '', contactInfo: '' }]
+const Projects = () => {
+    const { user } = useAuth();
+    const navigate = useNavigate();  // 🆕 追加
+    const [projects, setProjects] = useState([]);
+    const [partners, setPartners] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [showModal, setShowModal] = useState(false);
+    const [editingProject, setEditingProject] = useState(null);
+    const [formData, setFormData] = useState({
+        name: '',
+        status: 'NEW',
+        partnerId: '',
+        ownerId: ''
     });
-    setShowDetailModal(false);  // 詳細モーダルを閉じる
-    setShowEditModal(true);     // 編集モーダルを開く
-  };
 
-  // 新規作成モーダルを開く
-  const handleOpenCreateModal = () => {
-    setEditingPartner(null);
-    setFormData({
-      name: '',
-      phone: '',
-      address: '',
-      contacts: [{ contactName: '', contactInfo: '' }]
-    });
-    setShowEditModal(true);
-  };
+    const isAdmin = user?.role === 'ADMIN';
 
-  // 編集モーダルを閉じる
-  const handleCloseEditModal = () => {
-    setShowEditModal(false);
-    setEditingPartner(null);
-    setFormData({
-      name: '',
-      phone: '',
-      address: '',
-      contacts: [{ contactName: '', contactInfo: '' }]
-    });
-  };
+    const fetchData = useCallback(async () => {
+        try {
+            setLoading(true);
+            const projectsData = await projectService.getAll(isAdmin ? null : user?.userId);
+            setProjects(projectsData);
 
-  // 担当者を追加
-  const handleAddContact = () => {
-    setFormData({
-      ...formData,
-      contacts: [...formData.contacts, { contactName: '', contactInfo: '' }]
-    });
-  };
+            const partnersData = await partnerService.getAll(isAdmin ? null : user?.userId);
+            setPartners(partnersData);
 
-  // 担当者を削除
-  const handleRemoveContact = (index) => {
-    const newContacts = formData.contacts.filter((_, i) => i !== index);
-    setFormData({
-      ...formData,
-      contacts: newContacts.length > 0 ? newContacts : [{ contactName: '', contactInfo: '' }]
-    });
-  };
+            setError('');
+        } catch (err) {
+            setError('データの取得に失敗しました');
+            console.error('Fetch data error:', err);
+        } finally {
+            setLoading(false);
+        }
+    }, [user, isAdmin]);
 
-  // 担当者情報を更新
-  const handleContactChange = (index, field, value) => {
-    const newContacts = [...formData.contacts];
-    newContacts[index][field] = value;
-    setFormData({
-      ...formData,
-      contacts: newContacts
-    });
-  };
+    useEffect(() => {
+        document.title = '案件管理 - PRM Tool';
+        fetchData();
+    }, [fetchData]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+    // 🆕 案件カードをクリックで詳細画面へ遷移
+    const handleProjectClick = (projectId) => {
+        navigate(`/projects/${projectId}`);
+    };
 
-    // バリデーション: 最低1人の担当者が必要
-    const validContacts = formData.contacts.filter(
-      c => c.contactName.trim() && c.contactInfo.trim()
-    );
+    const handleOpenModal = (project = null) => {
+        if (project) {
+            setEditingProject(project);
+            setFormData({
+                name: project.name,
+                status: project.status,
+                partnerId: project.partnerId || '',
+                ownerId: project.ownerId || user?.userId
+            });
+        } else {
+            setEditingProject(null);
+            setFormData({
+                name: '',
+                status: 'NEW',
+                partnerId: '',
+                ownerId: user?.userId
+            });
+        }
+        setShowModal(true);
+    };
 
-    if (validContacts.length === 0) {
-      setError('最低1人の担当者（名前と連絡先）を入力してください');
-      return;
-    }
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setEditingProject(null);
+        setFormData({ name: '', status: 'NEW', partnerId: '', ownerId: '' });
+    };
 
-    try {
-      const payload = {
-        ...formData,
-        contacts: validContacts
-      };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const payload = {
+                ...formData,
+                ownerId: user?.userId,
+            };
+            if (editingProject) {
+                await projectService.update(editingProject.id, payload);
+            } else {
+                await projectService.create(payload);
+            }
+            fetchData();
+            handleCloseModal();
+        } catch (err) {
+            setError('案件の保存に失敗しました');
+            console.error('Save project error:', err);
+        }
+    };
 
-      if (editingPartner) {
-        await partnerService.update(editingPartner.id, payload);
-      } else {
-        await partnerService.create(payload);
-      }
-      fetchPartners();
-      handleCloseEditModal();
-    } catch (err) {
-      setError('パートナーの保存に失敗しました');
-      console.error('Save partner error:', err);
-    }
-  };
+    const handleDelete = async (id) => {
+        if (window.confirm('この案件を削除してもよろしいですか？')) {
+            try {
+                await projectService.delete(id);
+                fetchData();
+            } catch (err) {
+                setError('案件の削除に失敗しました');
+                console.error('Delete project error:', err);
+            }
+        }
+    };
 
-  // 削除処理（詳細モーダルから）
-  const handleDelete = async (id) => {
-    if (window.confirm('このパートナーを削除してもよろしいですか？')) {
-      try {
-        await partnerService.delete(id);
-        handleCloseDetailModal();
-        fetchPartners();
-      } catch (err) {
-        setError('パートナーの削除に失敗しました');
-        console.error('Delete partner error:', err);
-      }
-    }
-  };
+    const getStatusLabel = (status) => {
+        const labels = {
+            NEW: '新規',
+            IN_PROGRESS: '進行中',
+            DONE: '完了'
+        };
+        return labels[status] || status;
+    };
 
-  // 担当者人数のみ表示（カード用）
-  const renderContactsCount = (contacts) => {
-    if (!contacts || contacts.length === 0) {
-      return <p>登録なし</p>;
-    }
-    return <p>{contacts.length}名</p>;
-  };
+    const getStatusClass = (status) => {
+        return `status-badge status-${status.toLowerCase()}`;
+    };
 
-  return (
-    <>
-      <Navbar />
-      <div className="partners-container">
-        <div className="partners-header">
-          <h1>パートナー管理</h1>
-          <button onClick={handleOpenCreateModal} className="btn-primary">
-            新規パートナー
-          </button>
-        </div>
-
-        {error && <div className="error-message">{error}</div>}
-
-        {loading ? (
-          <div className="loading">読み込み中...</div>
-        ) : (
-          <div className="partners-grid">
-            {partners.length === 0 ? (
-              <p className="no-data">パートナーがありません</p>
-            ) : (
-              partners.map((partner) => (
-                <div
-                  key={partner.id}
-                  className="partner-card"
-                  onDoubleClick={() => handleOpenDetailModal(partner)}  // ダブルクリック
-                >
-                  <h3>{partner.name}</h3>
-                  <div className="partner-info">
-                    <p><strong>代表電話:</strong> {partner.phone || '登録なし'}</p>
-                    <p><strong>住所:</strong> {partner.address || '登録なし'}</p>
-                  </div>
-
-                  <div className="partner-contacts">
-                    <strong>担当者: </strong>
-                    {renderContactsCount(partner.contacts)}
-                  </div>
-
-                  {/* 詳細ボタン */}
-                  <div className="partner-actions">
-                    <button
-                      onClick={() => handleOpenDetailModal(partner)}
-                      className="btn-detail"
-                    >
-                      詳細
+    return (
+        <>
+            <Navbar />
+            <div className="projects-container">
+                <div className="projects-header">
+                    <h1>案件管理</h1>
+                    <button onClick={() => handleOpenModal()} className="btn-primary">
+                        新規案件
                     </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        )}
-
-        {/* 詳細モーダル */}
-        {showDetailModal && selectedPartner && (
-          <div className="modal-overlay" onClick={handleCloseDetailModal}>
-            <div className="modal-content modal-detail" onClick={(e) => e.stopPropagation()}>
-              <h2>パートナー詳細</h2>
-
-              <div className="detail-section">
-                <div className="detail-item">
-                  <label>企業名</label>
-                  <p>{selectedPartner.name}</p>
                 </div>
 
-                <div className="detail-item">
-                  <label>代表電話</label>
-                  <p>{selectedPartner.phone || '登録なし'}</p>
-                </div>
+                {error && <div className="error-message">{error}</div>}
 
-                <div className="detail-item">
-                  <label>住所</label>
-                  <p>{selectedPartner.address || '登録なし'}</p>
-                </div>
-
-                <div className="detail-item">
-                  <label>担当者</label>
-                  {selectedPartner.contacts && selectedPartner.contacts.length > 0 ? (
-                    <div className="detail-contacts-grid">
-                      {selectedPartner.contacts.map((contact, index) => (
-                        <div key={contact.id || index} className="contact-grid-item">
-                          <div className="contact-field">
-                            <span className="contact-label">氏名：</span>
-                            <span className="contact-value">{contact.contactName}</span>
-                          </div>
-                          <div className="contact-field">
-                            <span className="contact-label">Mアドレス：</span>
-                            <span className="contact-value">{contact.contactInfo}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p>登録なし</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="modal-actions">
-                <button
-                  type="button"
-                  onClick={handleCloseDetailModal}
-                  className="btn-cancel"
-                >
-                  閉じる
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOpenEditModal(selectedPartner)}
-                  className="btn-edit-modal"
-                >
-                  編集
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(selectedPartner.id)}
-                  className="btn-delete-modal"
-                >
-                  削除
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 編集/新規作成モーダル */}
-        {showEditModal && (
-          <div className="modal-overlay" >
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <h2>{editingPartner ? 'パートナー編集' : '新規パートナー'}</h2>
-
-              {error && <div className="error-message">{error}</div>}
-
-              <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                  <label>企業名 *</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>代表電話</label>
-                  <input
-                    type="text"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>住所</label>
-                  <input
-                    type="text"
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>担当者 *</label>
-                  <div className="contacts-list">
-                    {formData.contacts.map((contact, index) => (
-                      <div key={index} className="contact-item">
-                        <input
-                          type="text"
-                          placeholder="担当者名"
-                          value={contact.contactName}
-                          onChange={(e) => handleContactChange(index, 'contactName', e.target.value)}
-                          className="form-input contact-name-input"
-                        />
-                        <input
-                          type="text"
-                          placeholder="連絡先（電話/メール）"
-                          value={contact.contactInfo}
-                          onChange={(e) => handleContactChange(index, 'contactInfo', e.target.value)}
-                          className="form-input contact-info-input"
-                        />
-                        {formData.contacts.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveContact(index)}
-                            className="btn-remove-contact"
-                          >
-                            削除
-                          </button>
+                {loading ? (
+                    <div className="loading">読み込み中...</div>
+                ) : (
+                    <div className="projects-grid">
+                        {projects.length === 0 ? (
+                            <p className="no-data">案件がありません</p>
+                        ) : (
+                            projects.map((project) => (
+                                <div
+                                    key={project.id}
+                                    className="project-card"
+                                    onClick={() => handleProjectClick(project.id)}  // 🆕 クリックで詳細へ
+                                >
+                                    <h3>{project.name}</h3>
+                                    <div className={getStatusClass(project.status)}>
+                                        {getStatusLabel(project.status)}
+                                    </div>
+                                    <p className="project-partner">
+                                        <strong>パートナー:</strong> {project.partnerName}
+                                    </p>
+                                    <p className="project-owner">
+                                        <strong>オーナー:</strong> {project.ownerName}
+                                    </p>
+                                    {/* 🆕 担当者数を表示 */}
+                                    <p className="project-assignments">
+                                        <strong>担当者:</strong> {project.assignments ? project.assignments.length : 0}名
+                                    </p>
+                                </div>
+                            ))
                         )}
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleAddContact}
-                    className="btn-add-contact"
-                  >
-                    + 担当者を追加
-                  </button>
-                </div>
+                    </div>
+                )}
 
-                <div className="modal-actions">
-                  <button type="button" onClick={handleCloseEditModal} className="btn-cancel">
-                    キャンセル
-                  </button>
-                  <button type="submit" className="btn-submit">
-                    保存
-                  </button>
-                </div>
-              </form>
+                {showModal && (
+                    <div className="modal-overlay" onClick={handleCloseModal}>
+                        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                            <h2>{editingProject ? '案件編集' : '新規案件'}</h2>
+                            <form onSubmit={handleSubmit}>
+                                <div className="form-group">
+                                    <label>案件名</label>
+                                    <input
+                                        type="text"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        required
+                                        className="form-input"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>ステータス</label>
+                                    <select
+                                        value={formData.status}
+                                        onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                                        required
+                                        className="form-input"
+                                    >
+                                        <option value="NEW">新規</option>
+                                        <option value="IN_PROGRESS">進行中</option>
+                                        <option value="DONE">完了</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>パートナー</label>
+                                    <select
+                                        value={formData.partnerId}
+                                        onChange={(e) => setFormData({ ...formData, partnerId: e.target.value })}
+                                        required
+                                        className="form-input"
+                                    >
+                                        <option value="">選択してください</option>
+                                        {partners.map(partner => (
+                                            <option key={partner.id} value={partner.id}>
+                                                {partner.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="modal-actions">
+                                    <button type="button" onClick={handleCloseModal} className="btn-cancel">
+                                        キャンセル
+                                    </button>
+                                    <button type="submit" className="btn-submit">
+                                        保存
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
             </div>
-          </div>
-        )}
-      </div>
-    </>
-  );
+        </>
+    );
 };
 
-export default Partners;
+export default Projects;
