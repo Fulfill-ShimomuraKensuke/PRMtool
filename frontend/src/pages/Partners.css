@@ -160,3 +160,259 @@
 .btn-submit:hover {
   opacity: 0.9;
 }
+
+/* 担当者リスト表示 */
+.partner-info {
+    margin: 0.5rem 0;
+}
+
+.partner-info p {
+    margin: 0.25rem 0;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.partner-contacts {
+    margin: 1rem 0;
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+}
+
+.partner-contacts strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+}
+
+.partner-contacts ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.partner-contacts li {
+    padding: 0.25rem 0;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+/* 担当者入力フォーム */
+.contacts-list {
+    margin-bottom: 1rem;
+}
+
+.contact-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    align-items: center;
+}
+
+.contact-name-input,
+.contact-info-input {
+    width: 100%;
+}
+
+.btn-remove-contact {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.btn-remove-contact:hover {
+    opacity: 0.9;
+}
+
+.btn-add-contact {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: opacity 0.2s;
+}
+
+.btn-add-contact:hover {
+    opacity: 0.9;
+}
+
+/* パートナーカードのダブルクリック対応 */
+.partner-card {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.partner-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 詳細ボタン */
+.btn-detail {
+    width: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 0.6rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: opacity 0.2s;
+}
+
+.btn-detail:hover {
+    opacity: 0.9;
+}
+
+/* 詳細モーダル */
+.modal-detail {
+    max-width: 700px;
+}
+
+.detail-section {
+    margin: 1.5rem 0;
+}
+
+.detail-item {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-item label {
+    display: block;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.detail-item p {
+    margin: 0;
+    color: #555;
+    font-size: 1rem;
+}
+
+.detail-contacts-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.detail-contacts-list li {
+    padding: 0.5rem 0;
+    color: #555;
+    font-size: 0.95rem;
+}
+
+.detail-contacts-list strong {
+    color: #2c3e50;
+}
+
+/* 詳細モーダルのボタン */
+.btn-edit-modal,
+.btn-delete-modal {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: opacity 0.2s;
+}
+
+.btn-edit-modal {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-edit-modal:hover {
+    opacity: 0.9;
+}
+
+.btn-delete-modal {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-delete-modal:hover {
+    opacity: 0.9;
+}
+
+/* 担当者表示の省略記号 */
+.partner-contacts ul li.more-indicator {
+    color: #999;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* パートナーカードの担当者人数表示 */
+.partner-contacts {
+    margin: 1rem 0;
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+}
+
+.partner-contacts strong {
+    margin-right: 0.5rem;
+    color: #2c3e50;
+}
+
+.partner-contacts p {
+    margin: 0;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+/* 詳細モーダルの担当者グリッド表示 */
+.detail-contacts-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.contact-grid-item {
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border-left: 3px solid #667eea;
+}
+
+.contact-field {
+    display: flex;
+    margin-bottom: 0.25rem;
+}
+
+.contact-field:last-child {
+    margin-bottom: 0;
+}
+
+.contact-label {
+    font-weight: 600;
+    color: #2c3e50;
+    min-width: 100px;
+    flex-shrink: 0;
+}
+
+.contact-value {
+    color: #555;
+    flex-grow: 1;
+}
