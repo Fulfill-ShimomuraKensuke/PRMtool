@@ -73,11 +73,25 @@ const projectService = {
   importCsv: async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     const response = await api.post('/api/projects/import-csv', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
+    });
+    return response.data;
+  },
+
+  // テーブルデータ取得
+  getTableData: async (projectId) => {
+    const response = await api.get(`/api/projects/${projectId}/table-data`);
+    return response.data;
+  },
+
+  // テーブルデータ保存
+  saveTableData: async (projectId, tableDataJson) => {
+    const response = await api.put(`/api/projects/${projectId}/table-data`, {
+      tableDataJson
     });
     return response.data;
   }
