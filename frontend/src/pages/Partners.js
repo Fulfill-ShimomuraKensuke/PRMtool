@@ -28,6 +28,7 @@ const Partners = () => {
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState(null);
   useEffect(() => {
+    document.title = 'パートナー管理 - PRM Tool';
     fetchPartners();
   }, []);
 
@@ -176,9 +177,9 @@ const Partners = () => {
 
   const renderContactsCount = (contacts) => {
     if (!contacts || contacts.length === 0) {
-      return <span>登録なし</span>;  // <p> → <span>
+      return <span>登録なし</span>;
     }
-    return <span>{contacts.length}名</span>;  // <p> → <span>
+    return <span>{contacts.length}名</span>;
   };
 
   // 検索クリア

@@ -10,7 +10,7 @@ const Projects = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
-  const [filteredProjects, setFilteredProjects] = useState([]);  // 追加
+  const [filteredProjects, setFilteredProjects] = useState([]);
   const [partners, setPartners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -42,7 +42,7 @@ const Projects = () => {
       setLoading(true);
       const projectsData = await projectService.getAll(isAdmin ? null : user?.id);
       setProjects(projectsData);
-      setFilteredProjects(projectsData);  // 追加
+      setFilteredProjects(projectsData);
 
       const partnersData = await partnerService.getAll(isAdmin ? null : user?.id);
       setPartners(partnersData);

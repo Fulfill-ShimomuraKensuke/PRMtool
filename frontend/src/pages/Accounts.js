@@ -5,7 +5,7 @@ import './Accounts.css';
 
 const Accounts = () => {
     const [users, setUsers] = useState([]);
-    const [filteredUsers, setFilteredUsers] = useState([]);  // 🆕 追加
+    const [filteredUsers, setFilteredUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showModal, setShowModal] = useState(false);
@@ -21,15 +21,16 @@ const Accounts = () => {
         role: 'REP',
     });
 
-    // 🆕 検索・フィルター用のstate
+    // 検索・フィルター用のstate
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState('ALL');
 
     useEffect(() => {
+        document.title = 'アカウント管理 - PRM Tool';
         fetchUsers();
     }, []);
 
-    // 🆕 検索・フィルター処理
+    // 検索・フィルター処理
     useEffect(() => {
         let filtered = [...users];
 
@@ -58,7 +59,7 @@ const Accounts = () => {
             setLoading(true);
             const data = await userService.getAll();
             setUsers(data);
-            setFilteredUsers(data);  // 🆕 追加
+            setFilteredUsers(data);
         } catch (err) {
             setError('アカウント一覧の取得に失敗しました');
             console.error(err);
@@ -146,13 +147,13 @@ const Accounts = () => {
         return role === 'ADMIN' ? '管理者' : '担当者';
     };
 
-    // 🆕 フィルタークリア
+    // フィルタークリア
     const handleClearFilters = () => {
         setSearchTerm('');
         setRoleFilter('ALL');
     };
 
-    // 🆕 フィルターが適用されているかチェック
+    // フィルターが適用されているかチェック
     const hasActiveFilters = searchTerm || roleFilter !== 'ALL';
 
     return (
@@ -166,7 +167,7 @@ const Accounts = () => {
                     </button>
                 </div>
 
-                {/* 🆕 検索・フィルターエリア */}
+                {/* 検索・フィルターエリア */}
                 <div className="filter-section">
                     {/* 検索バー */}
                     <div className="search-bar">

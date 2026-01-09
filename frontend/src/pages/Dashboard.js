@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';  // 追加
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import projectService from '../services/projectService';
 import Navbar from '../components/Navbar';
@@ -7,7 +7,7 @@ import './Dashboard.css';
 
 const Dashboard = () => {
     const { user } = useAuth();
-    const navigate = useNavigate();  // 追加
+    const navigate = useNavigate();
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
