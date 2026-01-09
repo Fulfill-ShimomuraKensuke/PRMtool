@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';  // 🆕 追加
+import { useNavigate } from 'react-router-dom';  // 追加
 import { useAuth } from '../context/AuthContext';
 import projectService from '../services/projectService';
 import Navbar from '../components/Navbar';
@@ -7,7 +7,7 @@ import './Dashboard.css';
 
 const Dashboard = () => {
     const { user } = useAuth();
-    const navigate = useNavigate();  // 🆕 追加
+    const navigate = useNavigate();  // 追加
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -43,7 +43,7 @@ const Dashboard = () => {
         return `status-badge status-${status.toLowerCase()}`;
     };
 
-    // 🆕 案件カードをクリックで詳細画面へ遷移
+    // 案件カードをクリックで詳細画面へ遷移
     const handleProjectClick = (projectId) => {
         navigate(`/projects/${projectId}`);
     };
@@ -98,8 +98,8 @@ const Dashboard = () => {
                                         <div
                                             key={project.id}
                                             className="project-item"
-                                            onClick={() => handleProjectClick(project.id)}  // 🆕 クリックで詳細へ
-                                            style={{ cursor: 'pointer' }}  // 🆕 カーソル変更
+                                            onClick={() => handleProjectClick(project.id)}  // クリックで詳細へ
+                                            style={{ cursor: 'pointer' }}  // カーソル変更
                                         >
                                             <div className="project-item-header">
                                                 <h3>{project.name}</h3>
