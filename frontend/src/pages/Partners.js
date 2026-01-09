@@ -176,9 +176,9 @@ const Partners = () => {
 
   const renderContactsCount = (contacts) => {
     if (!contacts || contacts.length === 0) {
-      return <p>登録なし</p>;
+      return <span>登録なし</span>;  // <p> → <span>
     }
-    return <p>{contacts.length}名</p>;
+    return <span>{contacts.length}名</span>;  // <p> → <span>
   };
 
   // 検索クリア
