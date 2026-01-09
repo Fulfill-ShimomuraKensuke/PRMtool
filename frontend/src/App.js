@@ -6,7 +6,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Partners from './pages/Partners';
 import Projects from './pages/Projects';
-import ProjectDetail from './pages/ProjectDetail';  // 🆕 追加
+import ProjectDetail from './pages/ProjectDetail';
 import Accounts from './pages/Accounts';
 import './App.css';
 

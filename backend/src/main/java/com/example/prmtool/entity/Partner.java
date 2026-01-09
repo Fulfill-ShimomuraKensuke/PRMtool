@@ -21,41 +21,41 @@ import java.util.UUID;
 @Builder
 public class Partner {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private UUID id; // パートナーの一意識別子
 
-    @Column(nullable = false)
-    private String name;  // 企業名（必須）
+  @Column(nullable = false)
+  private String name; // 企業名（必須）
 
-    @Column
-    private String phone;  // 代表電話（任意）
+  @Column
+  private String phone; // 代表電話（任意）
 
-    @Column
-    private String address;  // 住所（任意）
+  @Column
+  private String address; // 住所（任意）
 
-    // 追加: 複数の担当者
-    @OneToMany(mappedBy = "partner", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<PartnerContact> contacts = new ArrayList<>();
+  // 複数の担当者
+  @OneToMany(mappedBy = "partner", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Builder.Default
+  private List<PartnerContact> contacts = new ArrayList<>();
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+  @CreationTimestamp
+  @Column(nullable = false, updatable = false)
+  private LocalDateTime createdAt;
 
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
+  @UpdateTimestamp
+  @Column(nullable = false)
+  private LocalDateTime updatedAt;
 
-    // 追加: 担当者を追加するヘルパーメソッド
-    public void addContact(PartnerContact contact) {
-        contacts.add(contact);
-        contact.setPartner(this);
-    }
+  // 担当者を追加するヘルパーメソッド
+  public void addContact(PartnerContact contact) {
+    contacts.add(contact);
+    contact.setPartner(this);
+  }
 
-    // 追加: 担当者を削除するヘルパーメソッド
-    public void removeContact(PartnerContact contact) {
-        contacts.remove(contact);
-        contact.setPartner(null);
-    }
+  // 担当者を削除するヘルパーメソッド
+  public void removeContact(PartnerContact contact) {
+    contacts.remove(contact);
+    contact.setPartner(null);
+  }
 }

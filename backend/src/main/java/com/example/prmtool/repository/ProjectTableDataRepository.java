@@ -10,13 +10,9 @@ import java.util.UUID;
 @Repository
 public interface ProjectTableDataRepository extends JpaRepository<ProjectTableData, UUID> {
 
-    /**
-     * プロジェクトIDからテーブルデータを取得
-     */
-    Optional<ProjectTableData> findByProjectId(UUID projectId);
+  // プロジェクトIDからテーブルデータを取得
+  Optional<ProjectTableData> findByProjectId(UUID projectId);
 
-    /**
-     * プロジェクトIDでテーブルデータを削除
-     */
-    void deleteByProjectId(UUID projectId);
+  // プロジェクトIDでテーブルデータを削除
+  void deleteByProjectId(UUID projectId);
 }

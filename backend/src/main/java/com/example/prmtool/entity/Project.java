@@ -21,57 +21,55 @@ import java.util.UUID;
 @Builder
 public class Project {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private UUID id;
 
-    @Column(nullable = false)
-    private String name;
+  @Column(nullable = false)
+  private String name;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private ProjectStatus status;
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private ProjectStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "partner_id", nullable = false)
-    private Partner partner;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "partner_id", nullable = false)
+  private Partner partner; // 関連するパートナー企業
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id", nullable = false)
-    private User owner; // メイン担当者（作成者）
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "owner_id", nullable = false)
+  private User owner; // メイン担当者（作成者）
 
-    // 🆕 追加: 複数の担当者
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<ProjectAssignment> assignments = new ArrayList<>();
+  @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Builder.Default
+  private List<ProjectAssignment> assignments = new ArrayList<>();// 複数の担当者
 
-    // 🆕 追加: テーブルデータ
-    @OneToOne(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
-    private ProjectTableData tableData;
+  @OneToOne(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+  private ProjectTableData tableData;// テーブルデータ
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+  @CreationTimestamp
+  @Column(nullable = false, updatable = false)
+  private LocalDateTime createdAt; // 作成日時
 
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
+  @UpdateTimestamp
+  @Column(nullable = false)
+  private LocalDateTime updatedAt; // 更新日時
 
-    // 🆕 追加: 担当者を追加するヘルパーメソッド
-    public void addAssignment(ProjectAssignment assignment) {
-        assignments.add(assignment);
-        assignment.setProject(this);
-    }
+  // 担当者を追加するヘルパーメソッド
+  public void addAssignment(ProjectAssignment assignment) {
+    assignments.add(assignment);
+    assignment.setProject(this);
+  }
 
-    // 🆕 追加: 担当者を削除するヘルパーメソッド
-    public void removeAssignment(ProjectAssignment assignment) {
-        assignments.remove(assignment);
-        assignment.setProject(null);
-    }
+  // 担当者を削除するヘルパーメソッド
+  public void removeAssignment(ProjectAssignment assignment) {
+    assignments.remove(assignment);
+    assignment.setProject(null);
+  }
 
-    public enum ProjectStatus {
-        NEW,
-        IN_PROGRESS,
-        DONE
-    }
+  public enum ProjectStatus {
+    NEW, // 新規
+    IN_PROGRESS, // 進行中
+    DONE // 完了
+  }
 }

@@ -14,7 +14,7 @@ import java.util.UUID;
 @Builder
 public class ProjectTableDataDTO {
 
-    private UUID id;
+    private UUID id; // テーブルデータの一意識別子
     private String tableDataJson; // JSON形式のテーブルデータ
 
     public static ProjectTableDataDTO from(ProjectTableData tableData) {

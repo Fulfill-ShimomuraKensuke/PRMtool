@@ -18,64 +18,64 @@ import java.util.UUID;
 @CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
 
-    private final UserService userService;
+  private final UserService userService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+  public UserController(UserService userService) {
+    this.userService = userService;
+  }
 
-    /**
-     * 全ユーザー取得（管理者のみ）
-     */
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
-        List<UserResponse> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
-    }
+  /**
+   * 全ユーザー取得（管理者のみ）
+   */
+  @GetMapping
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<List<UserResponse>> getAllUsers() {
+    List<UserResponse> users = userService.getAllUsers();
+    return ResponseEntity.ok(users);
+  }
 
-    /**
-     * 特定ユーザー取得（管理者のみ）
-     */
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable UUID id) {
-        UserResponse user = userService.getUserById(id);
-        return ResponseEntity.ok(user);
-    }
+  /**
+   * 特定ユーザー取得（管理者のみ）
+   */
+  @GetMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<UserResponse> getUserById(@PathVariable UUID id) {
+    UserResponse user = userService.getUserById(id);
+    return ResponseEntity.ok(user);
+  }
 
-    /**
-     * ユーザー作成（管理者のみ）
-     */
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponse> createUser(
-            @Valid @RequestBody UserRequest request,
-            Authentication authentication) {
-        String createdBy = authentication.getName();
-        UserResponse user = userService.createUser(request, createdBy);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
-    }
+  /**
+   * ユーザー作成（管理者のみ）
+   */
+  @PostMapping
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<UserResponse> createUser(
+      @Valid @RequestBody UserRequest request,
+      Authentication authentication) {
+    String createdBy = authentication.getName();
+    UserResponse user = userService.createUser(request, createdBy);
+    return ResponseEntity.status(HttpStatus.CREATED).body(user);
+  }
 
-    /**
-     * ユーザー更新（管理者のみ）
-     */
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponse> updateUser(
-            @PathVariable UUID id,
-            @Valid @RequestBody UserRequest request) {
-        UserResponse user = userService.updateUser(id, request);
-        return ResponseEntity.ok(user);
-    }
+  /**
+   * ユーザー更新（管理者のみ）
+   */
+  @PutMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<UserResponse> updateUser(
+      @PathVariable UUID id,
+      @Valid @RequestBody UserRequest request) {
+    UserResponse user = userService.updateUser(id, request);
+    return ResponseEntity.ok(user);
+  }
 
-    /**
-     * ユーザー削除（管理者のみ）
-     */
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
-        userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
-    }
+  /**
+   * ユーザー削除（管理者のみ）
+   */
+  @DeleteMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
+    userService.deleteUser(id);
+    return ResponseEntity.noContent().build();
+  }
 }

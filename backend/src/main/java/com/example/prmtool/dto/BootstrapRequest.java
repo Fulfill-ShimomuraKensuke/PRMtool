@@ -12,13 +12,13 @@ import lombok.NoArgsConstructor;
 @Builder
 public class BootstrapRequest {
 
-    private String name;  // 名前（任意、デフォルト"Admin"）
+  private String name; // 名前
 
-    @NotBlank(message = "ログインIDは必須です")
-    private String loginId;  // ログインID（必須）
+  @NotBlank(message = "ログインIDは必須です")
+  private String loginId; // ログインID
 
-    @NotBlank(message = "パスワードは必須です")
-    private String password;  // パスワード（必須）
+  @NotBlank(message = "パスワードは必須です")
+  private String password; // パスワード
 
-    private String email;  // メールアドレス（任意）
+  private String email; // メールアドレス
 }

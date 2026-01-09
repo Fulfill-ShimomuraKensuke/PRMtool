@@ -15,20 +15,20 @@ import java.util.UUID;
 @Builder
 public class ProjectAssignmentDTO {
 
-    private UUID userId; // ユーザーID
-    private String userName; // ユーザー名
-    private String userLoginId; // ログインID
-    private LocalDateTime assignedAt; // 割り当て日時
+  private UUID userId; // ユーザーID
+  private String userName; // ユーザー名
+  private String userLoginId; // ログインID
+  private LocalDateTime assignedAt; // 割り当て日時
 
-    public static ProjectAssignmentDTO from(ProjectAssignment assignment) {
-        if (assignment == null)
-            return null;
+  public static ProjectAssignmentDTO from(ProjectAssignment assignment) {
+    if (assignment == null)
+      return null;
 
-        return ProjectAssignmentDTO.builder()
-                .userId(assignment.getUser().getId())
-                .userName(assignment.getUser().getName())
-                .userLoginId(assignment.getUser().getLoginId())
-                .assignedAt(assignment.getAssignedAt())
-                .build();
-    }
+    return ProjectAssignmentDTO.builder()
+        .userId(assignment.getUser().getId())
+        .userName(assignment.getUser().getName())
+        .userLoginId(assignment.getUser().getLoginId())
+        .assignedAt(assignment.getAssignedAt())
+        .build();
+  }
 }

@@ -55,7 +55,7 @@ const partnerService = {
     }
   },
 
-  // 🆕 CSVインポート
+  // CSVインポート
   importCsv: async (file) => {
     try {
       const formData = new FormData();

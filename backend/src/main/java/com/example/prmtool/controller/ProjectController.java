@@ -5,7 +5,7 @@ import com.example.prmtool.dto.ProjectResponse;
 import com.example.prmtool.entity.User;
 import com.example.prmtool.repository.UserRepository;
 import com.example.prmtool.service.ProjectService;
-import com.example.prmtool.service.ProjectCsvService; // 🆕 追加
+import com.example.prmtool.service.ProjectCsvService;
 
 import jakarta.validation.Valid;
 
@@ -16,10 +16,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile; // 🆕 追加
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map; // 🆕 追加
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -29,14 +29,14 @@ public class ProjectController {
 
   private final ProjectService projectService;
   private final UserRepository userRepository;
-  private final ProjectCsvService projectCsvService; // 🆕 追加
+  private final ProjectCsvService projectCsvService;
 
   public ProjectController(ProjectService projectService,
       UserRepository userRepository,
-      ProjectCsvService projectCsvService) { // 🆕 修正
+      ProjectCsvService projectCsvService) {
     this.projectService = projectService;
     this.userRepository = userRepository;
-    this.projectCsvService = projectCsvService; // 🆕 追加
+    this.projectCsvService = projectCsvService;
   }
 
   /**

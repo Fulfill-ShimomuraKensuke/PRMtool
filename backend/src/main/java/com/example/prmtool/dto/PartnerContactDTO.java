@@ -14,17 +14,18 @@ import java.util.UUID;
 @Builder
 public class PartnerContactDTO {
 
-    private UUID id;
-    private String contactName;   // 担当者名
-    private String contactInfo;   // 担当者連絡先
+  private UUID id; // 担当者ID
+  private String contactName; // 担当者名
+  private String contactInfo; // 担当者連絡先
 
-    public static PartnerContactDTO from(PartnerContact contact) {
-        if (contact == null) return null;
-        
-        return PartnerContactDTO.builder()
-                .id(contact.getId())
-                .contactName(contact.getContactName())
-                .contactInfo(contact.getContactInfo())
-                .build();
-    }
+  public static PartnerContactDTO from(PartnerContact contact) {
+    if (contact == null)
+      return null;
+
+    return PartnerContactDTO.builder()
+        .id(contact.getId())
+        .contactName(contact.getContactName())
+        .contactInfo(contact.getContactInfo())
+        .build();
+  }
 }

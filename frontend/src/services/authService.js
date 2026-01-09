@@ -37,7 +37,7 @@ const authService = {
 
       // 🔧 userオブジェクトを整形してから保存
       const user = {
-        id: response.data.userId,        // 🆕 id プロパティを追加
+        id: response.data.userId,
         userId: response.data.userId,    // 互換性のため残す
         email: response.data.email,
         role: response.data.role,

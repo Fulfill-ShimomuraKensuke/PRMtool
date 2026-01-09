@@ -11,15 +11,15 @@ import java.util.UUID;
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
 
-    // オーナーIDで案件を検索
-    List<Project> findByOwnerId(UUID ownerId);
+  // オーナーIDで案件を検索
+  List<Project> findByOwnerId(UUID ownerId);
 
-    // ステータスで案件を検索
-    List<Project> findByStatus(ProjectStatus status);
+  // ステータスで案件を検索
+  List<Project> findByStatus(ProjectStatus status);
 
-    // パートナーIDで案件を検索
-    List<Project> findByPartnerId(UUID partnerId);
+  // パートナーIDで案件を検索
+  List<Project> findByPartnerId(UUID partnerId);
 
-    // ステータスまたはオーナーIDで重複なく案件を検索
-    List<Project> findDistinctByStatusOrOwnerId(ProjectStatus status, UUID ownerId);
+  // ステータスまたはオーナーIDで重複なく案件を検索
+  List<Project> findDistinctByStatusOrOwnerId(ProjectStatus status, UUID ownerId);
 }

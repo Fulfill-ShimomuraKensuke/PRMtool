@@ -19,25 +19,25 @@ import java.util.UUID;
 @Builder
 public class PartnerContact {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "partner_id", nullable = false)
-    private Partner partner;
+  @ManyToOne
+  @JoinColumn(name = "partner_id", nullable = false)
+  private Partner partner;
 
-    @Column(nullable = false)
-    private String contactName;  // 担当者名
+  @Column(nullable = false)
+  private String contactName; // 担当者名
 
-    @Column(nullable = false)
-    private String contactInfo;  // 担当者連絡先（電話/メール）
+  @Column(nullable = false)
+  private String contactInfo; // 担当者連絡先（電話/メール）
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+  @CreationTimestamp
+  @Column(nullable = false, updatable = false)
+  private LocalDateTime createdAt;
 
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
+  @UpdateTimestamp
+  @Column(nullable = false)
+  private LocalDateTime updatedAt;
 }

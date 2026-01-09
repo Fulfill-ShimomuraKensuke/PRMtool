@@ -12,9 +12,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class LoginRequest {
 
-    @NotBlank(message = "ログインIDは必須です")
-    private String loginId;  // emailからloginIdに変更
-
-    @NotBlank(message = "パスワードは必須です")
-    private String password;
+  @NotBlank(message = "ログインIDは必須です")
+  private String loginId;
+  @NotBlank(message = "パスワードは必須です")
+  private String password;
 }

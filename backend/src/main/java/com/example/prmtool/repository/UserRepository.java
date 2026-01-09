@@ -12,19 +12,23 @@ import java.util.UUID;
 
 public interface UserRepository extends JpaRepository<User, UUID> {
 
-    // loginIdでユーザーを検索（ログイン用）
-    Optional<User> findByLoginId(String loginId);
-    
-    // loginIdの存在確認
-    boolean existsByLoginId(String loginId);
+  // loginIdでユーザーを検索（ログイン用）
+  Optional<User> findByLoginId(String loginId);
 
-    // 後方互換性のため残す（既存コードで使用している可能性）
-    Optional<User> findByEmail(String email);
-    boolean existsByEmail(String email);
+  // loginIdの存在確認
+  boolean existsByLoginId(String loginId);
 
-    boolean existsByRole(User.UserRole role);
+  // 後方互換性のため残す（既存コードで使用している可能性）
+  Optional<User> findByEmail(String email);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select count(u) from User u where u.role = :role")
-    long countByRoleForUpdate(@Param("role") User.UserRole role);
+  // emailの存在確認
+  boolean existsByEmail(String email);
+
+  // 指定した役割のユーザーが存在するか確認
+  boolean existsByRole(User.UserRole role);
+
+  // 指定した役割のユーザー数を排他ロック付きでカウント
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("select count(u) from User u where u.role = :role")
+  long countByRoleForUpdate(@Param("role") User.UserRole role);
 }

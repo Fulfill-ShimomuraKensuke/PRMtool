@@ -17,27 +17,28 @@ import java.util.stream.Collectors;
 @Builder
 public class PartnerResponse {
 
-    private UUID id;
-    private String name;        // 企業名
-    private String phone;       // 代表電話
-    private String address;     // 住所
-    private List<PartnerContactDTO> contacts;  // 担当者リスト
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+  private UUID id; // 企業ID
+  private String name; // 企業名
+  private String phone; // 代表電話
+  private String address; // 住所
+  private List<PartnerContactDTO> contacts; // 担当者リスト
+  private LocalDateTime createdAt; // 作成日時
+  private LocalDateTime updatedAt; // 更新日時
 
-    public static PartnerResponse from(Partner partner) {
-        if (partner == null) return null;
+  public static PartnerResponse from(Partner partner) {
+    if (partner == null)
+      return null;
 
-        return PartnerResponse.builder()
-                .id(partner.getId())
-                .name(partner.getName())
-                .phone(partner.getPhone())
-                .address(partner.getAddress())
-                .contacts(partner.getContacts().stream()
-                        .map(PartnerContactDTO::from)
-                        .collect(Collectors.toList()))
-                .createdAt(partner.getCreatedAt())
-                .updatedAt(partner.getUpdatedAt())
-                .build();
-    }
+    return PartnerResponse.builder()
+        .id(partner.getId())
+        .name(partner.getName())
+        .phone(partner.getPhone())
+        .address(partner.getAddress())
+        .contacts(partner.getContacts().stream()
+            .map(PartnerContactDTO::from)
+            .collect(Collectors.toList()))
+        .createdAt(partner.getCreatedAt())
+        .updatedAt(partner.getUpdatedAt())
+        .build();
+  }
 }

@@ -17,11 +17,11 @@ import java.util.stream.Collectors;
 @Service
 public class ProjectService {
 
-  private final ProjectRepository projectRepository;
-  private final PartnerRepository partnerRepository;
-  private final UserRepository userRepository;
-  private final ProjectAssignmentRepository projectAssignmentRepository;
-  private final ProjectTableDataRepository projectTableDataRepository;
+  private final ProjectRepository projectRepository; // ProjectRepository追加
+  private final PartnerRepository partnerRepository; // PartnerRepository追加
+  private final UserRepository userRepository; // UserRepository追加
+  private final ProjectAssignmentRepository projectAssignmentRepository; // ProjectAssignmentRepository追加
+  private final ProjectTableDataRepository projectTableDataRepository; // ProjectTableDataRepository追加
 
   public ProjectService(ProjectRepository projectRepository,
       PartnerRepository partnerRepository,
@@ -35,9 +35,7 @@ public class ProjectService {
     this.projectTableDataRepository = projectTableDataRepository;
   }
 
-  /**
-   * 案件作成
-   */
+  // 案件作成
   @Transactional
   public ProjectResponse createProject(ProjectRequest request) {
     // パートナーを取得
@@ -86,9 +84,7 @@ public class ProjectService {
     return ProjectResponse.from(finalProject);
   }
 
-  /**
-   * 全案件取得
-   */
+  // 全案件取得
   @Transactional(readOnly = true)
   public List<ProjectResponse> getAllProjects() {
     return projectRepository.findAll().stream()
@@ -96,9 +92,7 @@ public class ProjectService {
         .collect(Collectors.toList());
   }
 
-  /**
-   * オーナーで絞り込んで案件取得
-   */
+  // オーナーで絞り込んで案件取得
   @Transactional(readOnly = true)
   public List<ProjectResponse> getProjectsByOwner(UUID ownerId) {
     return projectRepository.findByOwnerId(Objects.requireNonNull(ownerId)).stream()
@@ -106,9 +100,7 @@ public class ProjectService {
         .collect(Collectors.toList());
   }
 
-  /**
-   * 担当者として見える案件を取得（NEW または 自分が担当）
-   */
+  // 担当者として見える案件を取得（NEW または 自分が担当）
   @Transactional(readOnly = true)
   public List<ProjectResponse> getVisibleProjectsForPartner(UUID userId) {
     // NEWステータスの案件
@@ -129,9 +121,7 @@ public class ProjectService {
         .collect(Collectors.toList());
   }
 
-  /**
-   * 案件詳細取得（アクセス制御付き）
-   */
+  // 案件詳細取得（アクセス制御付き）
   @Transactional(readOnly = true)
   public ProjectResponse getProjectByIdWithAccessControl(UUID id, String loginId) {
     User me = userRepository.findByLoginId(loginId)
@@ -155,9 +145,7 @@ public class ProjectService {
     return ProjectResponse.from(project);
   }
 
-  /**
-   * 案件更新
-   */
+  // 案件更新
   @Transactional
   public ProjectResponse updateProject(UUID id, ProjectRequest request, String loginId) {
     User editor = userRepository.findByLoginId(loginId)
@@ -182,12 +170,10 @@ public class ProjectService {
     if (editor.getRole() == User.UserRole.ADMIN && request.getAssignedUserIds() != null) {
       // 既存の担当者をクリア
       project.getAssignments().clear();
-
       // 新しい担当者を追加
       for (UUID userId : request.getAssignedUserIds()) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + userId));
-
         ProjectAssignment assignment = ProjectAssignment.builder()
             .user(user)
             .build();
@@ -209,16 +195,12 @@ public class ProjectService {
         project.setTableData(tableData);
       }
     }
-
     // 担当者は常に編集者にする（オーナーは変更しない）
-
     Project updatedProject = projectRepository.save(project);
     return ProjectResponse.from(updatedProject);
   }
 
-  /**
-   * 案件削除
-   */
+  // 案件削除
   @Transactional
   public void deleteProject(UUID id) {
     if (!projectRepository.existsById(Objects.requireNonNull(id))) {
@@ -227,29 +209,22 @@ public class ProjectService {
     projectRepository.deleteById(Objects.requireNonNull(id));
   }
 
-  /**
-   * プロジェクトのテーブルデータを取得
-   */
+  // プロジェクトのテーブルデータを取得
   @Transactional(readOnly = true)
   public String getProjectTableData(UUID projectId) {
     // プロジェクトの存在確認（存在しない場合は早期にエラーを返す）
     projectRepository.findById(projectId)
         .orElseThrow(() -> new RuntimeException("案件が見つかりません"));
-
     // テーブルデータを取得
     Optional<ProjectTableData> tableData = projectTableDataRepository.findByProjectId(projectId);
-
     // テーブルデータが存在しない場合はデフォルトのJSONを返す
     if (tableData.isEmpty() || tableData.get().getTableDataJson() == null) {
       return getDefaultTableDataJson();
     }
-
     return tableData.get().getTableDataJson();
   }
 
-  /**
-   * プロジェクトのテーブルデータを保存
-   */
+  // プロジェクトのテーブルデータを保存
   @Transactional
   public void saveProjectTableData(UUID projectId, String tableDataJson) {
     // プロジェクトの存在確認
@@ -269,9 +244,7 @@ public class ProjectService {
     projectTableDataRepository.save(tableData);
   }
 
-  /**
-   * デフォルトのテーブルデータJSON（5行×5列）
-   */
+  // デフォルトのテーブルデータJSON（5行×5列）
   private String getDefaultTableDataJson() {
     return """
         {

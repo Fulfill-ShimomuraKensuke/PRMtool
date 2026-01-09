@@ -8,12 +8,12 @@ import java.util.UUID;
 
 public interface ProjectAssignmentRepository extends JpaRepository<ProjectAssignment, UUID> {
 
-    // 案件IDで担当者を検索
-    List<ProjectAssignment> findByProjectId(UUID projectId);
+  // 案件IDで担当者を検索
+  List<ProjectAssignment> findByProjectId(UUID projectId);
 
-    // 案件IDで担当者を削除
-    void deleteByProjectId(UUID projectId);
+  // 案件IDで担当者を削除
+  void deleteByProjectId(UUID projectId);
 
-    // ユーザーIDで担当している案件を検索
-    List<ProjectAssignment> findByUserId(UUID userId);
+  // ユーザーIDで担当している案件を検索
+  List<ProjectAssignment> findByUserId(UUID userId);
 }

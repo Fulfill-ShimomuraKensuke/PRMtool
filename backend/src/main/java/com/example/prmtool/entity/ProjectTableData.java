@@ -19,22 +19,22 @@ import java.util.UUID;
 @Builder
 public class ProjectTableData {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private UUID id; // テーブルデータの一意識別子
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false, unique = true)
-    private Project project;
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "project_id", nullable = false, unique = true)
+  private Project project; // 関連するプロジェクト
 
-    @Column(columnDefinition = "TEXT")
-    private String tableDataJson; // JSON形式でテーブルデータを保存
+  @Column(columnDefinition = "TEXT")
+  private String tableDataJson; // JSON形式でテーブルデータを保存
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+  @CreationTimestamp
+  @Column(nullable = false, updatable = false)
+  private LocalDateTime createdAt; // 作成日時
 
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
+  @UpdateTimestamp
+  @Column(nullable = false)
+  private LocalDateTime updatedAt; // 更新日時
 }

@@ -17,26 +17,26 @@ import java.util.stream.Collectors;
 @Builder
 public class ProjectResponse {
 
-    private UUID id;
-    private String name;
-    private Project.ProjectStatus status;
+    private UUID id; // プロジェクトID
+    private String name; // プロジェクト名
+    private Project.ProjectStatus status; // プロジェクトステータス
 
     // パートナー情報
-    private UUID partnerId;
-    private String partnerName;
+    private UUID partnerId; // 企業ID
+    private String partnerName; // 企業名
 
     // オーナー（作成者）情報
-    private UUID ownerId;
-    private String ownerName;
+    private UUID ownerId; // オーナーID
+    private String ownerName; // オーナー名
 
-    // 🆕 追加: 担当者リスト
-    private List<ProjectAssignmentDTO> assignments;
+    // 担当者リスト
+    private List<ProjectAssignmentDTO> assignments; // 担当者リスト
 
-    // 🆕 追加: テーブルデータ
-    private ProjectTableDataDTO tableData;
+    // テーブルデータ
+    private ProjectTableDataDTO tableData; // プロジェクトのテーブルデータ
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private LocalDateTime createdAt; // 作成日時
+    private LocalDateTime updatedAt; // 更新日時
 
     public static ProjectResponse from(Project project) {
         if (project == null)

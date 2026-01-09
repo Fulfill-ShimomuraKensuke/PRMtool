@@ -14,19 +14,20 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserRequest {
 
-    @NotBlank(message = "名前は必須です")
-    private String name;
+  @NotBlank(message = "名前は必須です")
+  private String name; // アカウントの名前
 
-    @NotBlank(message = "ログインIDは必須です")
-    private String loginId;
+  @NotBlank(message = "ログインIDは必須です")
+  private String loginId; // アカウントのログインID
 
-    private String password;  // 新規作成時は必須、更新時は任意
+  // 新規作成時は必須、更新時は任意
+  private String password; // パスワード
 
-    private String email;
-    private String phone;
-    private String address;
-    private String position;
+  private String email; // アカウントのメールアドレス
+  private String phone; // アカウントの電話番号
+  private String address; // アカウントの住所
+  private String position; // アカウントの役職
 
-    @NotNull(message = "役割は必須です")
-    private User.UserRole role;
+  @NotNull(message = "役割は必須です")
+  private User.UserRole role;
 }

@@ -14,9 +14,9 @@ import java.util.UUID;
 @Builder
 public class AuthResponse {
 
-    private String token;
-    private UUID userId;
-    private String loginId;  // emailの代わりにloginId
-    private String name;     // 名前追加
-    private User.UserRole role;
+  private String token; // 認証トークン
+  private UUID userId; // ユーザーID
+  private String loginId; // ログインID
+  private String name; // ユーザー名
+  private User.UserRole role; // ユーザーロール
 }

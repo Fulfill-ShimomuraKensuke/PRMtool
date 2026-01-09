@@ -15,31 +15,31 @@ import java.util.UUID;
 @Builder
 public class UserResponse {
 
-    private UUID id;
-    private String name;
-    private String loginId;
-    private String email;
-    private String phone;
-    private String address;
-    private String position;
-    private User.UserRole role;
-    private Boolean isSystemProtected;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+  private UUID id;
+  private String name;
+  private String loginId;
+  private String email;
+  private String phone;
+  private String address;
+  private String position;
+  private User.UserRole role;
+  private Boolean isSystemProtected;
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
 
-    public static UserResponse from(User user) {
-        return UserResponse.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .loginId(user.getLoginId())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .address(user.getAddress())
-                .position(user.getPosition())
-                .role(user.getRole())
-                .isSystemProtected(user.getIsSystemProtected())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .build();
-    }
+  public static UserResponse from(User user) {
+    return UserResponse.builder()
+        .id(user.getId())
+        .name(user.getName())
+        .loginId(user.getLoginId())
+        .email(user.getEmail())
+        .phone(user.getPhone())
+        .address(user.getAddress())
+        .position(user.getPosition())
+        .role(user.getRole())
+        .isSystemProtected(user.getIsSystemProtected())
+        .createdAt(user.getCreatedAt())
+        .updatedAt(user.getUpdatedAt())
+        .build();
+  }
 }

@@ -14,23 +14,24 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*")
 public class AuthController {
 
-    private final AuthService authService;
+  private final AuthService authService;
 
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
+  public AuthController(AuthService authService) {
+    this.authService = authService;
+  }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
-        try {
-            AuthResponse response = authService.login(request);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse("メールアドレスまたはパスワードが正しくありません"));
-        }
+  @PostMapping("/login")
+  public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+    try {
+      AuthResponse response = authService.login(request);
+      return ResponseEntity.ok(response);
+    } catch (RuntimeException e) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(new ErrorResponse("メールアドレスまたはパスワードが正しくありません"));
     }
-    // エラーレスポンス用の内部クラス
-    private record ErrorResponse(String message) {
-    }
+  }
+
+  // エラーレスポンス用の内部クラス
+  private record ErrorResponse(String message) {
+  }
 }
