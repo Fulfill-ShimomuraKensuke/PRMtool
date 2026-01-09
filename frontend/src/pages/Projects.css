@@ -124,133 +124,250 @@
 
 /* プロジェクトカードをクリック可能に */
 .project-card {
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .project-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* 担当者数の表示 */
 .project-assignments {
-    color: #555;
-    margin: 0.5rem 0;
-    font-size: 0.95rem;
+  color: #555;
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
 }
 
 /* フィルターセクション */
 .filter-section {
-    margin-bottom: 2rem;
-    background: white;
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* 検索バー */
 .search-bar {
-    margin-bottom: 1rem;
+  margin-bottom: 1rem;
 }
 
 .search-input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 1rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
 }
 
 .search-input:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 /* フィルター */
 .filters {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    align-items: center;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .filter-select {
-    padding: 0.75rem 1rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    background-color: white;
-    cursor: pointer;
-    min-width: 180px;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background-color: white;
+  cursor: pointer;
+  min-width: 180px;
 }
 
 .filter-select:focus {
-    outline: none;
-    border-color: #667eea;
+  outline: none;
+  border-color: #667eea;
 }
 
 .filter-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    padding: 0.5rem;
-    user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  user-select: none;
 }
 
 .filter-checkbox input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
 }
 
 .filter-checkbox span {
-    font-size: 0.95rem;
-    color: #2c3e50;
+  font-size: 0.95rem;
+  color: #2c3e50;
 }
 
 .btn-clear-filters {
-    background-color: #95a5a6;
+  background-color: #95a5a6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.2s;
+  font-size: 0.95rem;
+}
+
+.btn-clear-filters:hover {
+  opacity: 0.9;
+}
+
+.search-results-info {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: #e8f4f8;
+  border-left: 4px solid #3498db;
+  border-radius: 4px;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+
+  .filter-checkbox {
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+  }
+
+  /* CSVインポートモーダル */
+  .import-instructions {
+    margin-bottom: 1.5rem;
+  }
+
+  .import-instructions h3 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+  }
+
+  .import-instructions p {
+    color: #666;
+    margin-bottom: 1rem;
+  }
+
+  .csv-format {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 1rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .csv-notes {
+    margin-top: 1rem;
+    padding-left: 1.5rem;
+  }
+
+  .csv-notes li {
+    color: #666;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ファイルアップロード */
+  .file-upload {
+    margin: 1.5rem 0;
+  }
+
+  .file-label {
+    display: inline-block;
+    background-color: #3498db;
     color: white;
-    border: none;
     padding: 0.75rem 1.5rem;
     border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
     transition: opacity 0.2s;
-    font-size: 0.95rem;
-}
+  }
 
-.btn-clear-filters:hover {
+  .file-label:hover {
     opacity: 0.9;
-}
+  }
 
-.search-results-info {
-    margin-top: 1rem;
-    padding: 0.75rem;
-    background-color: #e8f4f8;
-    border-left: 4px solid #3498db;
-    border-radius: 4px;
+  .file-input {
+    display: none;
+  }
+
+  .file-name {
+    margin-top: 0.75rem;
     color: #2c3e50;
     font-weight: 500;
-}
+  }
 
-/* レスポンシブ */
-@media (max-width: 768px) {
-    .filters {
-        flex-direction: column;
-        align-items: stretch;
-    }
+  /* インポート結果 */
+  .import-result {
+    padding: 1rem 0;
+  }
 
-    .filter-select {
-        width: 100%;
-    }
+  .import-result h3 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+  }
 
-    .filter-checkbox {
-        padding: 0.75rem;
-        background-color: #f8f9fa;
-        border-radius: 6px;
-    }
+  .result-summary {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .success-count {
+    color: #27ae60;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .error-count {
+    color: #e74c3c;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .error-details {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #fff5f5;
+    border-left: 4px solid #e74c3c;
+    border-radius: 4px;
+  }
+
+  .error-details h4 {
+    color: #c33;
+    margin-bottom: 0.75rem;
+  }
+
+  .error-details ul {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+
+  .error-details li {
+    color: #666;
+    margin-bottom: 0.5rem;
+  }
 }

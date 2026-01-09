@@ -10,7 +10,7 @@ const Projects = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [projects, setProjects] = useState([]);
-    const [filteredProjects, setFilteredProjects] = useState([]);  // 🆕 追加
+    const [filteredProjects, setFilteredProjects] = useState([]);  // 追加
     const [partners, setPartners] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -23,11 +23,17 @@ const Projects = () => {
         ownerId: ''
     });
 
-    // 🆕 検索・フィルター用のstate
+    // 検索・フィルター用のstate
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('ALL');
     const [partnerFilter, setPartnerFilter] = useState('ALL');
     const [assignedToMe, setAssignedToMe] = useState(false);
+
+    // CSVインポート用のstate
+    const [showImportModal, setShowImportModal] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [importing, setImporting] = useState(false);
+    const [importResult, setImportResult] = useState(null);
 
     const isAdmin = user?.role === 'ADMIN';
 
@@ -36,7 +42,7 @@ const Projects = () => {
             setLoading(true);
             const projectsData = await projectService.getAll(isAdmin ? null : user?.id);
             setProjects(projectsData);
-            setFilteredProjects(projectsData);  // 🆕 追加
+            setFilteredProjects(projectsData);  // 追加
 
             const partnersData = await partnerService.getAll(isAdmin ? null : user?.id);
             setPartners(partnersData);
@@ -55,7 +61,7 @@ const Projects = () => {
         fetchData();
     }, [fetchData]);
 
-    // 🆕 検索・フィルター処理
+    // 検索・フィルター処理
     useEffect(() => {
         let filtered = [...projects];
 
@@ -158,7 +164,7 @@ const Projects = () => {
         return `status-badge status-${status.toLowerCase()}`;
     };
 
-    // 🆕 フィルタークリア
+    // フィルタークリア
     const handleClearFilters = () => {
         setSearchTerm('');
         setStatusFilter('ALL');
@@ -166,8 +172,61 @@ const Projects = () => {
         setAssignedToMe(false);
     };
 
-    // 🆕 フィルターが適用されているかチェック
+    // フィルターが適用されているかチェック
     const hasActiveFilters = searchTerm || statusFilter !== 'ALL' || partnerFilter !== 'ALL' || assignedToMe;
+
+    // インポートモーダルを開く
+    const handleOpenImportModal = () => {
+        setShowImportModal(true);
+        setSelectedFile(null);
+        setImportResult(null);
+        setError('');
+    };
+
+    // インポートモーダルを閉じる
+    const handleCloseImportModal = () => {
+        setShowImportModal(false);
+        setSelectedFile(null);
+        setImportResult(null);
+        setError('');
+    };
+
+    // ファイル選択
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (!file.name.endsWith('.csv')) {
+                setError('CSVファイル（.csv）を選択してください');
+                setSelectedFile(null);
+            } else {
+                setSelectedFile(file);
+                setError('');
+            }
+        }
+    };
+
+    // CSVインポート実行
+    const handleImportCsv = async () => {
+        if (!selectedFile) {
+            setError('ファイルを選択してください');
+            return;
+        }
+
+        try {
+            setImporting(true);
+            const result = await projectService.importCsv(selectedFile);
+            setImportResult(result);
+
+            if (result.successCount > 0) {
+                await fetchData();
+            }
+        } catch (err) {
+            setError(err.response?.data?.error || 'インポートに失敗しました');
+            console.error('Import error:', err);
+        } finally {
+            setImporting(false);
+        }
+    };
 
     return (
         <>
@@ -175,12 +234,18 @@ const Projects = () => {
             <div className="projects-container">
                 <div className="projects-header">
                     <h1>案件管理</h1>
+                    {/* CSVインポートボタン */}
+                    {isAdmin && (
+                        <button onClick={() => handleOpenImportModal()} className="btn-secondary">
+                            CSVインポート
+                        </button>
+                    )}
                     <button onClick={() => handleOpenModal()} className="btn-primary">
                         新規案件
                     </button>
                 </div>
 
-                {/* 🆕 検索・フィルターエリア */}
+                {/* 検索・フィルターエリア */}
                 <div className="filter-section">
                     {/* 検索バー */}
                     <div className="search-bar">
@@ -332,6 +397,112 @@ const Projects = () => {
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                )}
+                {/* CSVインポートモーダル */}
+                {showImportModal && (
+                    <div className="modal-overlay" onClick={handleCloseImportModal}>
+                        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                            <div className="modal-header">
+                                <h2>案件CSVインポート</h2>
+                                <button onClick={handleCloseImportModal} className="btn-close">×</button>
+                            </div>
+
+                            {error && <div className="error-message">{error}</div>}
+
+                            {!importResult ? (
+                                <>
+                                    <div className="import-instructions">
+                                        <h3>CSVファイル形式</h3>
+                                        <p>以下の形式でCSVファイルを作成してください：</p>
+                                        <pre className="csv-format">
+                                            案件名,ステータス,パートナー名,オーナーログインID
+                                            新規プロジェクトA,NEW,テスト株式会社,admin
+                                            システム導入B,IN_PROGRESS,サンプル商事,test1
+                                            完了案件C,DONE,テスト株式会社,
+                                        </pre>
+                                        <ul className="csv-notes">
+                                            <li>1行目はヘッダー行（列名）です</li>
+                                            <li>案件名とパートナー名は必須です</li>
+                                            <li>ステータス: NEW（新規）、IN_PROGRESS（進行中）、DONE（完了）</li>
+                                            <li>ステータスは省略可能（省略時はNEWになります）</li>
+                                            <li>オーナーログインIDは省略可能（省略時は現在のユーザー）</li>
+                                            <li>パートナー名は既存のパートナー名と完全一致する必要があります</li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="file-upload">
+                                        <label htmlFor="csv-file" className="file-label">
+                                            CSVファイルを選択
+                                        </label>
+                                        <input
+                                            type="file"
+                                            id="csv-file"
+                                            accept=".csv"
+                                            onChange={handleFileChange}
+                                            className="file-input"
+                                        />
+                                        {selectedFile && (
+                                            <p className="file-name">選択中: {selectedFile.name}</p>
+                                        )}
+                                    </div>
+
+                                    <div className="modal-actions">
+                                        <button
+                                            type="button"
+                                            onClick={handleCloseImportModal}
+                                            className="btn-cancel"
+                                            disabled={importing}
+                                        >
+                                            キャンセル
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={handleImportCsv}
+                                            className="btn-submit"
+                                            disabled={!selectedFile || importing}
+                                        >
+                                            {importing ? 'インポート中...' : 'インポート'}
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="import-result">
+                                        <h3>インポート結果</h3>
+                                        <div className="result-summary">
+                                            <p className="success-count">
+                                                ✅ 成功: {importResult.successCount}件
+                                            </p>
+                                            <p className="error-count">
+                                                ❌ エラー: {importResult.errorCount}件
+                                            </p>
+                                        </div>
+
+                                        {importResult.errors && importResult.errors.length > 0 && (
+                                            <div className="error-details">
+                                                <h4>エラー詳細:</h4>
+                                                <ul>
+                                                    {importResult.errors.map((err, index) => (
+                                                        <li key={index}>{err}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="modal-actions">
+                                        <button
+                                            type="button"
+                                            onClick={handleCloseImportModal}
+                                            className="btn-submit"
+                                        >
+                                            閉じる
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 )}

@@ -5,6 +5,7 @@ import com.example.prmtool.dto.ProjectResponse;
 import com.example.prmtool.entity.User;
 import com.example.prmtool.repository.UserRepository;
 import com.example.prmtool.service.ProjectService;
+import com.example.prmtool.service.ProjectCsvService; // 🆕 追加
 
 import jakarta.validation.Valid;
 
@@ -12,9 +13,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile; // 🆕 追加
 
 import java.util.List;
+import java.util.Map; // 🆕 追加
 import java.util.UUID;
 
 @RestController
@@ -24,10 +29,14 @@ public class ProjectController {
 
     private final ProjectService projectService;
     private final UserRepository userRepository;
+    private final ProjectCsvService projectCsvService; // 🆕 追加
 
-    public ProjectController(ProjectService projectService, UserRepository userRepository) {
+    public ProjectController(ProjectService projectService,
+            UserRepository userRepository,
+            ProjectCsvService projectCsvService) { // 🆕 修正
         this.projectService = projectService;
         this.userRepository = userRepository;
+        this.projectCsvService = projectCsvService; // 🆕 追加
     }
 
     /**
@@ -87,7 +96,7 @@ public class ProjectController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<ProjectResponse> getProjectById(
-            @PathVariable UUID id, 
+            @PathVariable UUID id,
             Authentication authentication) {
         String loginId = authentication.getName().trim();
         ProjectResponse response = projectService.getProjectByIdWithAccessControl(id, loginId);
@@ -118,5 +127,33 @@ public class ProjectController {
     public ResponseEntity<Void> deleteProject(@PathVariable UUID id) {
         projectService.deleteProject(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * CSVインポート（管理者のみ）
+     */
+    @PostMapping("/import-csv")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Object>> importCsv(
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "ファイルが空です"));
+            }
+
+            // 現在のユーザーを取得
+            String loginId = userDetails.getUsername().trim();
+            User currentUser = userRepository.findByLoginId(loginId)
+                    .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + loginId));
+
+            Map<String, Object> result = projectCsvService.importProjectsFromCsv(file, currentUser);
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "インポート中にエラーが発生しました: " + e.getMessage()));
+        }
     }
 }
