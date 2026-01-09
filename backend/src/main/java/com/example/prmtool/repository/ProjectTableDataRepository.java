@@ -2,15 +2,21 @@ package com.example.prmtool.repository;
 
 import com.example.prmtool.entity.ProjectTableData;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 import java.util.UUID;
 
+@Repository
 public interface ProjectTableDataRepository extends JpaRepository<ProjectTableData, UUID> {
-    
-    // 案件IDでテーブルデータを検索
+
+    /**
+     * プロジェクトIDからテーブルデータを取得
+     */
     Optional<ProjectTableData> findByProjectId(UUID projectId);
-    
-    // 案件IDでテーブルデータを削除
+
+    /**
+     * プロジェクトIDでテーブルデータを削除
+     */
     void deleteByProjectId(UUID projectId);
 }
