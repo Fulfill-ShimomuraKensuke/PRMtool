@@ -1,11 +1,10 @@
 import api from './api';
 
 const partnerService = {
-  // パートナー一覧取得
-  getAll: async (ownerId = null) => {
+  // 全パートナー取得
+  getAll: async () => {
     try {
-      const url = '/api/partners';
-      const response = await api.get(url);
+      const response = await api.get('/api/partners');
       return response.data;
     } catch (error) {
       console.error('Get all partners error:', error);
@@ -15,25 +14,63 @@ const partnerService = {
 
   // パートナー詳細取得
   getById: async (id) => {
-    const response = await api.get(`/api/partners/${id}`);
-    return response.data;
+    try {
+      const response = await api.get(`/api/partners/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Get partner by id error:', error);
+      throw error;
+    }
   },
 
-  // パートナー登録
+  // パートナー作成
   create: async (partnerData) => {
-    const response = await api.post('/api/partners', partnerData);
-    return response.data;
+    try {
+      const response = await api.post('/api/partners', partnerData);
+      return response.data;
+    } catch (error) {
+      console.error('Create partner error:', error);
+      throw error;
+    }
   },
 
   // パートナー更新
   update: async (id, partnerData) => {
-    const response = await api.put(`/api/partners/${id}`, partnerData);
-    return response.data;
+    try {
+      const response = await api.put(`/api/partners/${id}`, partnerData);
+      return response.data;
+    } catch (error) {
+      console.error('Update partner error:', error);
+      throw error;
+    }
   },
 
   // パートナー削除
   delete: async (id) => {
-    await api.delete(`/api/partners/${id}`);
+    try {
+      await api.delete(`/api/partners/${id}`);
+    } catch (error) {
+      console.error('Delete partner error:', error);
+      throw error;
+    }
+  },
+
+  // 🆕 CSVインポート
+  importCsv: async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await api.post('/api/partners/import-csv', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Import CSV error:', error);
+      throw error;
+    }
   },
 };
 
