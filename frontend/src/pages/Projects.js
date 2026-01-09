@@ -7,7 +7,6 @@ import { useAuth } from '../context/AuthContext';
 import './Projects.css';
 
 const Projects = () => {
-<<<<<<< HEAD
   const { user } = useAuth();
   const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
@@ -112,18 +111,6 @@ const Projects = () => {
     } else {
       setEditingProject(null);
       setFormData({
-=======
-    const { user } = useAuth();
-    const navigate = useNavigate();
-    const [projects, setProjects] = useState([]);
-    const [filteredProjects, setFilteredProjects] = useState([]);  // 追加
-    const [partners, setPartners] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [showModal, setShowModal] = useState(false);
-    const [editingProject, setEditingProject] = useState(null);
-    const [formData, setFormData] = useState({
->>>>>>> 6c14bcc7e24e1d016ba73d156df5f680c9278c7b
         name: '',
         status: 'NEW',
         partnerId: '',
@@ -133,7 +120,6 @@ const Projects = () => {
     setShowModal(true);
   };
 
-<<<<<<< HEAD
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingProject(null);
@@ -170,82 +156,6 @@ const Projects = () => {
       NEW: '新規',
       IN_PROGRESS: '進行中',
       DONE: '完了'
-=======
-    // 検索・フィルター用のstate
-    const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('ALL');
-    const [partnerFilter, setPartnerFilter] = useState('ALL');
-    const [assignedToMe, setAssignedToMe] = useState(false);
-
-    // CSVインポート用のstate
-    const [showImportModal, setShowImportModal] = useState(false);
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [importing, setImporting] = useState(false);
-    const [importResult, setImportResult] = useState(null);
-
-    const isAdmin = user?.role === 'ADMIN';
-
-    const fetchData = useCallback(async () => {
-        try {
-            setLoading(true);
-            const projectsData = await projectService.getAll(isAdmin ? null : user?.id);
-            setProjects(projectsData);
-            setFilteredProjects(projectsData);  // 追加
-
-            const partnersData = await partnerService.getAll(isAdmin ? null : user?.id);
-            setPartners(partnersData);
-
-            setError('');
-        } catch (err) {
-            setError('データの取得に失敗しました');
-            console.error('Fetch data error:', err);
-        } finally {
-            setLoading(false);
-        }
-    }, [user, isAdmin]);
-
-    useEffect(() => {
-        document.title = '案件管理 - PRM Tool';
-        fetchData();
-    }, [fetchData]);
-
-    // 検索・フィルター処理
-    useEffect(() => {
-        let filtered = [...projects];
-
-        // 案件名で検索
-        if (searchTerm) {
-            const searchLower = searchTerm.toLowerCase();
-            filtered = filtered.filter(project =>
-                project.name.toLowerCase().includes(searchLower) ||
-                project.partnerName.toLowerCase().includes(searchLower) ||
-                project.ownerName.toLowerCase().includes(searchLower)
-            );
-        }
-
-        // ステータスでフィルター
-        if (statusFilter !== 'ALL') {
-            filtered = filtered.filter(project => project.status === statusFilter);
-        }
-
-        // パートナーでフィルター
-        if (partnerFilter !== 'ALL') {
-            filtered = filtered.filter(project => project.partnerId === partnerFilter);
-        }
-
-        // 自分が担当している案件でフィルター
-        if (assignedToMe) {
-            filtered = filtered.filter(project =>
-                project.assignments && project.assignments.some(a => a.userId === user?.id)
-            );
-        }
-
-        setFilteredProjects(filtered);
-    }, [searchTerm, statusFilter, partnerFilter, assignedToMe, projects, user]);
-
-    const handleProjectClick = (projectId) => {
-        navigate(`/projects/${projectId}`);
->>>>>>> 6c14bcc7e24e1d016ba73d156df5f680c9278c7b
     };
     return labels[status] || status;
   };
@@ -295,7 +205,6 @@ const Projects = () => {
     }
   };
 
-<<<<<<< HEAD
   // CSVインポート実行
   const handleImportCsv = async () => {
     if (!selectedFile) {
@@ -337,101 +246,6 @@ const Projects = () => {
             </button>
           </div>
         </div>
-=======
-    // フィルタークリア
-    const handleClearFilters = () => {
-        setSearchTerm('');
-        setStatusFilter('ALL');
-        setPartnerFilter('ALL');
-        setAssignedToMe(false);
-    };
-
-    // フィルターが適用されているかチェック
-    const hasActiveFilters = searchTerm || statusFilter !== 'ALL' || partnerFilter !== 'ALL' || assignedToMe;
-
-    // インポートモーダルを開く
-    const handleOpenImportModal = () => {
-        setShowImportModal(true);
-        setSelectedFile(null);
-        setImportResult(null);
-        setError('');
-    };
-
-    // インポートモーダルを閉じる
-    const handleCloseImportModal = () => {
-        setShowImportModal(false);
-        setSelectedFile(null);
-        setImportResult(null);
-        setError('');
-    };
-
-    // ファイル選択
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            if (!file.name.endsWith('.csv')) {
-                setError('CSVファイル（.csv）を選択してください');
-                setSelectedFile(null);
-            } else {
-                setSelectedFile(file);
-                setError('');
-            }
-        }
-    };
-
-    // CSVインポート実行
-    const handleImportCsv = async () => {
-        if (!selectedFile) {
-            setError('ファイルを選択してください');
-            return;
-        }
-
-        try {
-            setImporting(true);
-            const result = await projectService.importCsv(selectedFile);
-            setImportResult(result);
-
-            if (result.successCount > 0) {
-                await fetchData();
-            }
-        } catch (err) {
-            setError(err.response?.data?.error || 'インポートに失敗しました');
-            console.error('Import error:', err);
-        } finally {
-            setImporting(false);
-        }
-    };
-
-    return (
-        <>
-            <Navbar />
-            <div className="projects-container">
-                <div className="projects-header">
-                    <h1>案件管理</h1>
-                    {/* CSVインポートボタン */}
-                    {isAdmin && (
-                        <button onClick={() => handleOpenImportModal()} className="btn-secondary">
-                            CSVインポート
-                        </button>
-                    )}
-                    <button onClick={() => handleOpenModal()} className="btn-primary">
-                        新規案件
-                    </button>
-                </div>
-
-                {/* 検索・フィルターエリア */}
-                <div className="filter-section">
-                    {/* 検索バー */}
-                    <div className="search-bar">
-                        <input
-                            type="text"
-                            placeholder="案件名、パートナー名、オーナー名で検索..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="search-input"
-                        />
-                    </div>
->>>>>>> 6c14bcc7e24e1d016ba73d156df5f680c9278c7b
 
         {/* 検索・フィルターエリア */}
         <div className="filter-section">
