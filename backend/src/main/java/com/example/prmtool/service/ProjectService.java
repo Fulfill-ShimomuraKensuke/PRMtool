@@ -210,7 +210,6 @@ public class ProjectService {
                 }
 
                 // 担当者は常に編集者にする（オーナーは変更しない）
-                // project.setOwner(editor); ← これは削除（オーナーは変更しない）
 
                 Project updatedProject = projectRepository.save(project);
                 return ProjectResponse.from(updatedProject);

@@ -5,7 +5,7 @@ import './Partners.css';
 
 const Partners = () => {
   const [partners, setPartners] = useState([]);
-  const [filteredPartners, setFilteredPartners] = useState([]);  // 追加
+  const [filteredPartners, setFilteredPartners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showEditModal, setShowEditModal] = useState(false);
@@ -23,9 +23,9 @@ const Partners = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   // CSVインポート用のstate
-  const [showImportModal, setShowImportModal] = useState(false);  // 追加
-  const [selectedFile, setSelectedFile] = useState(null);  // 追加
-  const [importing, setImporting] = useState(false);  // 追加
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState(null);
   useEffect(() => {
     fetchPartners();
@@ -56,7 +56,7 @@ const Partners = () => {
       setLoading(true);
       const data = await partnerService.getAll();
       setPartners(data);
-      setFilteredPartners(data);  // 追加
+      setFilteredPartners(data);
       setError('');
     } catch (err) {
       setError('パートナー一覧の取得に失敗しました');
@@ -242,7 +242,7 @@ const Partners = () => {
   return (
     <>
       <Navbar />
-      <div className="partners-container">  {/* 🔧 ここを修正 */}
+      <div className="partners-container">
         <div className="partners-header">
           <h1>パートナー管理</h1>
           <div className="header-buttons">
