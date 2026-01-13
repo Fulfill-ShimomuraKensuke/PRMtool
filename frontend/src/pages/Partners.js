@@ -3,15 +3,17 @@ import partnerService from '../services/partnerService';
 import Navbar from '../components/Navbar';
 import './Partners.css';
 
+// パートナー管理ページコンポーネント
 const Partners = () => {
-  const [partners, setPartners] = useState([]);
-  const [filteredPartners, setFilteredPartners] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [editingPartner, setEditingPartner] = useState(null);
-  const [selectedPartner, setSelectedPartner] = useState(null);
+  const [partners, setPartners] = useState([]); // 全パートナー一覧
+  const [filteredPartners, setFilteredPartners] = useState([]); // 検索フィルター後のパートナー一覧
+  const [loading, setLoading] = useState(true); // ローディング状態
+  const [error, setError] = useState(''); // エラーメッセージ表示用state
+  const [showEditModal, setShowEditModal] = useState(false); // 編集モーダル表示用state
+  const [showDetailModal, setShowDetailModal] = useState(false); // 詳細モーダル表示用state
+  const [editingPartner, setEditingPartner] = useState(null); // 編集中のパートナー情報
+  const [selectedPartner, setSelectedPartner] = useState(null); // 詳細表示中のパートナー情報
+  // フォームデータ用のstate
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -23,10 +25,12 @@ const Partners = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   // CSVインポート用のstate
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [importing, setImporting] = useState(false);
-  const [importResult, setImportResult] = useState(null);
+  const [showImportModal, setShowImportModal] = useState(false); // インポートモーダル表示用state
+  const [selectedFile, setSelectedFile] = useState(null); // 選択中のCSVファイル
+  const [importing, setImporting] = useState(false); // インポート中状態
+  const [importResult, setImportResult] = useState(null); // インポート結果表示用state
+
+  // 初回レンダリング時にパートナー一覧を取得
   useEffect(() => {
     document.title = 'パートナー管理 - PRM Tool';
     fetchPartners();
@@ -52,6 +56,7 @@ const Partners = () => {
     }
   }, [searchTerm, partners]);
 
+  // パートナー一覧取得関数
   const fetchPartners = async () => {
     try {
       setLoading(true);
@@ -67,6 +72,7 @@ const Partners = () => {
     }
   };
 
+  // 新規作成モーダルを開く
   const handleOpenCreateModal = () => {
     setEditingPartner(null);
     setFormData({
@@ -78,6 +84,7 @@ const Partners = () => {
     setShowEditModal(true);
   };
 
+  // 編集モーダルを開く
   const handleOpenEditModal = (partner) => {
     setEditingPartner(partner);
     setFormData({
@@ -91,22 +98,26 @@ const Partners = () => {
     setShowEditModal(true);
   };
 
+  // 編集モーダルを閉じる
   const handleCloseEditModal = () => {
     setShowEditModal(false);
     setEditingPartner(null);
     setError('');
   };
 
+  // 詳細モーダルを開く
   const handleOpenDetailModal = (partner) => {
     setSelectedPartner(partner);
     setShowDetailModal(true);
   };
 
+  // 詳細モーダルを閉じる
   const handleCloseDetailModal = () => {
     setShowDetailModal(false);
     setSelectedPartner(null);
   };
 
+  // 担当者追加・削除・変更処理
   const addContact = () => {
     setFormData({
       ...formData,
@@ -114,6 +125,7 @@ const Partners = () => {
     });
   };
 
+  // 担当者削除
   const removeContact = (index) => {
     const newContacts = formData.contacts.filter((_, i) => i !== index);
     setFormData({
@@ -122,6 +134,7 @@ const Partners = () => {
     });
   };
 
+  // 担当者情報変更
   const handleContactChange = (index, field, value) => {
     const newContacts = [...formData.contacts];
     newContacts[index][field] = value;
@@ -131,6 +144,7 @@ const Partners = () => {
     });
   };
 
+  // フォーム送信処理（新規作成・編集共通）
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -162,6 +176,7 @@ const Partners = () => {
     }
   };
 
+  // パートナー削除処理
   const handleDelete = async (id) => {
     if (window.confirm('このパートナーを削除してもよろしいですか？')) {
       try {
@@ -175,6 +190,7 @@ const Partners = () => {
     }
   };
 
+  // 担当者数の表示レンダリング
   const renderContactsCount = (contacts) => {
     if (!contacts || contacts.length === 0) {
       return <span>登録なし</span>;

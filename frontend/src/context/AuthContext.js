@@ -1,12 +1,14 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import authService from '../services/authService';
 
+// 認証コンテキストの作成
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null); // ユーザー情報の状態管理
+  const [loading, setLoading] = useState(true); // ローディング状態の管理
 
+  // 初期化処理
   useEffect(() => {
     if (authService.isTokenExpired && authService.isTokenExpired()) {
       authService.logout();
@@ -20,17 +22,20 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+  // ログイン処理
   const login = async (loginId, password) => {
     const userData = await authService.login(loginId, password);
     setUser(userData);
     return userData;
   };
 
+  // ログアウト処理
   const logout = () => {
     authService.logout();
     setUser(null);
   };
 
+  // コンテキストの値
   const value = {
     user,
     login,

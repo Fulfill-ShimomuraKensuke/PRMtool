@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './Spreadsheet.css';
 
+// スプレッドシートコンポーネント
 const Spreadsheet = ({ projectId, projectService }) => {
   const [tableData, setTableData] = useState({ headers: [], rows: [] });
   const [loading, setLoading] = useState(true);

@@ -8,26 +8,30 @@ import Spreadsheet from '../components/Spreadsheet';
 import { useAuth } from '../context/AuthContext';
 import './ProjectDetail.css';
 
+// 案件詳細ページコンポーネント
 const ProjectDetail = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [project, setProject] = useState(null);
-  const [allUsers, setAllUsers] = useState([]);
-  const [partners, setPartners] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [showAssignModal, setShowAssignModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedUsers, setSelectedUsers] = useState([]);
+  const { id } = useParams(); // URLパラメータから案件IDを取得
+  const navigate = useNavigate(); // ナビゲーションフック
+  const { user } = useAuth(); // 認証コンテキストからユーザー情報を取得
+  const [project, setProject] = useState(null); // 案件情報の状態管理
+  const [allUsers, setAllUsers] = useState([]); // 全ユーザー一覧の状態管理
+  const [partners, setPartners] = useState([]); // パートナー一覧の状態管理
+  const [loading, setLoading] = useState(true); // ローディング状態の管理
+  const [error, setError] = useState(''); // エラーメッセージの状態管理
+  const [showAssignModal, setShowAssignModal] = useState(false); // 担当者編集モーダルの表示状態管理
+  const [showEditModal, setShowEditModal] = useState(false); // 基本情報編集モーダルの表示状態管理
+  const [selectedUsers, setSelectedUsers] = useState([]); // 選択された担当者の状態管理
+  // 編集フォームの状態管理
   const [editFormData, setEditFormData] = useState({
     name: '',
     status: 'NEW',
     partnerId: ''
   });
 
+  // 管理者かどうかの判定
   const isAdmin = user?.role === 'ADMIN';
 
+  // 案件詳細データの取得
   useEffect(() => {
     const loadProjectData = async () => {
       try {
@@ -110,14 +114,17 @@ const ProjectDetail = () => {
     }
   };
 
+  // 担当者編集モーダルを開く
   const handleOpenAssignModal = () => {
     setShowAssignModal(true);
   };
 
+  // 担当者編集モーダルを閉じる
   const handleCloseAssignModal = () => {
     setShowAssignModal(false);
   };
 
+  // 担当者の選択/解除
   const handleUserToggle = (userId) => {
     setSelectedUsers(prev =>
       prev.includes(userId)
@@ -126,6 +133,7 @@ const ProjectDetail = () => {
     );
   };
 
+  // 担当者の保存
   const handleSaveAssignments = async () => {
     try {
       const payload = {
@@ -144,6 +152,7 @@ const ProjectDetail = () => {
     }
   };
 
+  // 案件の削除
   const handleDelete = async () => {
     if (window.confirm('この案件を削除してもよろしいですか？')) {
       try {
@@ -156,6 +165,7 @@ const ProjectDetail = () => {
     }
   };
 
+  // ステータス表示用ヘルパー関数
   const getStatusLabel = (status) => {
     const labels = {
       NEW: '新規',

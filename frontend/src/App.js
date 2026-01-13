@@ -49,7 +49,7 @@ function App() {
               }
             />
 
-            {/* 🆕 認証必要ルート - 案件詳細 */}
+            {/* 認証必要ルート - 案件詳細 */}
             <Route
               path="/projects/:id"
               element={

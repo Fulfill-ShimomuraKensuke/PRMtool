@@ -3,16 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Login.css';
 
+// ログインページコンポーネント
 const Login = () => {
-  const navigate = useNavigate();
-  const { login } = useAuth();
-  const [formData, setFormData] = useState({
+  const navigate = useNavigate();// ナビゲーションフック
+  const { login } = useAuth();// 認証コンテキストからログイン関数を取得
+  const [formData, setFormData] = useState({ // フォームデータの状態管理
     loginId: '',
     password: '',
   });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');// エラーメッセージの状態管理
+  const [loading, setLoading] = useState(false);// ローディング状態の管理
 
+  // フォーム入力変更ハンドラー
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -20,6 +22,7 @@ const Login = () => {
     });
   };
 
+  // フォーム送信ハンドラー
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');

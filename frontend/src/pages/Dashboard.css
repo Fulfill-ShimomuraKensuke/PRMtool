@@ -1,23 +1,28 @@
+/* ダッシュボードページのスタイル */
 .dashboard-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
 }
 
+/* ヘッダーセクション */
 .dashboard-header {
   margin-bottom: 2rem;
 }
 
+/* ヘッダータイトル */
 .dashboard-header h1 {
   color: #2c3e50;
   margin-bottom: 0.5rem;
 }
 
+/* ヘッダーサブタイトル */
 .dashboard-subtitle {
   color: #7f8c8d;
   font-size: 1.1rem;
 }
 
+/* エラーメッセージ */
 .error-message {
   background-color: #fee;
   color: #c33;
@@ -27,6 +32,7 @@
   border-left: 4px solid #c33;
 }
 
+/* ローディング状態 */
 .loading {
   text-align: center;
   padding: 3rem;
@@ -34,6 +40,7 @@
   font-size: 1.2rem;
 }
 
+/* 統計カードセクション */
 .stats-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -41,6 +48,7 @@
   margin-bottom: 3rem;
 }
 
+/* 統計カード */
 .stat-card {
   background: white;
   padding: 2rem;
@@ -50,47 +58,57 @@
   transition: transform 0.2s;
 }
 
+/* 統計カードホバー効果 */
 .stat-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
+/* 統計カードタイトル */
 .stat-card h3 {
   color: #555;
   font-size: 1rem;
   margin-bottom: 1rem;
 }
 
+/* 統計カード数値 */
 .stat-number {
   font-size: 3rem;
   font-weight: bold;
   margin: 0;
 }
 
+/* 統計カードの種類別スタイル */
 .stat-new {
   border-left: 4px solid #3498db;
 }
 
+/* 新規統計カードの数値色 */
 .stat-new .stat-number {
   color: #3498db;
 }
 
+/* 進行中統計カードのスタイル */
 .stat-progress {
   border-left: 4px solid #f39c12;
 }
 
+/* 進行中統計カードの数値色 */
 .stat-progress .stat-number {
   color: #f39c12;
 }
 
+/* 完了統計カードのスタイル */
 .stat-done {
   border-left: 4px solid #27ae60;
 }
 
+/* 完了統計カードの数値色 */
 .stat-done .stat-number {
   color: #27ae60;
 }
 
+/* プロジェクトセクション */
 .projects-section {
   background: white;
   padding: 2rem;
@@ -98,11 +116,13 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* プロジェクトセクションタイトル */
 .projects-section h2 {
   color: #2c3e50;
   margin-bottom: 1.5rem;
 }
 
+/* データなし表示 */
 .no-data {
   text-align: center;
   color: #95a5a6;
@@ -110,11 +130,13 @@
   font-size: 1.1rem;
 }
 
+/* プロジェクトリスト */
 .projects-list {
   display: grid;
   gap: 1rem;
 }
 
+/* 個々のプロジェクトカード */
 .project-card {
   border: 1px solid #e0e0e0;
   padding: 1.5rem;
@@ -122,11 +144,13 @@
   transition: border-color 0.3s;
 }
 
+/* プロジェクトカードホバー効果 */
 .project-card:hover {
   border-color: #3498db;
   box-shadow: 0 2px 8px rgba(52, 152, 219, 0.1);
 }
 
+/* プロジェクトヘッダー */
 .project-header {
   display: flex;
   justify-content: space-between;
@@ -134,12 +158,14 @@
   margin-bottom: 1rem;
 }
 
+/* プロジェクトタイトル */
 .project-header h3 {
   color: #2c3e50;
   margin: 0;
   font-size: 1.2rem;
 }
 
+/* ステータスバッジ */
 .status-badge {
   padding: 0.4rem 1rem;
   border-radius: 20px;
@@ -147,30 +173,36 @@
   font-weight: 600;
 }
 
+/* ステータス別スタイル */
 .status-new {
   background-color: #e3f2fd;
   color: #1976d2;
 }
 
+/* ステータス別スタイル */
 .status-in_progress {
   background-color: #fff3e0;
   color: #f57c00;
 }
 
+/* ステータス別スタイル */
 .status-done {
   background-color: #e8f5e9;
   color: #388e3c;
 }
 
+/* プロジェクト詳細 */
 .project-details {
   color: #555;
 }
 
+/* プロジェクト詳細の各行 */
 .project-details p {
   margin: 0.5rem 0;
   font-size: 0.95rem;
 }
 
+/* 個々のプロジェクトアイテム */
 .project-item {
   background: white;
   padding: 1.5rem;
@@ -178,17 +210,16 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 1rem;
   cursor: pointer;
-  /* 🆕 追加 */
   transition: transform 0.2s, box-shadow 0.2s;
-  /* 🆕 追加 */
 }
 
+/* プロジェクトアイテムホバー効果 */
 .project-item:hover {
-  /* 🆕 追加 */
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+/* プロジェクトアイテムヘッダー */
 .project-item-header {
   display: flex;
   justify-content: space-between;
@@ -196,22 +227,26 @@
   margin-bottom: 1rem;
 }
 
+/* プロジェクトアイテムタイトル */
 .project-item-header h3 {
   margin: 0;
   color: #2c3e50;
   font-size: 1.2rem;
 }
 
+/* プロジェクトアイテム詳細 */
 .project-item-details {
   display: flex;
   gap: 2rem;
   color: #666;
 }
 
+/* プロジェクトアイテム詳細の各行 */
 .project-item-details p {
   margin: 0;
 }
 
+/* プロジェクトアイテム詳細の強調テキスト */
 .project-item-details strong {
   color: #2c3e50;
 }

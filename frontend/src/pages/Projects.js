@@ -6,16 +6,18 @@ import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import './Projects.css';
 
+// 案件管理ページコンポーネント
 const Projects = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [projects, setProjects] = useState([]);
-  const [filteredProjects, setFilteredProjects] = useState([]);
-  const [partners, setPartners] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [editingProject, setEditingProject] = useState(null);
+  const { user } = useAuth(); // 認証コンテキストからユーザー情報を取得
+  const navigate = useNavigate(); // 画面遷移用のフック
+  const [projects, setProjects] = useState([]); // 案件一覧のstate
+  const [filteredProjects, setFilteredProjects] = useState([]); // フィルタリング後の案件一覧のstate
+  const [partners, setPartners] = useState([]); // パートナー一覧のstate
+  const [loading, setLoading] = useState(true); // ローディング状態のstate
+  const [error, setError] = useState(''); // エラーメッセージのstate
+  const [showModal, setShowModal] = useState(false); // 案件作成・編集モーダルの表示状態のstate
+  const [editingProject, setEditingProject] = useState(null); // 編集中の案件情報のstate
+  // 案件フォームのstate
   const [formData, setFormData] = useState({
     name: '',
     status: 'NEW',
@@ -24,19 +26,20 @@ const Projects = () => {
   });
 
   // 検索・フィルター用のstate
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
-  const [partnerFilter, setPartnerFilter] = useState('ALL');
-  const [assignedToMe, setAssignedToMe] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(''); // 検索キーワード
+  const [statusFilter, setStatusFilter] = useState('ALL'); // ステータスフィルター
+  const [partnerFilter, setPartnerFilter] = useState('ALL'); // パートナーフィルター
+  const [assignedToMe, setAssignedToMe] = useState(false); // 自分が担当している案件のみ表示フラグ
 
   // CSVインポート用のstate
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [importing, setImporting] = useState(false);
-  const [importResult, setImportResult] = useState(null);
+  const [showImportModal, setShowImportModal] = useState(false); // インポートモーダルの表示状態
+  const [selectedFile, setSelectedFile] = useState(null); // 選択されたCSVファイル
+  const [importing, setImporting] = useState(false); // インポート中の状態
+  const [importResult, setImportResult] = useState(null); // インポート結果のstate
 
   const isAdmin = user?.role === 'ADMIN';
 
+  // データ取得関数
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
@@ -95,10 +98,12 @@ const Projects = () => {
     setFilteredProjects(filtered);
   }, [searchTerm, statusFilter, partnerFilter, assignedToMe, projects, user]);
 
+  // 案件クリック時の処理
   const handleProjectClick = (projectId) => {
     navigate(`/projects/${projectId}`);
   };
 
+  // 案件作成・編集モーダルを開く
   const handleOpenModal = (project = null) => {
     if (project) {
       setEditingProject(project);
@@ -120,12 +125,14 @@ const Projects = () => {
     setShowModal(true);
   };
 
+  // 案件作成・編集モーダルを閉じる
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingProject(null);
     setFormData({ name: '', status: 'NEW', partnerId: '', ownerId: '' });
   };
 
+  // 案件作成・編集フォームの送信処理
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -151,6 +158,7 @@ const Projects = () => {
     }
   };
 
+  // ステータス表示用ラベルとクラス名取得
   const getStatusLabel = (status) => {
     const labels = {
       NEW: '新規',
@@ -160,6 +168,7 @@ const Projects = () => {
     return labels[status] || status;
   };
 
+  // ステータスクラス名取得
   const getStatusClass = (status) => {
     return `status-badge status-${status.toLowerCase()}`;
   };
@@ -211,12 +220,10 @@ const Projects = () => {
       setError('ファイルを選択してください');
       return;
     }
-
     try {
       setImporting(true);
       const result = await projectService.importCsv(selectedFile);
       setImportResult(result);
-
       if (result.successCount > 0) {
         await fetchData();
       }

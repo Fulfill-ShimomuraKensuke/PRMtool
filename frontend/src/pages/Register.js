@@ -3,17 +3,19 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Auth.css';
 
+// 新規登録ページコンポーネント
 const Register = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState('REP');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState(''); // メールアドレス
+  const [password, setPassword] = useState(''); // パスワード
+  const [confirmPassword, setConfirmPassword] = useState(''); // パスワード（確認用）
+  const [role, setRole] = useState('REP'); // ユーザーロール
+  const [error, setError] = useState(''); // エラーメッセージ
+  const [loading, setLoading] = useState(false); // ローディング状態
 
   const { register } = useAuth();
   const navigate = useNavigate();
 
+  // ページタイトル設定
   React.useEffect(() => {
     document.title = '新規登録 - PRM Tool';
   }, []);
@@ -30,22 +32,23 @@ const Register = () => {
     if (password.length < 6) {
       return { valid: false, message: 'パスワードは6文字以上で入力してください' };
     }
-    
+
     // 英字が含まれているか
     const hasLetter = /[a-zA-Z]/.test(password);
     if (!hasLetter) {
       return { valid: false, message: 'パスワードには英字を1文字以上含めてください' };
     }
-    
+
     // 数字が含まれているか
     const hasNumber = /[0-9]/.test(password);
     if (!hasNumber) {
       return { valid: false, message: 'パスワードには数字を1文字以上含めてください' };
     }
-    
+
     return { valid: true, message: '' };
   };
 
+  // フォーム送信処理
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');

@@ -1,9 +1,11 @@
+/* 全体のスタイル */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* ボディスタイル */
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -13,6 +15,7 @@ body {
   background-color: #f5f6fa;
 }
 
+/* アプリ全体のスタイル */
 .App {
   min-height: 100vh;
 }
@@ -25,6 +28,7 @@ body {
   font-size: 1.2rem;
 }
 
+/* エラーメッセージスタイル */
 .error-message {
   background-color: #fee;
   color: #c33;
@@ -34,6 +38,7 @@ body {
   border-left: 4px solid #c33;
 }
 
+/* データがない場合のスタイル */
 .no-data {
   text-align: center;
   color: #95a5a6;
@@ -41,6 +46,7 @@ body {
   font-size: 1.1rem;
 }
 
+/* フォーム共通スタイル */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -48,12 +54,14 @@ body {
   margin-bottom: 1rem;
 }
 
+/* フォームラベルスタイル */
 .form-group label {
   color: #555;
   font-weight: 500;
   font-size: 0.9rem;
 }
 
+/* フォーム入力スタイル */
 .form-input,
 .form-select {
   padding: 0.75rem;
@@ -63,12 +71,14 @@ body {
   transition: border-color 0.3s;
 }
 
+/* フォーカス時のスタイル */
 .form-input:focus,
 .form-select:focus {
   outline: none;
   border-color: #667eea;
 }
 
+/* セレクトボックススタイル */
 .form-select {
   cursor: pointer;
   background-color: white;
@@ -88,6 +98,7 @@ body {
   z-index: 1000;
 }
 
+/* モーダルコンテンツスタイル */
 .modal-content {
   background: white;
   padding: 2rem;
@@ -99,11 +110,13 @@ body {
   overflow-y: auto;
 }
 
+/* モーダルヘッダースタイル */
 .modal-content h2 {
   color: #2c3e50;
   margin-bottom: 1.5rem;
 }
 
+/* モーダルアクションボタンスタイル */
 .modal-actions {
   display: flex;
   gap: 1rem;
@@ -122,11 +135,13 @@ body {
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
+/* ボタンホバースタイル */
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
+/* キャンセル・サブミットボタンスタイル */
 .btn-cancel,
 .btn-submit {
   flex: 1;
@@ -138,26 +153,32 @@ body {
   transition: opacity 0.2s;
 }
 
+/* キャンセルボタンスタイル */
 .btn-cancel {
   background-color: #95a5a6;
   color: white;
 }
 
+/* キャンセルボタンホバースタイル */
 .btn-cancel:hover {
   opacity: 0.9;
 }
 
+/* サブミットボタンスタイル */
 .btn-submit {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 }
 
+/* サブミットボタンホバースタイル */
 .btn-submit:hover {
   opacity: 0.9;
 }
 
 /* レスポンシブ */
 @media (max-width: 768px) {
+
+  /* モーダルコンテンツの幅調整 */
   .modal-content {
     width: 95%;
     padding: 1.5rem;

@@ -1,9 +1,11 @@
+/* プロジェクト一覧ページのスタイル */
 .projects-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
 }
 
+/* ヘッダーセクション */
 .projects-header {
   display: flex;
   justify-content: space-between;
@@ -11,10 +13,12 @@
   margin-bottom: 2rem;
 }
 
+/* ヘッダータイトル */
 .projects-header h1 {
   color: #2c3e50;
 }
 
+/* プロジェクトテーブル */
 .projects-table-container {
   background: white;
   border-radius: 12px;
@@ -22,15 +26,18 @@
   overflow: hidden;
 }
 
+/* テーブルスタイル */
 .projects-table {
   width: 100%;
   border-collapse: collapse;
 }
 
+/* テーブルヘッダー */
 .projects-table thead {
   background-color: #f8f9fa;
 }
 
+/* テーブルセル */
 .projects-table th {
   padding: 1rem;
   text-align: left;
@@ -39,25 +46,30 @@
   border-bottom: 2px solid #e0e0e0;
 }
 
+/* テーブルボディ */
 .projects-table td {
   padding: 1rem;
   border-bottom: 1px solid #e0e0e0;
   color: #555;
 }
 
+/* テーブル行のホバー効果 */
 .projects-table tbody tr:hover {
   background-color: #f8f9fa;
 }
 
+/* 最後の行のボーダーを消す */
 .projects-table tbody tr:last-child td {
   border-bottom: none;
 }
 
+/* アクションボタン */
 .table-actions {
   display: flex;
   gap: 0.5rem;
 }
 
+/* 小さな編集・削除ボタン */
 .btn-edit-small,
 .btn-delete-small {
   padding: 0.4rem 0.8rem;
@@ -69,25 +81,29 @@
   transition: opacity 0.2s;
 }
 
+/* 編集・削除ボタンのスタイル */
 .btn-edit-small {
   background-color: #3498db;
   color: white;
 }
 
+/* 編集ボタンのホバー効果 */
 .btn-edit-small:hover {
   opacity: 0.9;
 }
 
+/* 削除ボタンのスタイル */
 .btn-delete-small {
   background-color: #e74c3c;
   color: white;
 }
 
+/* 削除ボタンのホバー効果 */
 .btn-delete-small:hover {
   opacity: 0.9;
 }
 
-/* Status badges */
+/* ステータスバッジ */
 .status-badge {
   padding: 0.4rem 0.8rem;
   border-radius: 20px;
@@ -96,27 +112,33 @@
   display: inline-block;
 }
 
+/* ステータスごとの色分け */
 .status-new {
   background-color: #e3f2fd;
   color: #1976d2;
 }
 
+/* 進行中ステータス */
 .status-in_progress {
   background-color: #fff3e0;
   color: #f57c00;
 }
 
+/* 完了ステータス */
 .status-done {
   background-color: #e8f5e9;
   color: #388e3c;
 }
 
-/* Responsive */
+/* レスポンシブ */
 @media (max-width: 768px) {
+
+  /* テーブルコンテナに横スクロールを追加 */
   .projects-table-container {
     overflow-x: auto;
   }
 
+  /* テーブルの最小幅を設定 */
   .projects-table {
     min-width: 600px;
   }
@@ -128,6 +150,7 @@
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
+/* ホバー時のエフェクト */
 .project-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
@@ -154,6 +177,7 @@
   margin-bottom: 1rem;
 }
 
+/* 検索入力フィールド */
 .search-input {
   width: 100%;
   padding: 0.75rem 1rem;
@@ -162,6 +186,7 @@
   font-size: 1rem;
 }
 
+/* フォーカス時のスタイル */
 .search-input:focus {
   outline: none;
   border-color: #667eea;
@@ -176,6 +201,7 @@
   align-items: center;
 }
 
+/* セレクトボックススタイル */
 .filter-select {
   padding: 0.75rem 1rem;
   border: 1px solid #ddd;
@@ -186,11 +212,13 @@
   min-width: 180px;
 }
 
+/* フォーカス時のスタイル */
 .filter-select:focus {
   outline: none;
   border-color: #667eea;
 }
 
+/* チェックボックススタイル */
 .filter-checkbox {
   display: flex;
   align-items: center;
@@ -200,17 +228,20 @@
   user-select: none;
 }
 
+/* チェックボックスのスタイル */
 .filter-checkbox input[type="checkbox"] {
   width: 18px;
   height: 18px;
   cursor: pointer;
 }
 
+/* チェックボックスラベル */
 .filter-checkbox span {
   font-size: 0.95rem;
   color: #2c3e50;
 }
 
+/* クリアフィルターボタン */
 .btn-clear-filters {
   background-color: #95a5a6;
   color: white;
@@ -223,10 +254,12 @@
   font-size: 0.95rem;
 }
 
+/* クリアフィルターボタンのホバー効果 */
 .btn-clear-filters:hover {
   opacity: 0.9;
 }
 
+/* 検索結果情報 */
 .search-results-info {
   margin-top: 1rem;
   padding: 0.75rem;
@@ -239,15 +272,19 @@
 
 /* レスポンシブ */
 @media (max-width: 768px) {
+
+  /* フィルターを縦並びに */
   .filters {
     flex-direction: column;
     align-items: stretch;
   }
 
+  /* セレクトボックスをフル幅に */
   .filter-select {
     width: 100%;
   }
 
+  /* チェックボックスをフル幅に */
   .filter-checkbox {
     padding: 0.75rem;
     background-color: #f8f9fa;
@@ -260,16 +297,19 @@
   margin-bottom: 1.5rem;
 }
 
+/* インポート手順のスタイル */
 .import-instructions h3 {
   color: #2c3e50;
   margin-bottom: 0.5rem;
 }
 
+/* インポート手順の説明文 */
 .import-instructions p {
   color: #666;
   margin-bottom: 1rem;
 }
 
+/* CSVフォーマット例 */
 .csv-format {
   background-color: #f8f9fa;
   border: 1px solid #dee2e6;
@@ -281,11 +321,13 @@
   white-space: pre;
 }
 
+/* CSV注意事項リスト */
 .csv-notes {
   margin-top: 1rem;
   padding-left: 1.5rem;
 }
 
+/* 注意事項リストのスタイル */
 .csv-notes li {
   color: #666;
   margin-bottom: 0.5rem;
@@ -296,6 +338,7 @@
   margin: 1.5rem 0;
 }
 
+/* カスタムファイル入力スタイル */
 .file-label {
   display: inline-block;
   background-color: #3498db;
@@ -307,14 +350,17 @@
   transition: opacity 0.2s;
 }
 
+/* ホバー効果 */
 .file-label:hover {
   opacity: 0.9;
 }
 
+/* 非表示のファイル入力 */
 .file-input {
   display: none;
 }
 
+/* 選択されたファイル名の表示 */
 .file-name {
   margin-top: 0.75rem;
   color: #2c3e50;
@@ -326,29 +372,34 @@
   padding: 1rem 0;
 }
 
+/* インポート結果タイトル */
 .import-result h3 {
   color: #2c3e50;
   margin-bottom: 1rem;
 }
 
+/* 結果サマリー */
 .result-summary {
   display: flex;
   gap: 2rem;
   margin-bottom: 1.5rem;
 }
 
+/* 成功・失敗カウントスタイル */
 .success-count {
   color: #27ae60;
   font-size: 1.1rem;
   font-weight: 600;
 }
 
+/* 失敗カウントスタイル */
 .error-count {
   color: #e74c3c;
   font-size: 1.1rem;
   font-weight: 600;
 }
 
+/* エラーディテールセクション */
 .error-details {
   margin-top: 1rem;
   padding: 1rem;
@@ -357,16 +408,19 @@
   border-radius: 4px;
 }
 
+/* エラーディテールタイトル */
 .error-details h4 {
   color: #c33;
   margin-bottom: 0.75rem;
 }
 
+/* エラーディテールリスト */
 .error-details ul {
   margin: 0;
   padding-left: 1.5rem;
 }
 
+/* エラーディテールリストアイテム */
 .error-details li {
   color: #666;
   margin-bottom: 0.5rem;

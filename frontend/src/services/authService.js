@@ -35,7 +35,7 @@ const authService = {
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
 
-      // 🔧 userオブジェクトを整形してから保存
+      // userオブジェクトを整形してから保存
       const user = {
         id: response.data.userId,
         userId: response.data.userId,    // 互換性のため残す
@@ -46,7 +46,7 @@ const authService = {
       };
 
       localStorage.setItem('user', JSON.stringify(user));
-      return user;  // 🔧 整形したuserを返す
+      return user;  // 整形したuserを返す
     }
     return response.data;
   },
@@ -64,7 +64,7 @@ const authService = {
 
     const user = JSON.parse(userStr);
 
-    // 🔧 古いデータとの互換性のため、idがない場合は追加
+    //  古いデータとの互換性のため、idがない場合は追加
     if (user && !user.id && user.userId) {
       user.id = user.userId;
       // 更新して保存し直す
