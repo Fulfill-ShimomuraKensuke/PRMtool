@@ -235,6 +235,97 @@ const Projects = () => {
     }
   };
 
+  // CSVエクスポート実行
+  const handleExportCsv = () => {
+    // ヘッダー行を作成
+    const headers = ['案件名', 'パートナー名', 'オーナー', 'ステータス', '担当者'];
+
+    // データ行を作成
+    const rows = projects.map(project => [
+      project.name,
+      project.partnerName || '',
+      project.ownerName || '',
+      project.status || '',
+      project.assignments && project.assignments.length > 0
+        ? project.assignments.map(a => a.userName).join('; ')
+        : ''
+    ]);
+
+    // CSV文字列を作成
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row =>
+        row.map(cell => {
+          // セル内にカンマや改行がある場合はダブルクォートで囲む
+          const cellStr = String(cell);
+          if (cellStr.includes(',') || cellStr.includes('\n') || cellStr.includes('"')) {
+            return `"${cellStr.replace(/"/g, '""')}"`;
+          }
+          return cellStr;
+        }).join(',')
+      )
+    ].join('\n');
+
+    // UTF-8 BOMを追加（Excel対応）
+    const bom = '\uFEFF';
+    const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+
+    // ダウンロード用のリンクを作成
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+
+    // ファイル名を生成（日付付き）
+    const date = new Date().toISOString().split('T')[0];
+    link.setAttribute('href', url);
+    link.setAttribute('download', `projects_${date}.csv`);
+
+    // ダウンロードを実行
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // URLを解放
+    URL.revokeObjectURL(url);
+  };
+
+  // CSVテンプレートダウンロード
+  const handleDownloadTemplate = () => {
+    // テンプレートヘッダーを作成
+    const headers = ['案件名', 'パートナー名', 'オーナー', 'ステータス', '担当者'];
+
+    // サンプルデータを作成（3行）
+    const sampleData = [
+      ['新規Webサイト開発', 'サンプル企業A', 'admin', '進行中', 'user1; user2'],
+      ['システム保守', 'サンプル企業B', 'manager', '計画中', 'user3'],
+      ['コンサルティング', 'サンプル企業C', 'admin', '完了', 'user1; user4']
+    ];
+
+    // CSV文字列を作成
+    const csvContent = [
+      headers.join(','),
+      ...sampleData.map(row => row.join(','))
+    ].join('\n');
+
+    // UTF-8 BOMを追加（Excel対応）
+    const bom = '\uFEFF';
+    const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+
+    // ダウンロード用のリンクを作成
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'projects_template.csv');
+
+    // ダウンロードを実行
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // URLを解放
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <>
       <Navbar />
@@ -242,13 +333,16 @@ const Projects = () => {
         <div className="projects-header">
           <h1>案件管理</h1>
           <div className="header-buttons">
-            {/* CSVインポートボタン */}
-            {isAdmin && (
-              <button onClick={() => handleOpenImportModal()} className="btn-secondary">
-                CSVインポート
-              </button>
-            )}
-            <button onClick={() => handleOpenModal()} className="btn-primary">
+            <button onClick={handleDownloadTemplate} className="btn-template">
+              CSVテンプレート
+            </button>
+            <button onClick={handleOpenImportModal} className="btn-secondary">
+              CSVインポート
+            </button>
+            <button onClick={handleExportCsv} className="btn-export">
+              CSVエクスポート
+            </button>
+            <button onClick={() => setShowModal(true)} className="btn-primary">
               新規案件
             </button>
           </div>

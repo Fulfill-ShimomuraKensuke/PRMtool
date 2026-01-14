@@ -286,6 +286,78 @@ const Spreadsheet = ({ projectId, projectService }) => {
     }
   };
 
+  // CSVエクスポート実行
+  const handleExportCsv = () => {
+    // ヘッダー行を作成
+    const headers = tableData.headers.join(',');
+
+    // データ行を作成
+    const rows = tableData.rows.map(row =>
+      row.map(cell => {
+        // セル内にカンマや改行がある場合はダブルクォートで囲む
+        if (cell.includes(',') || cell.includes('\n') || cell.includes('"')) {
+          return `"${cell.replace(/"/g, '""')}"`;
+        }
+        return cell;
+      }).join(',')
+    ).join('\n');
+
+    // CSV文字列を結合
+    const csvContent = `${headers}\n${rows}`;
+
+    // UTF-8 BOMを追加（Excel対応）
+    const bom = '\uFEFF';
+    const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+
+    // ダウンロード用のリンクを作成
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+
+    // ファイル名を生成（日付付き）
+    const date = new Date().toISOString().split('T')[0];
+    link.setAttribute('href', url);
+    link.setAttribute('download', `spreadsheet_${date}.csv`);
+
+    // ダウンロードを実行
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // URLを解放
+    URL.revokeObjectURL(url);
+  };
+
+  // CSVテンプレートダウンロード
+  const handleDownloadTemplate = () => {
+    // テンプレートヘッダーを作成（5列）
+    const headers = ['列A', '列B', '列C', '列D', '列E'].join(',');
+
+    // 空のデータ行を作成（3行）
+    const emptyRows = Array(3).fill(',,,,').join('\n');
+
+    // CSV文字列を結合
+    const csvContent = `${headers}\n${emptyRows}`;
+
+    // UTF-8 BOMを追加（Excel対応）
+    const bom = '\uFEFF';
+    const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+
+    // ダウンロード用のリンクを作成
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'spreadsheet_template.csv');
+
+    // ダウンロードを実行
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // URLを解放
+    URL.revokeObjectURL(url);
+  };
+
   if (loading) {
     return <div className="loading">読み込み中...</div>;
   }
@@ -295,8 +367,14 @@ const Spreadsheet = ({ projectId, projectService }) => {
       <div className="spreadsheet-header">
         <h3>スプレッドシート</h3>
         <div className="spreadsheet-actions">
+          <button onClick={handleDownloadTemplate} className="btn-template-csv">
+            CSVテンプレート
+          </button>
           <button onClick={handleOpenImportModal} className="btn-import-csv">
             CSVインポート
+          </button>
+          <button onClick={handleExportCsv} className="btn-export-csv">
+            CSVエクスポート
           </button>
           <button onClick={addRow} className="btn-add-row">
             + 行を追加
