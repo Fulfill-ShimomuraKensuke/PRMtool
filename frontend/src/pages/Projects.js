@@ -291,8 +291,8 @@ const Projects = () => {
         )}
 
         {showModal && (
-          <div className="modal-overlay" onClick={handleCloseModal}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-overlay">
+            <div className="modal-content">
               <h2>{editingProject ? '案件編集' : '新規案件'}</h2>
               <form onSubmit={handleSubmit}>
                 <div className="form-group">

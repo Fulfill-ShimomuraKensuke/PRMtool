@@ -452,7 +452,7 @@ const Partners = () => {
 
         {/* 詳細モーダル */}
         {showDetailModal && selectedPartner && (
-          <div className="modal-overlay" onClick={handleCloseDetailModal}>
+          <div className="modal-overlay">
             <div className="modal-content modal-large" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <h2>{selectedPartner.name}</h2>
@@ -507,7 +507,7 @@ const Partners = () => {
         {/* 編集モーダル */}
         {showEditModal && (
           <div className="modal-overlay">
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content">
               <h2>{editingPartner ? 'パートナー編集' : '新規パートナー'}</h2>
               {error && <div className="error-message">{error}</div>}
               <form onSubmit={handleSubmit}>
@@ -598,8 +598,8 @@ const Partners = () => {
 
         {/* CSVインポートモーダル */}
         {showImportModal && (
-          <div className="modal-overlay" onClick={handleCloseImportModal}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-overlay">
+            <div className="modal-content">
               <div className="modal-header">
                 <h2>パートナーCSVインポート</h2>
                 <button onClick={handleCloseImportModal} className="btn-close">×</button>

@@ -269,8 +269,8 @@ const Accounts = () => {
         )}
 
         {showModal && (
-          <div className="modal-overlay" onClick={handleCloseModal}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-overlay">
+            <div className="modal-content">
               <h2>{editingUser ? 'アカウント編集' : '新規アカウント作成'}</h2>
               {error && <div className="error-message">{error}</div>}
               <form onSubmit={handleSubmit}>
