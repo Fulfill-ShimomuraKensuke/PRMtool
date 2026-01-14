@@ -21,6 +21,7 @@ const ProjectDetail = () => {
   const [showAssignModal, setShowAssignModal] = useState(false); // 担当者編集モーダルの表示状態管理
   const [showEditModal, setShowEditModal] = useState(false); // 基本情報編集モーダルの表示状態管理
   const [selectedUsers, setSelectedUsers] = useState([]); // 選択された担当者の状態管理
+  const [showSidebar, setShowSidebar] = useState(false); // サイドバー表示状態
   // 編集フォームの状態管理
   const [editFormData, setEditFormData] = useState({
     name: '',
@@ -175,8 +176,19 @@ const ProjectDetail = () => {
     return labels[status] || status;
   };
 
+  // ステータスクラス名取得ヘルパー関数
   const getStatusClass = (status) => {
     return `status-badge status-${status.toLowerCase()}`;
+  };
+
+  // サイドバーを開く
+  const handleOpenSidebar = () => {
+    setShowSidebar(true);
+  };
+
+  // サイドバーを閉じる
+  const handleCloseSidebar = () => {
+    setShowSidebar(false);
   };
 
   if (loading) {
@@ -209,23 +221,39 @@ const ProjectDetail = () => {
           <button onClick={() => navigate('/projects')} className="btn-back">
             ← 戻る
           </button>
-          <div className="header-actions">
-            {/* 編集ボタン */}
-            <button onClick={handleOpenEditModal} className="btn-edit-header">
-              編集
+          <button onClick={handleOpenEditModal} className="btn-edit-header">
+            編集
+          </button>
+          {isAdmin && (
+            <button onClick={handleDelete} className="btn-delete">
+              削除
             </button>
-            {isAdmin && (
-              <button onClick={handleDelete} className="btn-delete">
-                削除
-              </button>
-            )}
-          </div>
+          )}
         </div>
 
         {error && <div className="error-message">{error}</div>}
 
-        <div className="detail-content">
-          <div className="detail-info">
+        {/* サイドバートグルボタン */}
+        <button onClick={handleOpenSidebar} className="btn-toggle-sidebar">
+          <span className="hamburger-icon">☰</span>
+          <span>案件情報</span>
+        </button>
+
+        {/* サイドバーオーバーレイ */}
+        {showSidebar && (
+          <div className="sidebar-overlay" onClick={handleCloseSidebar}></div>
+        )}
+
+        {/* サイドバー */}
+        <div className={`sidebar ${showSidebar ? 'sidebar-open' : ''}`}>
+          <div className="sidebar-header">
+            <h2>案件情報</h2>
+            <button onClick={handleCloseSidebar} className="btn-close-sidebar">
+              ×
+            </button>
+          </div>
+
+          <div className="sidebar-content">
             <h1>{project.name}</h1>
             <div className={getStatusClass(project.status)}>
               {getStatusLabel(project.status)}
@@ -264,13 +292,14 @@ const ProjectDetail = () => {
               )}
             </div>
           </div>
+        </div>
 
-          <div className="table-section">
-            <Spreadsheet
-              projectId={id}
-              projectService={projectService}
-            />
-          </div>
+        {/* メインコンテンツ */}
+        <div className="main-content">
+          <Spreadsheet
+            projectId={id}
+            projectService={projectService}
+          />
         </div>
 
         {/* 基本情報編集モーダル */}
