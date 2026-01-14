@@ -9,6 +9,12 @@ const Spreadsheet = ({ projectId, projectService }) => {
   const [saving, setSaving] = useState(false);
   const [editingCell, setEditingCell] = useState(null);
 
+  // CSVインポート用のstate
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [csvFile, setCsvFile] = useState(null);
+  const [importMode, setImportMode] = useState('append'); // 'append' or 'overwrite'
+  const [hasHeader, setHasHeader] = useState(true);
+
   // テーブルデータ取得（useCallbackでメモ化）
   const fetchTableData = useCallback(async () => {
     try {
@@ -115,6 +121,171 @@ const Spreadsheet = ({ projectId, projectService }) => {
     setEditingCell(null);
   };
 
+  // CSVインポートモーダルを開く
+  const handleOpenImportModal = () => {
+    setShowImportModal(true);
+    setCsvFile(null);
+    setError('');
+  };
+
+  // CSVインポートモーダルを閉じる
+  const handleCloseImportModal = () => {
+    setShowImportModal(false);
+    setCsvFile(null);
+    setImportMode('append');
+    setHasHeader(true);
+  };
+
+  // CSVファイル選択
+  const handleCsvFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.name.endsWith('.csv')) {
+        setError('CSVファイル（.csv）を選択してください');
+        setCsvFile(null);
+      } else {
+        setCsvFile(file);
+        setError('');
+      }
+    }
+  };
+
+  // CSVファイルを読み込んでパース
+  const parseCsvFile = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const text = e.target.result;
+          const lines = text.split('\n').filter(line => line.trim());
+          if (lines.length === 0) {
+            reject(new Error('CSVファイルが空です'));
+            return;
+          }
+          const parsedData = lines.map(line => {
+            // カンマで分割（簡易的な実装）
+            return line.split(',').map(cell => cell.trim());
+          });
+          resolve(parsedData);
+        } catch (err) {
+          reject(err);
+        }
+      };
+      reader.onerror = () => {
+        reject(new Error('ファイルの読み込みに失敗しました'));
+      };
+      reader.readAsText(file, 'UTF-8');
+    });
+  };
+
+  // CSVインポート実行
+  const handleImportCsv = async () => {
+    if (!csvFile) {
+      setError('ファイルを選択してください');
+      return;
+    }
+    try {
+      const parsedData = await parseCsvFile(csvFile);
+      if (parsedData.length === 0) {
+        setError('CSVファイルにデータがありません');
+        return;
+      }
+      let newHeaders = [...tableData.headers];
+      let newRows = [...tableData.rows];
+      if (importMode === 'overwrite') {
+        // 上書きモード: CSVのサイズに完全に置き換える
+        if (hasHeader) {
+          newHeaders = parsedData[0];
+          newRows = parsedData.slice(1);
+        } else {
+          // ヘッダーがない場合、列数に応じてヘッダーを生成
+          const maxCols = Math.max(...parsedData.map(row => row.length));
+          newHeaders = Array.from({ length: maxCols }, (_, i) => `列${i + 1}`);
+          newRows = parsedData;
+        }
+      } else {
+        // 追加モード
+        if (hasHeader) {
+          // CSVのヘッダーは無視して、データのみ追加
+          const dataRows = parsedData.slice(1);
+          // CSVの列数を取得
+          const csvColCount = dataRows.length > 0
+            ? Math.max(...dataRows.map(row => row.length))
+            : 0;
+          const currentColCount = tableData.headers.length;
+          // CSVの列数が既存より多い場合、ヘッダーを追加
+          if (csvColCount > currentColCount) {
+            for (let i = currentColCount; i < csvColCount; i++) {
+              newHeaders.push(`列${i + 1}`);
+            }
+          }
+          // 列数を統一（最大列数に合わせる）
+          const targetColCount = newHeaders.length;
+
+          // 既存行の列数を調整
+          newRows = newRows.map(row => {
+            const adjustedRow = [...row];
+            while (adjustedRow.length < targetColCount) {
+              adjustedRow.push('');
+            }
+            return adjustedRow;
+          });
+          // CSVデータの列数を調整して追加
+          const adjustedDataRows = dataRows.map(row => {
+            const adjustedRow = [...row];
+            while (adjustedRow.length < targetColCount) {
+              adjustedRow.push('');
+            }
+            return adjustedRow;
+          });
+          newRows = [...newRows, ...adjustedDataRows];
+        } else {
+          // ヘッダーなしの場合、全データを追加
+          const csvColCount = parsedData.length > 0
+            ? Math.max(...parsedData.map(row => row.length))
+            : 0;
+          const currentColCount = tableData.headers.length;
+          // CSVの列数が既存より多い場合、ヘッダーを追加
+          if (csvColCount > currentColCount) {
+            for (let i = currentColCount; i < csvColCount; i++) {
+              newHeaders.push(`列${i + 1}`);
+            }
+          }
+          // 列数を統一
+          const targetColCount = newHeaders.length;
+          // 既存行の列数を調整
+          newRows = newRows.map(row => {
+            const adjustedRow = [...row];
+            while (adjustedRow.length < targetColCount) {
+              adjustedRow.push('');
+            }
+            return adjustedRow;
+          });
+          // CSVデータの列数を調整して追加
+          const adjustedDataRows = parsedData.map(row => {
+            const adjustedRow = [...row];
+            while (adjustedRow.length < targetColCount) {
+              adjustedRow.push('');
+            }
+            return adjustedRow;
+          });
+          newRows = [...newRows, ...adjustedDataRows];
+        }
+      }
+
+      setTableData({
+        headers: newHeaders,
+        rows: newRows
+      });
+
+      handleCloseImportModal();
+      alert(`${importMode === 'overwrite' ? '上書き' : '追加'}インポートしました`);
+    } catch (err) {
+      setError(err.message || 'CSVのインポートに失敗しました');
+      console.error('CSV import error:', err);
+    }
+  };
+
   if (loading) {
     return <div className="loading">読み込み中...</div>;
   }
@@ -124,6 +295,9 @@ const Spreadsheet = ({ projectId, projectService }) => {
       <div className="spreadsheet-header">
         <h3>スプレッドシート</h3>
         <div className="spreadsheet-actions">
+          <button onClick={handleOpenImportModal} className="btn-import-csv">
+            CSVインポート
+          </button>
           <button onClick={addRow} className="btn-add-row">
             + 行を追加
           </button>
@@ -206,6 +380,90 @@ const Spreadsheet = ({ projectId, projectService }) => {
           </tbody>
         </table>
       </div>
+      {/* CSVインポートモーダル */}
+      {showImportModal && (
+        <div className="modal-overlay" onClick={handleCloseImportModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>CSVインポート</h2>
+              <button onClick={handleCloseImportModal} className="btn-close">×</button>
+            </div>
+
+            {error && <div className="error-message">{error}</div>}
+
+            <div className="import-options">
+              <div className="form-group">
+                <label htmlFor="csv-file-upload" className="file-label">
+                  CSVファイルを選択
+                </label>
+                <input
+                  type="file"
+                  id="csv-file-upload"
+                  accept=".csv"
+                  onChange={handleCsvFileChange}
+                  className="file-input"
+                />
+                {csvFile && (
+                  <p className="file-name">選択中: {csvFile.name}</p>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label>インポートモード</label>
+                <div className="radio-group">
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      value="append"
+                      checked={importMode === 'append'}
+                      onChange={(e) => setImportMode(e.target.value)}
+                    />
+                    <span>追加（既存データに追加）</span>
+                  </label>
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      value="overwrite"
+                      checked={importMode === 'overwrite'}
+                      onChange={(e) => setImportMode(e.target.value)}
+                    />
+                    <span>上書き（既存データを置き換え）</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={hasHeader}
+                    onChange={(e) => setHasHeader(e.target.checked)}
+                  />
+                  <span>CSVの1行目はヘッダー</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="modal-actions">
+              <button
+                type="button"
+                onClick={handleCloseImportModal}
+                className="btn-cancel"
+              >
+                キャンセル
+              </button>
+              <button
+                type="button"
+                onClick={handleImportCsv}
+                className="btn-submit"
+                disabled={!csvFile}
+              >
+                インポート
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
