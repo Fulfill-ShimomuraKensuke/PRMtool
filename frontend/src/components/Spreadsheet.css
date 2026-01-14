@@ -162,6 +162,7 @@
   color: #666;
   text-align: center;
   width: 50px;
+  position: relative;
 }
 
 /* セルの値 */
@@ -187,29 +188,30 @@
   outline: none;
 }
 
-/* 行アクション */
-.row-actions {
-  width: 80px;
-  text-align: center;
-  background-color: #f8f9fa;
-}
-
 /* 行削除ボタン */
 .btn-delete-row {
+  position: absolute;
+  top: 50%;
+  right: 2px;
+  transform: translateY(-50%);
   background-color: #e74c3c;
   color: white;
   border: none;
-  padding: 0.4rem 0.8rem;
-  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
   cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
   transition: opacity 0.2s;
 }
 
-/* 行削除ボタンホバー効果 */
-.btn-delete-row:hover {
-  opacity: 0.9;
+/* 行削除ボタンのホバー効果 */
+.spreadsheet-table tbody tr:hover .btn-delete-row {
+  opacity: 1;
 }
 
 /* レスポンシブ */

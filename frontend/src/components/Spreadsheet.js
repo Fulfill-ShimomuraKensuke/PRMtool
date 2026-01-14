@@ -343,7 +343,16 @@ const Spreadsheet = ({ projectId, projectService }) => {
           <tbody>
             {tableData.rows.map((row, rowIndex) => (
               <tr key={rowIndex}>
-                <td className="row-number">{rowIndex + 1}</td>
+                <td className="row-number">
+                  {rowIndex + 1}
+                  <button
+                    onClick={() => deleteRow(rowIndex)}
+                    className="btn-delete-row"
+                    title="行を削除"
+                  >
+                    ×
+                  </button>
+                </td>
                 {row.map((cell, colIndex) => (
                   <td
                     key={colIndex}
@@ -366,15 +375,6 @@ const Spreadsheet = ({ projectId, projectService }) => {
                     )}
                   </td>
                 ))}
-                <td className="row-actions">
-                  <button
-                    onClick={() => deleteRow(rowIndex)}
-                    className="btn-delete-row"
-                    title="行を削除"
-                  >
-                    削除
-                  </button>
-                </td>
               </tr>
             ))}
           </tbody>
