@@ -342,7 +342,7 @@ const Projects = () => {
             <button onClick={handleExportCsv} className="btn-export">
               CSVエクスポート
             </button>
-            <button onClick={() => setShowModal(true)} className="btn-primary">
+            <button onClick={() => handleOpenModal()} className="btn-primary">
               新規案件
             </button>
           </div>
