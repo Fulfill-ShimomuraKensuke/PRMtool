@@ -44,7 +44,8 @@ public class User {
   private UserRole role; // ユーザーロール
 
   @Column(nullable = false)
-  private Boolean isSystemProtected; // システム保護フラグ
+  @Builder.Default
+  private Boolean isSystemProtected = false; // システム保護フラグ
 
   @CreationTimestamp
   @Column(nullable = false, updatable = false)
@@ -56,11 +57,6 @@ public class User {
   @UpdateTimestamp
   @Column(nullable = false)
   private LocalDateTime updatedAt; // 更新日時
-
-  // ヘルパーメソッド：システム保護されているかチェック
-  public boolean isSystemProtected() {
-    return this.isSystemProtected != null && this.isSystemProtected;
-  }
 
   public enum UserRole {
     ADMIN, // 管理者

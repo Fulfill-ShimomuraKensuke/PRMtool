@@ -59,6 +59,7 @@ public class UserService {
         .address(request.getAddress())
         .position(request.getPosition())
         .role(request.getRole())
+        .isSystemProtected(false)
         .createdBy(createdBy)
         .build();
 
