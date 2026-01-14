@@ -28,6 +28,9 @@ public class Partner {
   @Column(nullable = false)
   private String name; // 企業名（必須）
 
+  @Column(length = 100)
+  private String industry; // 業界（任意）
+
   @Column
   private String phone; // 代表電話（任意）
 

@@ -29,6 +29,7 @@ public class PartnerService {
     // 1. Partnerエンティティを作成
     Partner partner = Partner.builder()
         .name(request.getName())
+        .industry(request.getIndustry())
         .phone(request.getPhone())
         .address(request.getAddress())
         .build();
@@ -73,6 +74,7 @@ public class PartnerService {
 
     // 基本情報を更新
     partner.setName(request.getName());
+    partner.setIndustry(request.getIndustry()); // 追加
     partner.setPhone(request.getPhone());
     partner.setAddress(request.getAddress());
 

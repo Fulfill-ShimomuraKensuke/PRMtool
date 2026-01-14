@@ -19,6 +19,7 @@ public class PartnerResponse {
 
   private UUID id; // 企業ID
   private String name; // 企業名
+  private String industry; // 業種
   private String phone; // 代表電話
   private String address; // 住所
   private List<PartnerContactDTO> contacts; // 担当者リスト
@@ -32,6 +33,7 @@ public class PartnerResponse {
     return PartnerResponse.builder()
         .id(partner.getId())
         .name(partner.getName())
+        .industry(partner.getIndustry()) // 追加
         .phone(partner.getPhone())
         .address(partner.getAddress())
         .contacts(partner.getContacts().stream()

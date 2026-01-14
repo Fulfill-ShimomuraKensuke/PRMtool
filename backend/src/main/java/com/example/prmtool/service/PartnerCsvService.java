@@ -24,19 +24,37 @@ public class PartnerCsvService {
   private static final Map<String, String> HEADER_MAPPING = new HashMap<>();
 
   static {
-    // 日本語ヘッダー
+    // パートナー名
+    HEADER_MAPPING.put("パートナー名", "name");
     HEADER_MAPPING.put("企業名", "name");
     HEADER_MAPPING.put("会社名", "name");
+
+    // 業種
+    HEADER_MAPPING.put("業種", "industry");
+    HEADER_MAPPING.put("業界", "industry");
+
+    // 代表電話
     HEADER_MAPPING.put("代表電話", "phone");
     HEADER_MAPPING.put("電話番号", "phone");
     HEADER_MAPPING.put("電話", "phone");
+
+    // 住所
     HEADER_MAPPING.put("住所", "address");
+
+    // 担当者名（1セルに複数値）
+    HEADER_MAPPING.put("担当者名", "contactNames");
+
+    // 担当者連絡先（1セルに複数値）
+    HEADER_MAPPING.put("担当者連絡先", "contactInfos");
 
     // 英語ヘッダー
     HEADER_MAPPING.put("name", "name");
     HEADER_MAPPING.put("company_name", "name");
+    HEADER_MAPPING.put("industry", "industry");
     HEADER_MAPPING.put("phone", "phone");
     HEADER_MAPPING.put("address", "address");
+    HEADER_MAPPING.put("contact_names", "contactNames");
+    HEADER_MAPPING.put("contact_infos", "contactInfos");
   }
 
   public PartnerCsvService(PartnerRepository partnerRepository) {
@@ -46,12 +64,18 @@ public class PartnerCsvService {
   // CSVファイルからパートナーをインポート
   @Transactional
   public Map<String, Object> importPartnersFromCsv(MultipartFile file) throws Exception {
-    List<String> errors = new ArrayList<>(); // エラーメッセージリスト
-    int successCount = 0; // 成功カウント
-    int errorCount = 0; // エラーカウント
+    List<String> errors = new ArrayList<>();
+    int successCount = 0;
+    int errorCount = 0;
 
     try (BufferedReader reader = new BufferedReader(
         new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+
+      // UTF-8 BOMをスキップ
+      reader.mark(1);
+      if (reader.read() != 0xFEFF) {
+        reader.reset();
+      }
 
       CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
           .setHeader()
@@ -68,11 +92,11 @@ public class PartnerCsvService {
         for (CSVRecord record : csvParser) {
           rowNumber++;
           try {
-            Partner partner = parsePartnerFromRecord(record, normalizedHeaders);
+            Partner partner = parsePartnerFromRecord(record, normalizedHeaders, rowNumber);
 
             // バリデーション
             if (partner.getName() == null || partner.getName().trim().isEmpty()) {
-              errors.add("行" + rowNumber + ": 企業名は必須です");
+              errors.add("行" + rowNumber + ": パートナー名は必須です");
               errorCount++;
               continue;
             }
@@ -116,16 +140,19 @@ public class PartnerCsvService {
   }
 
   // CSVレコードからPartnerエンティティを生成
-  private Partner parsePartnerFromRecord(CSVRecord record, Map<String, Integer> headers) {
+  private Partner parsePartnerFromRecord(CSVRecord record, Map<String, Integer> headers, int rowNumber)
+      throws Exception {
+
     Partner partner = Partner.builder()
         .name(getValueByKey(record, headers, "name"))
+        .industry(getValueByKey(record, headers, "industry"))
         .phone(getValueByKey(record, headers, "phone"))
         .address(getValueByKey(record, headers, "address"))
         .contacts(new ArrayList<>())
         .build();
 
-    // 担当者を動的に検出（contact1_name, contact1_info, contact2_name, ...）
-    List<PartnerContact> contacts = parseContacts(record, headers);
+    // 担当者をパース（1セルにカンマ区切りで複数値）
+    List<PartnerContact> contacts = parseContacts(record, headers, rowNumber);
     for (PartnerContact contact : contacts) {
       partner.addContact(contact);
     }
@@ -133,38 +160,46 @@ public class PartnerCsvService {
     return partner;
   }
 
-  // 担当者情報を動的にパース
-  private List<PartnerContact> parseContacts(CSVRecord record, Map<String, Integer> headers) {
+  // 担当者情報をパース（1セルにカンマ区切りで複数値）
+  private List<PartnerContact> parseContacts(CSVRecord record, Map<String, Integer> headers, int rowNumber)
+      throws Exception {
+
     List<PartnerContact> contacts = new ArrayList<>();
 
-    // contact1_name, contact1_info, contact2_name, contact2_info のパターンを検出
-    for (int i = 1; i <= 10; i++) { // 最大10人の担当者をサポート
-      String contactNameKey = "contact" + i + "_name";
-      String contactInfoKey = "contact" + i + "_info";
+    // 担当者名を取得（カンマ区切り）
+    String contactNamesStr = getValueByKey(record, headers, "contactNames");
+    // 担当者連絡先を取得（カンマ区切り）
+    String contactInfosStr = getValueByKey(record, headers, "contactInfos");
 
-      // 日本語パターンも対応
-      String jpContactNameKey = "担当者名" + i;
-      String jpContactInfoKey = "担当者連絡先" + i;
+    // 両方が空の場合はエラー
+    if ((contactNamesStr == null || contactNamesStr.trim().isEmpty()) &&
+        (contactInfosStr == null || contactInfosStr.trim().isEmpty())) {
+      throw new Exception("担当者名と担当者連絡先は必須です");
+    }
 
-      String contactName = getValueByKey(record, headers, contactNameKey);
-      String contactInfo = getValueByKey(record, headers, contactInfoKey);
+    // カンマで分割
+    String[] names = contactNamesStr != null ? contactNamesStr.split(",") : new String[0];
+    String[] infos = contactInfosStr != null ? contactInfosStr.split(",") : new String[0];
 
-      // 日本語ヘッダーもチェック
-      if (contactName == null || contactName.isEmpty()) {
-        contactName = getValueByKey(record, headers, jpContactNameKey);
+    // 数が一致するかチェック
+    if (names.length != infos.length) {
+      throw new Exception("担当者名と担当者連絡先の数が一致しません（名前:" + names.length + "件、連絡先:" + infos.length + "件）");
+    }
+
+    // 各担当者を生成
+    for (int i = 0; i < names.length; i++) {
+      String name = names[i].trim();
+      String info = infos[i].trim();
+
+      if (name.isEmpty() || info.isEmpty()) {
+        throw new Exception("担当者名と担当者連絡先は空にできません");
       }
-      if (contactInfo == null || contactInfo.isEmpty()) {
-        contactInfo = getValueByKey(record, headers, jpContactInfoKey);
-      }
 
-      if (contactName != null && !contactName.trim().isEmpty()
-          && contactInfo != null && !contactInfo.trim().isEmpty()) {
-        PartnerContact contact = PartnerContact.builder()
-            .contactName(contactName.trim())
-            .contactInfo(contactInfo.trim())
-            .build();
-        contacts.add(contact);
-      }
+      PartnerContact contact = PartnerContact.builder()
+          .contactName(name)
+          .contactInfo(info)
+          .build();
+      contacts.add(contact);
     }
 
     return contacts;

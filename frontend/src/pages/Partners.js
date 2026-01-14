@@ -16,6 +16,7 @@ const Partners = () => {
   // フォームデータ用のstate
   const [formData, setFormData] = useState({
     name: '',
+    industry: '',
     phone: '',
     address: '',
     contacts: [{ contactName: '', contactInfo: '' }]
@@ -77,6 +78,7 @@ const Partners = () => {
     setEditingPartner(null);
     setFormData({
       name: '',
+      industry: '',
       phone: '',
       address: '',
       contacts: [{ contactName: '', contactInfo: '' }]
@@ -89,6 +91,7 @@ const Partners = () => {
     setEditingPartner(partner);
     setFormData({
       name: partner.name,
+      industry: partner.industry || '',
       phone: partner.phone || '',
       address: partner.address || '',
       contacts: partner.contacts.length > 0
@@ -259,29 +262,28 @@ const Partners = () => {
   // CSVエクスポート実行
   const handleExportCsv = () => {
     // ヘッダー行を作成
-    const headers = ['パートナー名', '業種', '連絡先名', 'メールアドレス', '電話番号'];
+    const headers = ['パートナー名', '業種', '代表電話', '住所', '担当者名', '担当者連絡先'];
 
-    // データ行を作成
-    const rows = partners.flatMap(partner => {
-      if (partner.contacts && partner.contacts.length > 0) {
-        // 連絡先がある場合、各連絡先ごとに行を作成
-        return partner.contacts.map(contact => [
-          partner.name,
-          partner.industry || '',
-          contact.name || '',
-          contact.email || '',
-          contact.phone || ''
-        ]);
-      } else {
-        // 連絡先がない場合、パートナー情報のみ
-        return [[
-          partner.name,
-          partner.industry || '',
-          '',
-          '',
-          ''
-        ]];
-      }
+    // データ行を作成（1行に全ての担当者をカンマ区切りで）
+    const rows = partners.map(partner => {
+      // 担当者名をカンマ区切りで結合
+      const contactNames = partner.contacts && partner.contacts.length > 0
+        ? partner.contacts.map(c => c.contactName).join(',')
+        : '';
+
+      // 担当者連絡先をカンマ区切りで結合
+      const contactInfos = partner.contacts && partner.contacts.length > 0
+        ? partner.contacts.map(c => c.contactInfo).join(',')
+        : '';
+
+      return [
+        partner.name,
+        partner.industry || '',
+        partner.phone || '',
+        partner.address || '',
+        contactNames,
+        contactInfos
+      ];
     });
 
     // CSV文字列を作成
@@ -324,19 +326,27 @@ const Partners = () => {
   // CSVテンプレートダウンロード
   const handleDownloadTemplate = () => {
     // テンプレートヘッダーを作成
-    const headers = ['パートナー名', '業種', '連絡先名', 'メールアドレス', '電話番号'];
+    const headers = ['パートナー名', '業種', '代表電話', '住所', '担当者名', '担当者連絡先'];
 
     // サンプルデータを作成（3行）
     const sampleData = [
-      ['サンプル企業A', 'IT・通信', '山田太郎', 'yamada@example.com', '03-1234-5678'],
-      ['サンプル企業B', '製造業', '佐藤花子', 'sato@example.com', '03-2345-6789'],
-      ['サンプル企業C', '金融・保険', '田中次郎', 'tanaka@example.com', '03-3456-7890']
+      ['サンプル企業A', 'IT・通信', '03-1234-5678', '東京都渋谷区', '山田太郎,佐藤花子', 'yamada@example.com,sato@example.com'],
+      ['サンプル企業B', '製造業', '03-2345-6789', '大阪府大阪市', '田中次郎', 'tanaka@example.com'],
+      ['サンプル企業C', '金融・保険', '03-3456-7890', '福岡県福岡市', '鈴木一郎,高橋美咲,伊藤健太', 'suzuki@example.com,takahashi@example.com,ito@example.com']
     ];
 
     // CSV文字列を作成
     const csvContent = [
       headers.join(','),
-      ...sampleData.map(row => row.join(','))
+      ...sampleData.map(row =>
+        row.map(cell => {
+          // セル内にカンマがある場合はダブルクォートで囲む
+          if (cell.includes(',')) {
+            return `"${cell}"`;
+          }
+          return cell;
+        }).join(',')
+      )
     ].join('\n');
 
     // UTF-8 BOMを追加（Excel対応）
@@ -423,6 +433,7 @@ const Partners = () => {
                     onDoubleClick={() => handleOpenDetailModal(partner)}
                   >
                     <h3>{partner.name}</h3>
+                    <p><strong>業種:</strong> {partner.industry || '登録なし'}</p>
                     <p><strong>代表電話:</strong> {partner.phone || '登録なし'}</p>
                     <p><strong>住所:</strong> {partner.address || '登録なし'}</p>
                     <p><strong>担当者:</strong> {renderContactsCount(partner.contacts)}</p>
@@ -451,6 +462,7 @@ const Partners = () => {
               <div className="partner-detail-content">
                 <div className="detail-section">
                   <h3>基本情報</h3>
+                  <p><strong>業種:</strong> {selectedPartner.industry || '登録なし'}</p>
                   <p><strong>代表電話:</strong> {selectedPartner.phone || '登録なし'}</p>
                   <p><strong>住所:</strong> {selectedPartner.address || '登録なし'}</p>
                 </div>
@@ -506,6 +518,15 @@ const Partners = () => {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>業種</label>
+                  <input
+                    type="text"
+                    value={formData.industry}
+                    onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
                     className="form-input"
                   />
                 </div>
@@ -592,14 +613,16 @@ const Partners = () => {
                     <h3>CSVファイル形式</h3>
                     <p>以下の形式でCSVファイルを作成してください：</p>
                     <pre className="csv-format">
-                      企業名,代表電話,住所,担当者名1,担当者連絡先1,担当者名2,担当者連絡先2
-                      テスト株式会社,03-1234-5678,東京都渋谷区,山田太郎,yamada@example.com,佐藤花子,sato@example.com
+                      パートナー名,業種,代表電話,住所,担当者名,担当者連絡先
+                      サンプル企業A,IT・通信,03-1234-5678,東京都渋谷区,"山田太郎,佐藤花子","yamada@example.com,sato@example.com"
+                      サンプル企業B,製造業,03-2345-6789,大阪府大阪市,田中次郎,tanaka@example.com
                     </pre>
                     <ul className="csv-notes">
                       <li>1行目はヘッダー行（列名）です</li>
-                      <li>企業名と最低1人の担当者（名前・連絡先）は必須です</li>
-                      <li>担当者は最大10人まで登録可能です</li>
-                      <li>代表電話と住所は省略可能です</li>
+                      <li>パートナー名と最低1人の担当者（名前・連絡先）は必須です</li>
+                      <li>複数の担当者はカンマ区切りで1セルに入力してください</li>
+                      <li>担当者名と担当者連絡先の数は一致させる必要があります</li>
+                      <li>業種、代表電話、住所は省略可能です</li>
                     </ul>
                   </div>
 
