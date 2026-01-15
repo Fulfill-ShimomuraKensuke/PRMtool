@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import projectService from '../services/projectService';
 import partnerService from '../services/partnerService';
 import userService from '../services/userService';
-import Navbar from '../components/Navbar';
 import Spreadsheet from '../components/Spreadsheet';
 import { useAuth } from '../context/AuthContext';
 import './ProjectDetail.css';

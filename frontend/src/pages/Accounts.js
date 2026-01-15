@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import userService from '../services/userService';
-import Navbar from '../components/Navbar';
 import './Accounts.css';
 
 // アカウント管理ページコンポーネント

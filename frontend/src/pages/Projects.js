@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import projectService from '../services/projectService';
 import partnerService from '../services/partnerService';
-import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import './Projects.css';
 
