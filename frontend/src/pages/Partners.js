@@ -570,7 +570,7 @@ const Partners = () => {
                           <button
                             type="button"
                             onClick={() => removeContact(index)}
-                            className="btn-remove"
+                            className="btn-delete-modal"
                           >
                             削除
                           </button>

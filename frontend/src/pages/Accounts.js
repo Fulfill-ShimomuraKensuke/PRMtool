@@ -175,7 +175,6 @@ const Accounts = () => {
 
   return (
     <>
-      {/* <Navbar /> */}
       <div className="accounts-container">
         <div className="accounts-header">
           <h1>アカウント管理</h1>

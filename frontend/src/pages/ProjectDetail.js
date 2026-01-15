@@ -194,7 +194,6 @@ const ProjectDetail = () => {
   if (loading) {
     return (
       <>
-        <Navbar />
         <div className="project-detail-container">
           <div className="loading">読み込み中...</div>
         </div>
@@ -205,7 +204,6 @@ const ProjectDetail = () => {
   if (!project) {
     return (
       <>
-        <Navbar />
         <div className="project-detail-container">
           <div className="error-message">案件が見つかりません</div>
         </div>
