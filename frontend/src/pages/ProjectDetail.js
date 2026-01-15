@@ -42,9 +42,9 @@ const ProjectDetail = () => {
         setProject(data);
         setSelectedUsers(data.assignments ? data.assignments.map(a => a.userId) : []);
 
-        // 管理者の場合はユーザー一覧も取得
+        // 管理者の場合はユーザー一覧も取得（SYSTEMロールを除外）
         if (isAdmin) {
-          const users = await userService.getAll();
+          const users = await userService.getAssignable();
           setAllUsers(users);
         }
 

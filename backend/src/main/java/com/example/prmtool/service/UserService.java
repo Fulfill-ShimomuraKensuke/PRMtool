@@ -39,6 +39,15 @@ public class UserService {
     return UserResponse.from(user);
   }
 
+  // 案件担当者として割り当て可能なユーザーを取得（SYSTEMロールを除外）
+  @Transactional(readOnly = true)
+  public List<UserResponse> getAssignableUsers() {
+    return userRepository.findAll().stream()
+        .filter(user -> user.getRole() != User.UserRole.SYSTEM) // SYSTEMロールは案件担当者になれない
+        .map(UserResponse::from)
+        .collect(Collectors.toList());
+  }
+
   // ユーザーを作成
   @Transactional
   public UserResponse createUser(UserRequest request, String createdBy) {

@@ -203,7 +203,6 @@ const Accounts = () => {
               className="filter-select"
             >
               <option value="ALL">全てのロール</option>
-              <option value="SYSTEM">システム管理者</option>
               <option value="ADMIN">管理者</option>
               <option value="REP">担当者</option>
             </select>
@@ -314,7 +313,6 @@ const Accounts = () => {
                   <select name="role" value={formData.role} onChange={handleChange} required>
                     <option value="REP">担当者</option>
                     <option value="ADMIN">管理者</option>
-                    <option value="SYSTEM">システム管理者</option>
                   </select>
                 </div>
                 <div className="modal-actions">

@@ -71,8 +71,8 @@ public class SecurityConfig {
             // CORS Preflight リクエストを許可
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-            // ユーザー管理（SYSTEM と ADMIN のみアクセス可能）
-            .requestMatchers("/api/users", "/api/users/**").hasAnyRole("SYSTEM", "ADMIN")
+            // ユーザー管理（ADMIN, SYSTEM, REP がアクセス可能、SYSTEMロールを除外した一覧を返す）
+            .requestMatchers("/api/users", "/api/users/**").hasAnyRole("SYSTEM", "ADMIN", "REP")
 
             // パートナー管理（ADMIN と REP のみアクセス可能、SYSTEMは除外）
             .requestMatchers(HttpMethod.GET, "/api/partners", "/api/partners/*").hasAnyRole("ADMIN", "REP")
