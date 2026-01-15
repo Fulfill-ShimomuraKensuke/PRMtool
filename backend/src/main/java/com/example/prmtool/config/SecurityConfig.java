@@ -25,6 +25,7 @@ public class SecurityConfig {
   private final UserDetailsService userDetailsService;
   private final CorsConfigurationSource corsConfigurationSource;
 
+  // 必要なサービスをDIコンテナから注入
   public SecurityConfig(JwtRequestFilter jwtRequestFilter,
       UserDetailsService userDetailsService,
       CorsConfigurationSource corsConfigurationSource) {
@@ -33,11 +34,13 @@ public class SecurityConfig {
     this.corsConfigurationSource = corsConfigurationSource;
   }
 
+  // パスワードのハッシュ化に使用するエンコーダーを定義
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
 
+  // 認証マネージャーの設定
   @Bean
   public AuthenticationManager authenticationManager(HttpSecurity http,
       PasswordEncoder passwordEncoder) throws Exception {
@@ -48,13 +51,14 @@ public class SecurityConfig {
     return authManagerBuilder.build();
   }
 
+  // セキュリティフィルターチェーンの設定（アクセス制御のルール定義）
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
         .cors(cors -> cors.configurationSource(corsConfigurationSource))
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(auth -> auth
-            // 認証不要
+            // 認証不要のエンドポイント
             .requestMatchers(
                 "/",
                 "/api/health",
@@ -64,24 +68,25 @@ public class SecurityConfig {
                 "/api/admin/bootstrap")
             .permitAll()
 
-            // CORS Preflight
+            // CORS Preflight リクエストを許可
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-            // ユーザー管理（管理者のみ） ← 追加
-            .requestMatchers("/api/users", "/api/users/**").hasRole("ADMIN")
+            // ユーザー管理（SYSTEM と ADMIN のみアクセス可能）
+            .requestMatchers("/api/users", "/api/users/**").hasAnyRole("SYSTEM", "ADMIN")
 
-            // パートナー管理
-            .requestMatchers(HttpMethod.GET, "/api/partners", "/api/partners/*").authenticated()
+            // パートナー管理（ADMIN と REP のみアクセス可能、SYSTEMは除外）
+            .requestMatchers(HttpMethod.GET, "/api/partners", "/api/partners/*").hasAnyRole("ADMIN", "REP")
             .requestMatchers(HttpMethod.POST, "/api/partners").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/partners/*").hasRole("ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/api/partners/*").hasRole("ADMIN")
 
-            // 案件管理
-            .requestMatchers(HttpMethod.GET, "/api/projects", "/api/projects/*").authenticated()
-            .requestMatchers(HttpMethod.POST, "/api/projects").authenticated()
-            .requestMatchers(HttpMethod.PUT, "/api/projects/*").authenticated()
+            // 案件管理（ADMIN と REP のみアクセス可能、SYSTEMは除外）
+            .requestMatchers(HttpMethod.GET, "/api/projects", "/api/projects/*").hasAnyRole("ADMIN", "REP")
+            .requestMatchers(HttpMethod.POST, "/api/projects").hasAnyRole("ADMIN", "REP")
+            .requestMatchers(HttpMethod.PUT, "/api/projects/*").hasAnyRole("ADMIN", "REP")
             .requestMatchers(HttpMethod.DELETE, "/api/projects/*").hasRole("ADMIN")
 
+            // その他全てのリクエストは認証が必要
             .anyRequest().authenticated())
         .sessionManagement(session -> session
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

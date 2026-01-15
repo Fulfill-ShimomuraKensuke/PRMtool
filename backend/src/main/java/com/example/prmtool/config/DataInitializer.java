@@ -15,21 +15,27 @@ public class DataInitializer {
 
   private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
 
+  // 初期管理者の有効/無効フラグを設定ファイルから取得
   @Value("${app.initial-admin.enabled:true}")
   private boolean initialAdminEnabled;
 
-  @Value("${app.initial-admin.name:Admin}")
+  // 初期管理者の名前を設定ファイルから取得
+  @Value("${app.initial-admin.name:System Admin}")
   private String initialAdminName;
 
-  @Value("${app.initial-admin.loginId:admin}")
+  // 初期管理者のログインIDを設定ファイルから取得
+  @Value("${app.initial-admin.loginId:system}")
   private String initialAdminLoginId;
 
-  @Value("${app.initial-admin.email:admin@example.com}")
+  // 初期管理者のメールアドレスを設定ファイルから取得
+  @Value("${app.initial-admin.email:system@example.com}")
   private String initialAdminEmail;
 
-  @Value("${app.initial-admin.password:StrongPassword123!}")
+  // 初期管理者のパスワードを設定ファイルから取得
+  @Value("${app.initial-admin.password:SystemPass123!}")
   private String initialAdminPassword;
 
+  // アプリケーション起動時に初期データを投入するメソッド
   @Bean
   public CommandLineRunner initData(UserRepository userRepository, PasswordEncoder passwordEncoder) {
     return args -> {
@@ -45,25 +51,26 @@ public class DataInitializer {
         return;
       }
 
-      // 初期管理者を作成
-      User admin = User.builder()
+      // SYSTEMロールで初期管理者を作成（アカウント管理のみ可能）
+      User systemAdmin = User.builder()
           .name(initialAdminName)
           .loginId(initialAdminLoginId)
           .passwordHash(passwordEncoder.encode(initialAdminPassword))
           .email(initialAdminEmail)
-          .role(User.UserRole.ADMIN)
+          .role(User.UserRole.SYSTEM) // システム管理者として作成
           .createdBy("system-init")
-          .isSystemProtected(true)
+          .isSystemProtected(true) // システム保護フラグを有効化
           .build();
 
-      userRepository.save(admin);
+      userRepository.save(systemAdmin);
 
       log.info("=================================================");
-      log.info("初期管理者が作成されました");
+      log.info("初期システム管理者が作成されました");
       log.info("名前: {}", initialAdminName);
       log.info("ログインID: {}", initialAdminLoginId);
       log.info("メールアドレス: {}", initialAdminEmail);
       log.info("パスワード: {}", initialAdminPassword);
+      log.info("ロール: SYSTEM（アカウント管理のみ可能）");
       log.info("=================================================");
       log.warn("セキュリティ警告: 本番環境では必ずパスワードを変更してください！");
     };

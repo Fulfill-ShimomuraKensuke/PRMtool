@@ -180,7 +180,6 @@ const Projects = () => {
 
   return (
     <>
-      <Navbar />
       <div className="projects-container">
         <div className="projects-header">
           <h1>案件管理</h1>

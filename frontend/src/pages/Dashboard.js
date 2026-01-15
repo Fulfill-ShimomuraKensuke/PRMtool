@@ -61,7 +61,6 @@ const Dashboard = () => {
 
   return (
     <>
-      <Navbar />
       <div className="dashboard-container">
         <div className="dashboard-header">
           <h1>ダッシュボード</h1>

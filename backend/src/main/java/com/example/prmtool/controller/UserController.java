@@ -28,7 +28,7 @@ public class UserController {
    * 全ユーザー取得（管理者のみ）
    */
   @GetMapping
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasAnyRole('ADMIN', 'SYSTEM')")
   public ResponseEntity<List<UserResponse>> getAllUsers() {
     List<UserResponse> users = userService.getAllUsers();
     return ResponseEntity.ok(users);
@@ -38,7 +38,7 @@ public class UserController {
    * 特定ユーザー取得（管理者のみ）
    */
   @GetMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasAnyRole('ADMIN', 'SYSTEM')")
   public ResponseEntity<UserResponse> getUserById(@PathVariable UUID id) {
     UserResponse user = userService.getUserById(id);
     return ResponseEntity.ok(user);
@@ -48,7 +48,7 @@ public class UserController {
    * ユーザー作成（管理者のみ）
    */
   @PostMapping
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasAnyRole('ADMIN', 'SYSTEM')")
   public ResponseEntity<UserResponse> createUser(
       @Valid @RequestBody UserRequest request,
       Authentication authentication) {
@@ -61,7 +61,7 @@ public class UserController {
    * ユーザー更新（管理者のみ）
    */
   @PutMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasAnyRole('ADMIN', 'SYSTEM')")
   public ResponseEntity<UserResponse> updateUser(
       @PathVariable UUID id,
       @Valid @RequestBody UserRequest request) {
@@ -73,7 +73,7 @@ public class UserController {
    * ユーザー削除（管理者のみ）
    */
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasAnyRole('ADMIN', 'SYSTEM')")
   public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
     userService.deleteUser(id);
     return ResponseEntity.noContent().build();

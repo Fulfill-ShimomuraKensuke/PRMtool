@@ -58,8 +58,10 @@ public class User {
   @Column(nullable = false)
   private LocalDateTime updatedAt; // 更新日時
 
+  // ユーザーの役割を定義
   public enum UserRole {
-    ADMIN, // 管理者
-    REP // 担当者
+    SYSTEM, // システム管理者：アカウント管理のみ可能、案件・パートナーへのアクセス不可
+    ADMIN,  // 管理者：全ての機能にアクセス可能
+    REP     // 担当者：限定的な機能にアクセス可能
   }
 }

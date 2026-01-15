@@ -2,31 +2,44 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-// プライベートルートコンポーネント
-const PrivateRoute = ({ children, adminOnly = false }) => {
-  const { isAuthenticated, isAdmin, loading } = useAuth();
+// 認証が必要なルートを保護するコンポーネント
+const PrivateRoute = ({ children, requiredRole, systemRestricted }) => {
+  const { user, loading, isSystem, isAdmin, isRep } = useAuth();
 
+  // ローディング中は何も表示しない
   if (loading) {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh'
-      }}>
-        <div>読み込み中...</div>
-      </div>
-    );
+    return <div>Loading...</div>;
   }
 
-  if (!isAuthenticated()) {
+  // 未ログインの場合はログインページへリダイレクト
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  if (adminOnly && !isAdmin) {
-    return <Navigate to="/dashboard" replace />;
+  // SYSTEMロールが制限されているページにアクセスしようとした場合
+  if (systemRestricted && isSystem) {
+    return <Navigate to="/accounts" replace />;
   }
 
+  // 特定のロールが必要な場合のチェック
+  if (requiredRole) {
+    // SYSTEM権限が必要な場合
+    if (requiredRole === 'SYSTEM' && !isSystem && !isAdmin) {
+      return <Navigate to="/" replace />;
+    }
+
+    // ADMIN権限が必要な場合
+    if (requiredRole === 'ADMIN' && !isAdmin) {
+      return <Navigate to="/" replace />;
+    }
+
+    // REP権限が必要な場合（SYSTEMは除外）
+    if (requiredRole === 'REP' && !isRep && !isAdmin) {
+      return <Navigate to="/" replace />;
+    }
+  }
+
+  // 全てのチェックをパスした場合、子コンポーネントを表示
   return children;
 };
 

@@ -371,7 +371,6 @@ const Partners = () => {
 
   return (
     <>
-      <Navbar />
       <div className="partners-container">
         <div className="partners-header">
           <h1>パートナー管理</h1>

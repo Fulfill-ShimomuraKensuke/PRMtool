@@ -32,8 +32,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       @NonNull FilterChain chain)
       throws ServletException, IOException {
 
+    String authorizationHeader = null; // ★ tryの外で宣言
+
     try {
-      final String authorizationHeader = request.getHeader("Authorization");
+      authorizationHeader = request.getHeader("Authorization");
 
       String username = null;
       String jwt = null;
@@ -42,6 +44,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         jwt = authorizationHeader.substring(7);
         username = jwtUtil.extractUsername(jwt);
       }
+
       if (username != null &&
           SecurityContextHolder.getContext().getAuthentication() == null) {
 
@@ -49,14 +52,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if (jwtUtil.validateToken(jwt, userDetails)) {
           UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
               userDetails, null, userDetails.getAuthorities());
+
           auth.setDetails(
               new WebAuthenticationDetailsSource().buildDetails(request));
           SecurityContextHolder.getContext().setAuthentication(auth);
         }
       }
     } catch (Exception e) {
-      logger.error("JWT authentication failed", e);
-      // 認証失敗として続行（SecurityContextは空のまま）
+      logger.warn("JWT invalid. AuthorizationHeader=" + authorizationHeader, e);
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      return;
     }
     chain.doFilter(request, response);
   }

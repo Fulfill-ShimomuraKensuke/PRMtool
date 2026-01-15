@@ -215,7 +215,6 @@ const ProjectDetail = () => {
 
   return (
     <>
-      <Navbar />
       <div className="project-detail-container">
         <div className="detail-header">
           <button onClick={() => navigate('/projects')} className="btn-back">

@@ -13,13 +13,13 @@ spring:
 app:
   initial-admin-key: ${INITIAL_ADMIN_KEY:dev-bootstrap-secret}
   
-  # 初期管理者の自動作成設定
+  # 初期システム管理者の自動作成設定（SYSTEMロール）
   initial-admin:
     enabled: ${INITIAL_ADMIN_ENABLED:true}
-    name: ${INITIAL_ADMIN_NAME:管理者}
-    loginId: ${INITIAL_ADMIN_LOGIN_ID:admin}
-    email: ${INITIAL_ADMIN_EMAIL:admin@example.com}
-    password: ${INITIAL_ADMIN_PASSWORD:AdminPass123!}
+    name: ${INITIAL_ADMIN_NAME:システム管理者}
+    loginId: ${INITIAL_ADMIN_LOGIN_ID:system}
+    email: ${INITIAL_ADMIN_EMAIL:system@example.com}
+    password: ${INITIAL_ADMIN_PASSWORD:SystemPass123!}
 
 ---
 # ==========================================

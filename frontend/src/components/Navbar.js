@@ -1,58 +1,65 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
-// ナビゲーションバーコンポーネント
 const Navbar = () => {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout, isSystem, isAdmin, isRep } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
+  // ログアウト処理
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
+  // アクティブなリンクのクラス名を取得
+  const getActiveClass = (path) => {
+    return location.pathname === path ? 'active' : '';
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <Link to="/dashboard" className="navbar-logo">
+        <Link to="/" className="navbar-logo">
           PRM Tool
         </Link>
 
-        <ul className="navbar-menu">
-          <li className="navbar-item">
-            <Link to="/dashboard" className="navbar-link">
-              ダッシュボード
+        <div className="navbar-menu">
+          {/* SYSTEMロールの場合はアカウント管理のみ表示 */}
+          {isSystem && (
+            <Link to="/accounts" className={`navbar-link ${getActiveClass('/accounts')}`}>
+              アカウント管理
             </Link>
-          </li>
+          )}
 
-          {isAdmin && (
+          {/* ADMIN と REP はダッシュボード、パートナー、案件にアクセス可能 */}
+          {(isAdmin || isRep) && (
             <>
-              <li className="navbar-item">
-                <Link to="/partners" className="navbar-link">
-                  パートナー管理
-                </Link>
-              </li>
-              <li className="navbar-item">
-                <Link to="/accounts" className="navbar-link">
-                  アカウント管理
-                </Link>
-              </li>
+              <Link to="/" className={`navbar-link ${getActiveClass('/')}`}>
+                ダッシュボード
+              </Link>
+              <Link to="/partners" className={`navbar-link ${getActiveClass('/partners')}`}>
+                パートナー
+              </Link>
+              <Link to="/projects" className={`navbar-link ${getActiveClass('/projects')}`}>
+                案件
+              </Link>
             </>
           )}
 
-          <li className="navbar-item">
-            <Link to="/projects" className="navbar-link">
-              案件管理
+          {/* ADMIN のみアカウント管理にアクセス可能 */}
+          {isAdmin && (
+            <Link to="/accounts" className={`navbar-link ${getActiveClass('/accounts')}`}>
+              アカウント管理
             </Link>
-          </li>
-        </ul>
+          )}
+        </div>
 
         <div className="navbar-user">
-          <span className="navbar-user-name">{user?.name || user?.loginId}</span>
-          <span className="navbar-user-role">
-            ({user?.role === 'ADMIN' ? '管理者' : '担当者'})
+          <span className="user-info">
+            {user?.name} ({user?.role})
           </span>
           <button onClick={handleLogout} className="navbar-logout-btn">
             ログアウト

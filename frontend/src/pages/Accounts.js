@@ -35,7 +35,7 @@ const Accounts = () => {
   useEffect(() => {
     let filtered = [...users];
 
-    // 検索処理
+    // 検索処理（名前、ログインID、メール、電話番号、役職で検索）
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(user =>
@@ -52,7 +52,6 @@ const Accounts = () => {
       filtered = filtered.filter(user => user.role === roleFilter);
     }
 
-    // フィルタリング結果をセット
     setFilteredUsers(filtered);
   }, [searchTerm, roleFilter, users]);
 
@@ -71,7 +70,7 @@ const Accounts = () => {
     }
   };
 
-  // モーダル開閉処理
+  // モーダル開閉処理（新規作成または編集）
   const handleOpenModal = (user = null) => {
     if (user) {
       setEditingUser(user);
@@ -116,7 +115,7 @@ const Accounts = () => {
     });
   };
 
-  // フォーム送信処理
+  // フォーム送信処理（作成または更新）
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -151,9 +150,18 @@ const Accounts = () => {
     }
   };
 
-  // ロール表示ラベル取得
+  // ロールを日本語表示に変換
   const getRoleLabel = (role) => {
-    return role === 'ADMIN' ? '管理者' : '担当者';
+    switch (role) {
+      case 'SYSTEM':
+        return 'システム管理者';
+      case 'ADMIN':
+        return '管理者';
+      case 'REP':
+        return '担当者';
+      default:
+        return role;
+    }
   };
 
   // フィルタークリア
@@ -167,7 +175,7 @@ const Accounts = () => {
 
   return (
     <>
-      <Navbar />
+      {/* <Navbar /> */}
       <div className="accounts-container">
         <div className="accounts-header">
           <h1>アカウント管理</h1>
@@ -197,6 +205,7 @@ const Accounts = () => {
               className="filter-select"
             >
               <option value="ALL">全てのロール</option>
+              <option value="SYSTEM">システム管理者</option>
               <option value="ADMIN">管理者</option>
               <option value="REP">担当者</option>
             </select>
@@ -307,6 +316,7 @@ const Accounts = () => {
                   <select name="role" value={formData.role} onChange={handleChange} required>
                     <option value="REP">担当者</option>
                     <option value="ADMIN">管理者</option>
+                    <option value="SYSTEM">システム管理者</option>
                   </select>
                 </div>
                 <div className="modal-actions">
