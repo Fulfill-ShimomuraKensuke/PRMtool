@@ -9,7 +9,6 @@ import Partners from './pages/Partners';
 import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
 import Accounts from './pages/Accounts';
-
 import Commissions from './pages/Commissions';
 import Invoices from './pages/Invoices';
 import PartnerDashboard from './pages/PartnerDashboard';
@@ -19,8 +18,6 @@ import './App.css';
 // ルートリダイレクト（ロールに応じて適切なページへリダイレクト）
 const RootRedirect = () => {
   const { isSystem } = useAuth();
-
-  // SYSTEMロールの場合はアカウント管理へ、それ以外はダッシュボードへ
   return <Navigate to={isSystem ? '/accounts' : '/'} replace />;
 };
 
@@ -42,7 +39,6 @@ function AppContent() {
 
   return (
     <>
-      {/* ログイン済みの場合のみナビゲーションバーを表示 */}
       {user && <Navbar />}
 
       <Routes>
@@ -69,6 +65,16 @@ function AppContent() {
           }
         />
 
+        {/* パートナー別ダッシュボード */}
+        <Route
+          path="/partners/:id/dashboard"
+          element={
+            <PrivateRoute systemRestricted={true}>
+              <PartnerDashboard />
+            </PrivateRoute>
+          }
+        />
+
         {/* 案件管理（SYSTEMロールは制限） */}
         <Route
           path="/projects"
@@ -89,6 +95,26 @@ function AppContent() {
           }
         />
 
+        {/* 手数料管理 */}
+        <Route
+          path="/commissions"
+          element={
+            <PrivateRoute systemRestricted={true}>
+              <Commissions />
+            </PrivateRoute>
+          }
+        />
+
+        {/* 請求書管理 */}
+        <Route
+          path="/invoices"
+          element={
+            <PrivateRoute systemRestricted={true}>
+              <Invoices />
+            </PrivateRoute>
+          }
+        />
+
         {/* アカウント管理（SYSTEM と ADMIN のみ） */}
         <Route
           path="/accounts"
@@ -99,35 +125,8 @@ function AppContent() {
           }
         />
 
-        {/* その他のルートはルートリダイレクトへ */}
+        {/* ワイルドカードルートは必ず最後に配置 */}
         <Route path="*" element={<RootRedirect />} />
-
-        <Route
-          path="/commissions"
-          element={
-            <PrivateRoute>
-              <Commissions />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/invoices"
-          element={
-            <PrivateRoute>
-              <Invoices />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/partners/:id/dashboard"
-          element={
-            <PrivateRoute>
-              <PartnerDashboard />
-            </PrivateRoute>
-          }
-        />
       </Routes>
     </>
   );
