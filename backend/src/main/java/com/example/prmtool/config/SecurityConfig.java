@@ -86,6 +86,25 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.PUT, "/api/projects/*").hasAnyRole("ADMIN", "REP")
             .requestMatchers(HttpMethod.DELETE, "/api/projects/*").hasRole("ADMIN")
 
+            // 手数料管理（ADMIN と REP のみアクセス可能、SYSTEMは除外）
+            .requestMatchers(HttpMethod.GET, "/api/commissions", "/api/commissions/*").hasAnyRole("ADMIN", "REP")
+            .requestMatchers(HttpMethod.POST, "/api/commissions").hasAnyRole("ADMIN", "REP")
+            .requestMatchers(HttpMethod.PUT, "/api/commissions/*").hasAnyRole("ADMIN", "REP")
+            .requestMatchers(HttpMethod.DELETE, "/api/commissions/*").hasRole("ADMIN")
+
+            // 請求書管理（ADMIN と REP のみアクセス可能、SYSTEMは除外）
+            .requestMatchers(HttpMethod.GET, "/api/invoices", "/api/invoices/*").hasAnyRole("ADMIN", "REP")
+            .requestMatchers(HttpMethod.POST, "/api/invoices").hasAnyRole("ADMIN", "REP")
+            .requestMatchers(HttpMethod.PUT, "/api/invoices/*").hasAnyRole("ADMIN", "REP")
+            .requestMatchers(HttpMethod.DELETE, "/api/invoices/*").hasRole("ADMIN")
+
+            // パートナー別ダッシュボード（ADMIN と REP のみアクセス可能、SYSTEMは除外）
+            .requestMatchers(HttpMethod.GET, "/api/partners/*/dashboard").hasAnyRole("ADMIN", "REP")
+            .requestMatchers(HttpMethod.POST, "/api/partners/*/dashboard").hasAnyRole("ADMIN", "REP")
+            .requestMatchers(HttpMethod.PUT, "/api/partners/*/dashboard").hasAnyRole("ADMIN", "REP")
+            .requestMatchers(HttpMethod.DELETE, "/api/partners/*/dashboard").hasRole("ADMIN")
+
+
             // その他全てのリクエストは認証が必要
             .anyRequest().authenticated())
         .sessionManagement(session -> session
