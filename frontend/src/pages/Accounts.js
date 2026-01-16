@@ -14,6 +14,7 @@ const Accounts = () => {
     name: '',
     loginId: '',
     password: '',
+    confirmPassword: '',
     email: '',
     phone: '',
     address: '',
@@ -77,6 +78,7 @@ const Accounts = () => {
         name: user.name,
         loginId: user.loginId,
         password: '',
+        confirmPassword: '',
         email: user.email || '',
         phone: user.phone || '',
         address: user.address || '',
@@ -89,6 +91,7 @@ const Accounts = () => {
         name: '',
         loginId: '',
         password: '',
+        confirmPassword: '',
         email: '',
         phone: '',
         address: '',
@@ -119,15 +122,28 @@ const Accounts = () => {
     e.preventDefault();
     setError('');
 
+    // パスワード入力がある場合は確認用パスワードと一致するかチェック
+    if (formData.password) {
+      if (formData.password !== formData.confirmPassword) {
+        setError('パスワードと確認用パスワードが一致しません');
+        return;
+      }
+    }
+
     try {
       if (editingUser) {
-        await userService.update(editingUser.id, formData);
+        // 編集時：確認用パスワードを除外してバックエンドに送信
+        const { confirmPassword, ...updateData } = formData;
+        await userService.update(editingUser.id, updateData);
       } else {
+        // 新規作成時：パスワードは必須
         if (!formData.password) {
           setError('パスワードは必須です');
           return;
         }
-        await userService.create(formData);
+        // 確認用パスワードを除外してバックエンドに送信
+        const { confirmPassword, ...createData } = formData;
+        await userService.create(createData);
       }
       await fetchUsers();
       handleCloseModal();
@@ -290,7 +306,24 @@ const Accounts = () => {
                 </div>
                 <div className="form-group">
                   <label>パスワード {editingUser ? '' : '*'}</label>
-                  <input type="password" name="password" value={formData.password} onChange={handleChange} required={!editingUser} placeholder={editingUser ? '変更する場合のみ入力' : ''} />
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required={!editingUser}
+                    placeholder={editingUser ? '変更する場合のみ入力' : ''} />
+                </div>
+                <div className="form-group">
+                  <label>パスワード確認 {editingUser ? '' : '*'}</label>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    required={!editingUser}
+                    placeholder={editingUser ? '変更する場合のみ入力' : ''}
+                  />
                 </div>
                 <div className="form-group">
                   <label>メールアドレス *</label>
