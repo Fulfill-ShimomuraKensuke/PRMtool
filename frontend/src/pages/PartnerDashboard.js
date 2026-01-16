@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import partnerService from '../services/partnerService';
 import './PartnerDashboard.css';
@@ -11,24 +11,24 @@ const PartnerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchDashboard();
-  }, [id]);
+const fetchDashboard = useCallback(async () => {
+  try {
+    setLoading(true);
+    const data = await partnerService.getDashboard(id);
+    setDashboard(data);
+    document.title = `${data.partnerName} - ダッシュボード - PRM Tool`;
+  } catch (err) {
+    setError('ダッシュボードの取得に失敗しました');
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+}, [id]);
 
-  // ダッシュボードデータを取得
-  const fetchDashboard = async () => {
-    try {
-      setLoading(true);
-      const data = await partnerService.getDashboard(id);
-      setDashboard(data);
-      document.title = `${data.partnerName} - ダッシュボード - PRM Tool`;
-    } catch (err) {
-      setError('ダッシュボードの取得に失敗しました');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+useEffect(() => {
+  fetchDashboard();
+}, [fetchDashboard]);
+
 
   // 金額をフォーマット
   const formatCurrency = (amount) => {
