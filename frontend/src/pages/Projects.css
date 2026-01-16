@@ -105,6 +105,7 @@
 
 /* ステータスバッジ */
 .status-badge {
+  margin: 0.5rem 0;
   padding: 0.4rem 0.8rem;
   border-radius: 20px;
   font-size: 0.85rem;
@@ -147,13 +148,34 @@
 /* プロジェクトカードをクリック可能に */
 .project-card {
   cursor: pointer;
+  padding: 10px 10px;
   transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* プロジェクトカードのタイトル */
+.project-card h3 {
+  margin: 0.5rem 0;
+  color: #000000;
 }
 
 /* ホバー時のエフェクト */
 .project-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* パートナー名の表示 */
+.project-partner {
+  color: #555;
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+/* オーナー名の表示 */
+.project-owner {
+  color: #555;
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
 }
 
 /* 担当者数の表示 */

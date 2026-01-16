@@ -35,7 +35,7 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  gap: 2rem;
+  gap: 0rem;
 }
 
 /* ナビゲーションメニューのアイテム */
@@ -49,7 +49,7 @@
   text-decoration: none;
   font-size: 1rem;
   transition: color 0.3s;
-  padding: 0.5rem 1rem;
+  padding: 0.1rem 1rem;
   border-radius: 4px;
 }
 
