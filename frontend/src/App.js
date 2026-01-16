@@ -15,12 +15,6 @@ import PartnerDashboard from './pages/PartnerDashboard';
 
 import './App.css';
 
-// ルートリダイレクト（ロールに応じて適切なページへリダイレクト）
-const RootRedirect = () => {
-  const { isSystem } = useAuth();
-  return <Navigate to={isSystem ? '/accounts' : '/'} replace />;
-};
-
 function App() {
   return (
     <AuthProvider>
@@ -33,7 +27,6 @@ function App() {
   );
 }
 
-// アプリケーションのメインコンテンツ
 function AppContent() {
   const { user } = useAuth();
 
@@ -42,10 +35,8 @@ function AppContent() {
       {user && <Navbar />}
 
       <Routes>
-        {/* ログインページ */}
         <Route path="/login" element={<Login />} />
 
-        {/* ダッシュボード（SYSTEMロールは制限） */}
         <Route
           path="/"
           element={
@@ -55,7 +46,6 @@ function AppContent() {
           }
         />
 
-        {/* パートナー管理（SYSTEMロールは制限） */}
         <Route
           path="/partners"
           element={
@@ -65,17 +55,15 @@ function AppContent() {
           }
         />
 
-        {/* パートナー別ダッシュボード */}
         <Route
           path="/partners/:id/dashboard"
           element={
-            <PrivateRoute systemRestricted={true}>
+            <PrivateRoute>
               <PartnerDashboard />
             </PrivateRoute>
           }
         />
 
-        {/* 案件管理（SYSTEMロールは制限） */}
         <Route
           path="/projects"
           element={
@@ -85,7 +73,6 @@ function AppContent() {
           }
         />
 
-        {/* 案件詳細（SYSTEMロールは制限） */}
         <Route
           path="/projects/:id"
           element={
@@ -95,7 +82,6 @@ function AppContent() {
           }
         />
 
-        {/* 手数料管理 */}
         <Route
           path="/commissions"
           element={
@@ -105,7 +91,6 @@ function AppContent() {
           }
         />
 
-        {/* 請求書管理 */}
         <Route
           path="/invoices"
           element={
@@ -115,7 +100,6 @@ function AppContent() {
           }
         />
 
-        {/* アカウント管理（SYSTEM と ADMIN のみ） */}
         <Route
           path="/accounts"
           element={
@@ -125,8 +109,7 @@ function AppContent() {
           }
         />
 
-        {/* ワイルドカードルートは必ず最後に配置 */}
-        <Route path="*" element={<RootRedirect />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
   );

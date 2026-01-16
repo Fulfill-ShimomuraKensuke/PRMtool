@@ -495,7 +495,10 @@ const Partners = () => {
               </div>
 
               <div className="modal-actions">
-                <button onClick={() => { handleCloseDetailModal(); navigate(`/api/partners/${selectedPartner.id}/dashboard`); }} className="btn-dashboard">
+                <button
+                  onClick={() => navigate(`/partners/${selectedPartner.id}/dashboard`)}
+                  className="btn-dashboard"
+                >
                   📊 ダッシュボードを見る
                 </button>
                 <button onClick={() => handleOpenEditModal(selectedPartner)} className="btn-edit">
