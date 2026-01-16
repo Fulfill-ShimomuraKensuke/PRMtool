@@ -23,17 +23,12 @@ const PrivateRoute = ({ children, requiredRole, systemRestricted }) => {
 
   // 特定のロールが必要な場合のチェック
   if (requiredRole) {
-    // SYSTEM権限が必要な場合（SYSTEMロールのみアクセス可能）
-    if (requiredRole === 'SYSTEM' && !isSystem) {
+    // ADMIN権限が必要な場合（SYSTEMまたはADMINロールがアクセス可能）
+    if (requiredRole === 'ADMIN' && !isAdmin && !isSystem) {
       return <Navigate to="/" replace />;
     }
 
-    // ADMIN権限が必要な場合（ADMINロールのみアクセス可能）
-    if (requiredRole === 'ADMIN' && !isAdmin) {
-      return <Navigate to="/" replace />;
-    }
-
-    // REP権限が必要な場合（REPおよびADMINがアクセス可能）
+    // REP権限が必要な場合（REPおよびADMINがアクセス可能、SYSTEMは除外）
     if (requiredRole === 'REP' && !isRep && !isAdmin) {
       return <Navigate to="/" replace />;
     }
