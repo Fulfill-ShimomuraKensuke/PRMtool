@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import partnerService from '../services/partnerService';
 import './Partners.css';
 
 // パートナー管理ページコンポーネント
 const Partners = () => {
+  const navigate = useNavigate(); // ナビゲーション用フック
+
+  // state定義
   const [partners, setPartners] = useState([]); // 全パートナー一覧
   const [filteredPartners, setFilteredPartners] = useState([]); // 検索フィルター後のパートナー一覧
   const [loading, setLoading] = useState(true); // ローディング状態
@@ -491,6 +495,9 @@ const Partners = () => {
               </div>
 
               <div className="modal-actions">
+                <button onClick={() => { handleCloseDetailModal(); navigate(`/api/partners/${selectedPartner.id}/dashboard`); }} className="btn-dashboard">
+                  📊 ダッシュボードを見る
+                </button>
                 <button onClick={() => handleOpenEditModal(selectedPartner)} className="btn-edit">
                   編集
                 </button>
