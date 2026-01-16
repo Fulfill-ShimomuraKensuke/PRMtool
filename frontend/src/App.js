@@ -9,12 +9,17 @@ import Partners from './pages/Partners';
 import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
 import Accounts from './pages/Accounts';
+
+import Commissions from './pages/Commissions';
+import Invoices from './pages/Invoices';
+import PartnerDashboard from './pages/PartnerDashboard';
+
 import './App.css';
 
 // ルートリダイレクト（ロールに応じて適切なページへリダイレクト）
 const RootRedirect = () => {
   const { isSystem } = useAuth();
-  
+
   // SYSTEMロールの場合はアカウント管理へ、それ以外はダッシュボードへ
   return <Navigate to={isSystem ? '/accounts' : '/'} replace />;
 };
@@ -39,7 +44,7 @@ function AppContent() {
     <>
       {/* ログイン済みの場合のみナビゲーションバーを表示 */}
       {user && <Navbar />}
-      
+
       <Routes>
         {/* ログインページ */}
         <Route path="/login" element={<Login />} />
@@ -96,6 +101,33 @@ function AppContent() {
 
         {/* その他のルートはルートリダイレクトへ */}
         <Route path="*" element={<RootRedirect />} />
+
+        <Route
+          path="/commissions"
+          element={
+            <PrivateRoute>
+              <Commissions />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/invoices"
+          element={
+            <PrivateRoute>
+              <Invoices />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/partners/:id/dashboard"
+          element={
+            <PrivateRoute>
+              <PartnerDashboard />
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </>
   );

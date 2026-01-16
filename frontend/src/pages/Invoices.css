@@ -1,0 +1,196 @@
+/* 請求書管理ページのスタイル */
+
+.invoices-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.invoices-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.invoices-header h1 {
+  font-size: 2rem;
+  color: #333;
+  margin: 0;
+}
+
+/* ステータスバッジのスタイル */
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-draft {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.status-issued {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.status-paid {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-cancelled {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+/* テーブルのスタイル */
+.invoices-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.invoices-table thead {
+  background-color: #f9fafb;
+}
+
+.invoices-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.invoices-table td {
+  padding: 1rem;
+  border-top: 1px solid #e5e7eb;
+  color: #1f2937;
+}
+
+.invoices-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+/* モーダルのスタイル */
+.modal-large {
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* フォーム行のスタイル */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* 請求明細セクション */
+.invoice-items-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px solid #e5e7eb;
+}
+
+.items-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.items-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+/* 明細項目のスタイル */
+.invoice-item {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.item-header span {
+  font-weight: 600;
+  color: #374151;
+}
+
+/* ボタンのスタイル */
+.btn-add-item {
+  padding: 0.5rem 1rem;
+  background-color: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-add-item:hover {
+  background-color: #059669;
+}
+
+.btn-remove-item {
+  padding: 0.25rem 0.75rem;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-remove-item:hover {
+  background-color: #dc2626;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .invoices-container {
+    padding: 1rem;
+  }
+
+  .invoices-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .invoices-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .modal-large {
+    max-width: 95%;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}

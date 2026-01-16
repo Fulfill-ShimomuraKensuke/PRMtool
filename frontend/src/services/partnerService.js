@@ -72,6 +72,12 @@ const partnerService = {
       throw error;
     }
   },
+
+  // パートナー別ダッシュボードを取得
+  getDashboard: async (partnerId) => {
+    const response = await api.get(`/partners/${partnerId}/dashboard`);
+    return response.data;
+  },
 };
 
 export default partnerService;

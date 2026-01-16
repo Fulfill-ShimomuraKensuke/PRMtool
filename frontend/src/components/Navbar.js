@@ -60,6 +60,12 @@ const Navbar = () => {
               <Link to="/projects" className={`navbar-link ${getActiveClass('/projects')}`}>
                 案件
               </Link>
+              <Link to="/commissions" className={`navbar-link ${getActiveClass('/commissions')}`}>
+                手数料管理
+              </Link>
+              <Link to="/invoices" className={`navbar-link ${getActiveClass('/invoices')}`}>
+                請求書
+              </Link>
             </>
           )}
 
