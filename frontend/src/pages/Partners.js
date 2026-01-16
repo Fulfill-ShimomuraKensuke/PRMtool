@@ -600,7 +600,6 @@ const Partners = () => {
             <div className="modal-content">
               <div className="modal-header">
                 <h2>パートナーCSVインポート</h2>
-                <button onClick={handleCloseImportModal} className="btn-close">×</button>
               </div>
 
               {error && <div className="error-message">{error}</div>}
