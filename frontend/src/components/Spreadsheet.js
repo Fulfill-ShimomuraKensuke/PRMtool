@@ -464,7 +464,6 @@ const Spreadsheet = ({ projectId, projectService }) => {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>CSVインポート</h2>
-              <button onClick={handleCloseImportModal} className="btn-close">×</button>
             </div>
 
             {error && <div className="error-message">{error}</div>}
