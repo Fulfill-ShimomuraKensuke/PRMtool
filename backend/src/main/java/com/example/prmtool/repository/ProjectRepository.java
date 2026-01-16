@@ -22,7 +22,7 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
   List<Project> findByOwnerId(UUID ownerId);
 
   // 案件に割り当てられているユーザーを検索
-  @Query("SELECT p FROM Project p JOIN p.assignedUsers u WHERE u.id = :userId")
+  @Query("SELECT p FROM Project p JOIN p.assignments a WHERE a.user.id = :userId")
   List<Project> findProjectsByAssignedUser(@Param("userId") UUID userId);
 
   // ステータス別の案件数を取得
