@@ -19,6 +19,20 @@ const Navbar = () => {
     return location.pathname === path ? 'active' : '';
   };
 
+  // ロールを日本語表示に変換
+  const getRoleLabel = (role) => {
+    switch (role) {
+      case 'SYSTEM':
+        return 'システム管理者';
+      case 'ADMIN':
+        return '管理者';
+      case 'REP':
+        return '担当者';
+      default:
+        return role;
+    }
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
@@ -59,7 +73,7 @@ const Navbar = () => {
 
         <div className="navbar-user">
           <span className="user-info">
-            {user?.name} ({user?.role})
+            {user?.name} ({getRoleLabel(user?.role)})
           </span>
           <button onClick={handleLogout} className="navbar-logout-btn">
             ログアウト

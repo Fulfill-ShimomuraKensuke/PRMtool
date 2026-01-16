@@ -16,7 +16,7 @@ app:
   # 初期システム管理者の自動作成設定（SYSTEMロール）
   initial-admin:
     enabled: ${INITIAL_ADMIN_ENABLED:true}
-    name: ${INITIAL_ADMIN_NAME:システム管理者}
+    name: ${INITIAL_ADMIN_NAME:初期システム管理者}
     loginId: ${INITIAL_ADMIN_LOGIN_ID:system}
     email: ${INITIAL_ADMIN_EMAIL:system@example.com}
     password: ${INITIAL_ADMIN_PASSWORD:SystemPass123!}
