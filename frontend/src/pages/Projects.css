@@ -292,6 +292,47 @@
   font-weight: 500;
 }
 
+/* ユーザー選択リスト */
+.users-list {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 0.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 0.5rem;
+}
+
+/* 各ユーザーチェックボックス */
+.user-checkbox {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+/* ホバー効果 */
+.user-checkbox:hover {
+  background-color: #e9ecef;
+}
+
+/* チェックボックススタイル */
+.user-checkbox input[type="checkbox"] {
+  margin-right: 0.75rem;
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+/* ユーザーネームスタイル */
+.user-checkbox span {
+  color: #2c3e50;
+  font-size: 0.95rem;
+}
+
 /* レスポンシブ */
 @media (max-width: 768px) {
 

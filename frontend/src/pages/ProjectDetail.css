@@ -85,7 +85,10 @@
 .users-list {
   max-height: 400px;
   overflow-y: auto;
-  margin: 1.5rem 0;
+  margin: 1rem 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 0.5rem;
 }
 
 /* 各ユーザーチェックボックス */
@@ -106,9 +109,11 @@
 }
 
 /* チェックボックススタイル */
-.user-checkbox input {
+.user-checkbox input[type="checkbox"] {
   margin-right: 0.75rem;
   cursor: pointer;
+  width: 18px;
+  height: 18px;
 }
 
 /* ユーザーネームスタイル */
@@ -304,22 +309,6 @@
 .sidebar-content .assignments-header h3 {
   margin: 0;
   color: #2c3e50;
-}
-
-.sidebar-content .btn-assign {
-  background-color: #3498db;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.85rem;
-  transition: opacity 0.2s;
-}
-
-.sidebar-content .btn-assign:hover {
-  opacity: 0.9;
 }
 
 .sidebar-content .assignments-list {

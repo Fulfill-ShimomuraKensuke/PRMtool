@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import projectService from '../services/projectService';
 import partnerService from '../services/partnerService';
+import userService from '../services/userService';
 import { useAuth } from '../context/AuthContext';
 import './Projects.css';
 
@@ -12,6 +13,7 @@ const Projects = () => {
   const [projects, setProjects] = useState([]); // 案件一覧のstate
   const [filteredProjects, setFilteredProjects] = useState([]); // フィルタリング後の案件一覧のstate
   const [partners, setPartners] = useState([]); // パートナー一覧のstate
+  const [allUsers, setAllUsers] = useState([]); // ユーザー一覧のstate
   const [loading, setLoading] = useState(true); // ローディング状態のstate
   const [error, setError] = useState(''); // エラーメッセージのstate
   const [showModal, setShowModal] = useState(false); // 案件作成・編集モーダルの表示状態のstate
@@ -21,7 +23,8 @@ const Projects = () => {
     name: '',
     status: 'NEW',
     partnerId: '',
-    ownerId: ''
+    ownerId: '',
+    assignedUserIds: []
   });
 
   // 検索・フィルター用のstate
@@ -42,6 +45,12 @@ const Projects = () => {
 
       const partnersData = await partnerService.getAll(isAdmin ? null : user?.id);
       setPartners(partnersData);
+
+      // 管理者の場合はユーザー一覧も取得
+      if (isAdmin) {
+        const usersData = await userService.getAssignable();
+        setAllUsers(usersData);
+      }
 
       setError('');
     } catch (err) {
@@ -104,7 +113,8 @@ const Projects = () => {
         name: project.name,
         status: project.status,
         partnerId: project.partnerId || '',
-        ownerId: project.ownerId || user?.id
+        ownerId: project.ownerId || user?.id,
+        assignedUserIds: project.assignments ? project.assignments.map(a => a.userId) : []
       });
     } else {
       setEditingProject(null);
@@ -112,7 +122,8 @@ const Projects = () => {
         name: '',
         status: 'NEW',
         partnerId: '',
-        ownerId: user?.id
+        ownerId: user?.id,
+        assignedUserIds: []
       });
     }
     setShowModal(true);
@@ -122,7 +133,17 @@ const Projects = () => {
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingProject(null);
-    setFormData({ name: '', status: 'NEW', partnerId: '', ownerId: '' });
+    setFormData({ name: '', status: 'NEW', partnerId: '', ownerId: '', assignedUserIds: [] });
+  };
+
+  // 担当者の選択/解除
+  const handleUserToggle = (userId) => {
+    setFormData(prev => ({
+      ...prev,
+      assignedUserIds: prev.assignedUserIds.includes(userId)
+        ? prev.assignedUserIds.filter(id => id !== userId)
+        : [...prev.assignedUserIds, userId]
+    }));
   };
 
   // 案件作成・編集フォームの送信処理
@@ -134,7 +155,7 @@ const Projects = () => {
         status: formData.status,
         partnerId: formData.partnerId,
         ownerId: user?.id,
-        assignedUserIds: [],
+        assignedUserIds: formData.assignedUserIds,
         tableDataJson: null
       };
 
@@ -294,7 +315,7 @@ const Projects = () => {
               <h2>{editingProject ? '案件編集' : '新規案件'}</h2>
               <form onSubmit={handleSubmit}>
                 <div className="form-group">
-                  <label>案件名</label>
+                  <label>案件名 *</label>
                   <input
                     type="text"
                     value={formData.name}
@@ -304,7 +325,7 @@ const Projects = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>ステータス</label>
+                  <label>ステータス *</label>
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value })}
@@ -317,7 +338,7 @@ const Projects = () => {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>パートナー</label>
+                  <label>パートナー *</label>
                   <select
                     value={formData.partnerId}
                     onChange={(e) => setFormData({ ...formData, partnerId: e.target.value })}
@@ -332,6 +353,23 @@ const Projects = () => {
                     ))}
                   </select>
                 </div>
+                {isAdmin && (
+                  <div className="form-group">
+                    <label>担当者</label>
+                    <div className="users-list">
+                      {allUsers.map((u) => (
+                        <label key={u.id} className="user-checkbox">
+                          <input
+                            type="checkbox"
+                            checked={formData.assignedUserIds.includes(u.id)}
+                            onChange={() => handleUserToggle(u.id)}
+                          />
+                          <span>{u.name} ({u.loginId})</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="modal-actions">
                   <button type="button" onClick={handleCloseModal} className="btn-cancel">
                     キャンセル

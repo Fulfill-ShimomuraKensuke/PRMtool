@@ -17,15 +17,14 @@ const ProjectDetail = () => {
   const [partners, setPartners] = useState([]); // パートナー一覧の状態管理
   const [loading, setLoading] = useState(true); // ローディング状態の管理
   const [error, setError] = useState(''); // エラーメッセージの状態管理
-  const [showAssignModal, setShowAssignModal] = useState(false); // 担当者編集モーダルの表示状態管理
   const [showEditModal, setShowEditModal] = useState(false); // 基本情報編集モーダルの表示状態管理
-  const [selectedUsers, setSelectedUsers] = useState([]); // 選択された担当者の状態管理
   const [showSidebar, setShowSidebar] = useState(false); // サイドバー表示状態
   // 編集フォームの状態管理
   const [editFormData, setEditFormData] = useState({
     name: '',
     status: 'NEW',
-    partnerId: ''
+    partnerId: '',
+    assignedUserIds: []
   });
 
   // 管理者かどうかの判定
@@ -40,7 +39,6 @@ const ProjectDetail = () => {
         // 案件詳細を取得
         const data = await projectService.getById(id);
         setProject(data);
-        setSelectedUsers(data.assignments ? data.assignments.map(a => a.userId) : []);
 
         // 管理者の場合はユーザー一覧も取得（SYSTEMロールを除外）
         if (isAdmin) {
@@ -70,7 +68,6 @@ const ProjectDetail = () => {
       setLoading(true);
       const data = await projectService.getById(id);
       setProject(data);
-      setSelectedUsers(data.assignments ? data.assignments.map(a => a.userId) : []);
       setError('');
     } catch (err) {
       setError('案件の取得に失敗しました');
@@ -85,7 +82,8 @@ const ProjectDetail = () => {
     setEditFormData({
       name: project.name,
       status: project.status,
-      partnerId: project.partnerId
+      partnerId: project.partnerId,
+      assignedUserIds: project.assignments ? project.assignments.map(a => a.userId) : []
     });
     setShowEditModal(true);
   };
@@ -93,6 +91,16 @@ const ProjectDetail = () => {
   // 編集モーダルを閉じる
   const handleCloseEditModal = () => {
     setShowEditModal(false);
+  };
+
+  // 担当者の選択/解除
+  const handleUserToggle = (userId) => {
+    setEditFormData(prev => ({
+      ...prev,
+      assignedUserIds: prev.assignedUserIds.includes(userId)
+        ? prev.assignedUserIds.filter(id => id !== userId)
+        : [...prev.assignedUserIds, userId]
+    }));
   };
 
   // 基本情報の保存
@@ -103,7 +111,7 @@ const ProjectDetail = () => {
         status: editFormData.status,
         partnerId: editFormData.partnerId,
         ownerId: project.ownerId,
-        assignedUserIds: selectedUsers
+        assignedUserIds: editFormData.assignedUserIds
       };
       await projectService.update(id, payload);
       await fetchProjectDetail();
@@ -114,47 +122,9 @@ const ProjectDetail = () => {
     }
   };
 
-  // 担当者編集モーダルを開く
-  const handleOpenAssignModal = () => {
-    setShowAssignModal(true);
-  };
-
-  // 担当者編集モーダルを閉じる
-  const handleCloseAssignModal = () => {
-    setShowAssignModal(false);
-  };
-
-  // 担当者の選択/解除
-  const handleUserToggle = (userId) => {
-    setSelectedUsers(prev =>
-      prev.includes(userId)
-        ? prev.filter(id => id !== userId)
-        : [...prev, userId]
-    );
-  };
-
-  // 担当者の保存
-  const handleSaveAssignments = async () => {
-    try {
-      const payload = {
-        name: project.name,
-        status: project.status,
-        partnerId: project.partnerId,
-        ownerId: project.ownerId,
-        assignedUserIds: selectedUsers
-      };
-      await projectService.update(id, payload);
-      await fetchProjectDetail();
-      handleCloseAssignModal();
-    } catch (err) {
-      setError('担当者の更新に失敗しました');
-      console.error('Update assignments error:', err);
-    }
-  };
-
   // 案件の削除
   const handleDelete = async () => {
-    if (window.confirm('この案件を削除してもよろしいですか？')) {
+    if (window.confirm('この案件を削除してもよろしいですか?')) {
       try {
         await projectService.delete(id);
         navigate('/projects');
@@ -269,11 +239,6 @@ const ProjectDetail = () => {
             <div className="assignments-section">
               <div className="assignments-header">
                 <h3>担当者</h3>
-                {isAdmin && (
-                  <button onClick={handleOpenAssignModal} className="btn-assign">
-                    担当者を編集
-                  </button>
-                )}
               </div>
               {project.assignments && project.assignments.length > 0 ? (
                 <ul className="assignments-list">
@@ -342,6 +307,23 @@ const ProjectDetail = () => {
                     ))}
                   </select>
                 </div>
+                {isAdmin && (
+                  <div className="form-group">
+                    <label>担当者 (複数選択可)</label>
+                    <div className="users-list">
+                      {allUsers.map((u) => (
+                        <label key={u.id} className="user-checkbox">
+                          <input
+                            type="checkbox"
+                            checked={editFormData.assignedUserIds.includes(u.id)}
+                            onChange={() => handleUserToggle(u.id)}
+                          />
+                          <span>{u.name} ({u.loginId})</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="modal-actions">
                   <button type="button" onClick={handleCloseEditModal} className="btn-cancel">
                     キャンセル
@@ -351,35 +333,6 @@ const ProjectDetail = () => {
                   </button>
                 </div>
               </form>
-            </div>
-          </div>
-        )}
-
-        {/* 担当者編集モーダル */}
-        {showAssignModal && (
-          <div className="modal-overlay">
-            <div className="modal-content">
-              <h2>担当者の編集</h2>
-              <div className="users-list">
-                {allUsers.map((u) => (
-                  <label key={u.id} className="user-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={selectedUsers.includes(u.id)}
-                      onChange={() => handleUserToggle(u.id)}
-                    />
-                    <span>{u.name} ({u.loginId})</span>
-                  </label>
-                ))}
-              </div>
-              <div className="modal-actions">
-                <button type="button" onClick={handleCloseAssignModal} className="btn-cancel">
-                  キャンセル
-                </button>
-                <button type="button" onClick={handleSaveAssignments} className="btn-submit">
-                  保存
-                </button>
-              </div>
             </div>
           </div>
         )}

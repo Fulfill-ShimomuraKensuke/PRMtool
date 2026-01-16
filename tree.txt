@@ -2,6 +2,8 @@ PRMtool
 ├─ .mvn
 │  └─ wrapper
 │     └─ maven-wrapper.properties
+├─ .vscode
+│  └─ settings.json
 ├─ backend
 │  ├─ src
 │  │  ├─ main
@@ -12,35 +14,69 @@ PRMtool
 │  │  │  │           ├─ config
 │  │  │  │           │  ├─ CorsConfig.java
 │  │  │  │           │  ├─ CustomUserDetailsService.java
+│  │  │  │           │  ├─ DataInitializer.java
 │  │  │  │           │  ├─ JwtRequestFilter.java
 │  │  │  │           │  ├─ JwtUtil.java
 │  │  │  │           │  └─ SecurityConfig.java
 │  │  │  │           ├─ controller
+│  │  │  │           │  ├─ AdminBootstrapController.java
 │  │  │  │           │  ├─ AuthController.java
+│  │  │  │           │  ├─ CommissionController.java
 │  │  │  │           │  ├─ HealthController.java
+│  │  │  │           │  ├─ InvoiceController.java
 │  │  │  │           │  ├─ PartnerController.java
+│  │  │  │           │  ├─ PartnerDashboardController.java
 │  │  │  │           │  ├─ ProjectController.java
-│  │  │  │           │  └─ RootController.java
+│  │  │  │           │  ├─ RootController.java
+│  │  │  │           │  └─ UserController.java
 │  │  │  │           ├─ dto
 │  │  │  │           │  ├─ AuthResponse.java
+│  │  │  │           │  ├─ BootstrapRequest.java
+│  │  │  │           │  ├─ CommissionRequest.java
+│  │  │  │           │  ├─ CommissionResponse.java
+│  │  │  │           │  ├─ InvoiceRequest.java
+│  │  │  │           │  ├─ InvoiceResponse.java
 │  │  │  │           │  ├─ LoginRequest.java
+│  │  │  │           │  ├─ PartnerContactDTO.java
+│  │  │  │           │  ├─ PartnerDashboardResponse.java
 │  │  │  │           │  ├─ PartnerRequest.java
 │  │  │  │           │  ├─ PartnerResponse.java
+│  │  │  │           │  ├─ ProjectAssignmentDTO.java
 │  │  │  │           │  ├─ ProjectRequest.java
 │  │  │  │           │  ├─ ProjectResponse.java
-│  │  │  │           │  └─ RegisterRequest.java
+│  │  │  │           │  ├─ ProjectTableDataDTO.java
+│  │  │  │           │  ├─ UserRequest.java
+│  │  │  │           │  └─ UserResponse.java
 │  │  │  │           ├─ entity
+│  │  │  │           │  ├─ Commission.java
+│  │  │  │           │  ├─ Invoice.java
+│  │  │  │           │  ├─ InvoiceItem.java
 │  │  │  │           │  ├─ Partner.java
+│  │  │  │           │  ├─ PartnerContact.java
 │  │  │  │           │  ├─ Project.java
+│  │  │  │           │  ├─ ProjectAssignment.java
+│  │  │  │           │  ├─ ProjectTableData.java
 │  │  │  │           │  └─ User.java
 │  │  │  │           ├─ repository
+│  │  │  │           │  ├─ CommissionRepository.java
+│  │  │  │           │  ├─ InvoiceRepository.java
+│  │  │  │           │  ├─ PartnerContactRepository.java
 │  │  │  │           │  ├─ PartnerRepository.java
+│  │  │  │           │  ├─ ProjectAssignmentRepository.java
 │  │  │  │           │  ├─ ProjectRepository.java
+│  │  │  │           │  ├─ ProjectTableDataRepository.java
 │  │  │  │           │  └─ UserRepository.java
 │  │  │  │           ├─ service
+│  │  │  │           │  ├─ AdminBootstrapService.java
 │  │  │  │           │  ├─ AuthService.java
+│  │  │  │           │  ├─ CommissionService.java
+│  │  │  │           │  ├─ InvoiceService.java
+│  │  │  │           │  ├─ PartnerCsvService.java
+│  │  │  │           │  ├─ PartnerDashboardService.java
 │  │  │  │           │  ├─ PartnerService.java
-│  │  │  │           │  └─ ProjectService.java
+│  │  │  │           │  ├─ ProjectCsvService.java
+│  │  │  │           │  ├─ ProjectService.java
+│  │  │  │           │  └─ UserService.java
 │  │  │  │           └─ PrmtoolApplication.java
 │  │  │  └─ resources
 │  │  │     ├─ static
@@ -53,8 +89,148 @@ PRMtool
 │  │              └─ prmtool
 │  │                 ├─ application-test.yml
 │  │                 └─ PrmtoolApplicationTests.java
+│  ├─ target
+│  │  ├─ classes
+│  │  │  ├─ com
+│  │  │  │  └─ example
+│  │  │  │     └─ prmtool
+│  │  │  │        ├─ config
+│  │  │  │        │  ├─ CorsConfig.class
+│  │  │  │        │  ├─ CustomUserDetailsService.class
+│  │  │  │        │  ├─ DataInitializer.class
+│  │  │  │        │  ├─ JwtRequestFilter.class
+│  │  │  │        │  ├─ JwtUtil.class
+│  │  │  │        │  └─ SecurityConfig.class
+│  │  │  │        ├─ controller
+│  │  │  │        │  ├─ AdminBootstrapController.class
+│  │  │  │        │  ├─ AdminBootstrapController$ErrorResponse.class
+│  │  │  │        │  ├─ AuthController.class
+│  │  │  │        │  ├─ AuthController$ErrorResponse.class
+│  │  │  │        │  ├─ CommissionController.class
+│  │  │  │        │  ├─ HealthController.class
+│  │  │  │        │  ├─ InvoiceController.class
+│  │  │  │        │  ├─ PartnerController.class
+│  │  │  │        │  ├─ PartnerDashboardController.class
+│  │  │  │        │  ├─ ProjectController.class
+│  │  │  │        │  ├─ RootController.class
+│  │  │  │        │  └─ UserController.class
+│  │  │  │        ├─ dto
+│  │  │  │        │  ├─ AuthResponse.class
+│  │  │  │        │  ├─ AuthResponse$AuthResponseBuilder.class
+│  │  │  │        │  ├─ BootstrapRequest.class
+│  │  │  │        │  ├─ BootstrapRequest$BootstrapRequestBuilder.class
+│  │  │  │        │  ├─ CommissionRequest.class
+│  │  │  │        │  ├─ CommissionRequest$CommissionRequestBuilder.class
+│  │  │  │        │  ├─ CommissionResponse.class
+│  │  │  │        │  ├─ CommissionResponse$1.class
+│  │  │  │        │  ├─ CommissionResponse$CommissionResponseBuilder.class
+│  │  │  │        │  ├─ InvoiceRequest.class
+│  │  │  │        │  ├─ InvoiceRequest$InvoiceItemRequest.class
+│  │  │  │        │  ├─ InvoiceRequest$InvoiceItemRequest$InvoiceItemRequestBuilder.class
+│  │  │  │        │  ├─ InvoiceRequest$InvoiceRequestBuilder.class
+│  │  │  │        │  ├─ InvoiceResponse.class
+│  │  │  │        │  ├─ InvoiceResponse$1.class
+│  │  │  │        │  ├─ InvoiceResponse$InvoiceItemResponse.class
+│  │  │  │        │  ├─ InvoiceResponse$InvoiceItemResponse$InvoiceItemResponseBuilder.class
+│  │  │  │        │  ├─ InvoiceResponse$InvoiceResponseBuilder.class
+│  │  │  │        │  ├─ LoginRequest.class
+│  │  │  │        │  ├─ LoginRequest$LoginRequestBuilder.class
+│  │  │  │        │  ├─ PartnerContactDTO.class
+│  │  │  │        │  ├─ PartnerContactDTO$PartnerContactDTOBuilder.class
+│  │  │  │        │  ├─ PartnerDashboardResponse.class
+│  │  │  │        │  ├─ PartnerDashboardResponse$PartnerDashboardResponseBuilder.class
+│  │  │  │        │  ├─ PartnerRequest.class
+│  │  │  │        │  ├─ PartnerRequest$PartnerRequestBuilder.class
+│  │  │  │        │  ├─ PartnerResponse.class
+│  │  │  │        │  ├─ PartnerResponse$PartnerResponseBuilder.class
+│  │  │  │        │  ├─ ProjectAssignmentDTO.class
+│  │  │  │        │  ├─ ProjectAssignmentDTO$ProjectAssignmentDTOBuilder.class
+│  │  │  │        │  ├─ ProjectRequest.class
+│  │  │  │        │  ├─ ProjectRequest$ProjectRequestBuilder.class
+│  │  │  │        │  ├─ ProjectResponse.class
+│  │  │  │        │  ├─ ProjectResponse$ProjectResponseBuilder.class
+│  │  │  │        │  ├─ ProjectTableDataDTO.class
+│  │  │  │        │  ├─ ProjectTableDataDTO$ProjectTableDataDTOBuilder.class
+│  │  │  │        │  ├─ UserRequest.class
+│  │  │  │        │  ├─ UserRequest$UserRequestBuilder.class
+│  │  │  │        │  ├─ UserResponse.class
+│  │  │  │        │  └─ UserResponse$UserResponseBuilder.class
+│  │  │  │        ├─ entity
+│  │  │  │        │  ├─ Commission.class
+│  │  │  │        │  ├─ Commission$CommissionBuilder.class
+│  │  │  │        │  ├─ Commission$CommissionStatus.class
+│  │  │  │        │  ├─ Invoice.class
+│  │  │  │        │  ├─ Invoice$InvoiceBuilder.class
+│  │  │  │        │  ├─ Invoice$InvoiceStatus.class
+│  │  │  │        │  ├─ InvoiceItem.class
+│  │  │  │        │  ├─ InvoiceItem$InvoiceItemBuilder.class
+│  │  │  │        │  ├─ Partner.class
+│  │  │  │        │  ├─ Partner$PartnerBuilder.class
+│  │  │  │        │  ├─ PartnerContact.class
+│  │  │  │        │  ├─ PartnerContact$PartnerContactBuilder.class
+│  │  │  │        │  ├─ Project.class
+│  │  │  │        │  ├─ Project$ProjectBuilder.class
+│  │  │  │        │  ├─ Project$ProjectStatus.class
+│  │  │  │        │  ├─ ProjectAssignment.class
+│  │  │  │        │  ├─ ProjectAssignment$ProjectAssignmentBuilder.class
+│  │  │  │        │  ├─ ProjectTableData.class
+│  │  │  │        │  ├─ ProjectTableData$ProjectTableDataBuilder.class
+│  │  │  │        │  ├─ User.class
+│  │  │  │        │  ├─ User$UserBuilder.class
+│  │  │  │        │  └─ User$UserRole.class
+│  │  │  │        ├─ repository
+│  │  │  │        │  ├─ CommissionRepository.class
+│  │  │  │        │  ├─ InvoiceRepository.class
+│  │  │  │        │  ├─ PartnerContactRepository.class
+│  │  │  │        │  ├─ PartnerRepository.class
+│  │  │  │        │  ├─ ProjectAssignmentRepository.class
+│  │  │  │        │  ├─ ProjectRepository.class
+│  │  │  │        │  ├─ ProjectTableDataRepository.class
+│  │  │  │        │  └─ UserRepository.class
+│  │  │  │        ├─ service
+│  │  │  │        │  ├─ AdminBootstrapService.class
+│  │  │  │        │  ├─ AuthService.class
+│  │  │  │        │  ├─ CommissionService.class
+│  │  │  │        │  ├─ InvoiceService.class
+│  │  │  │        │  ├─ PartnerCsvService.class
+│  │  │  │        │  ├─ PartnerDashboardService.class
+│  │  │  │        │  ├─ PartnerService.class
+│  │  │  │        │  ├─ ProjectCsvService.class
+│  │  │  │        │  ├─ ProjectCsvService$ProjectImportData.class
+│  │  │  │        │  ├─ ProjectService.class
+│  │  │  │        │  └─ UserService.class
+│  │  │  │        └─ PrmtoolApplication.class
+│  │  │  └─ application.yml
+│  │  ├─ generated-sources
+│  │  │  └─ annotations
+│  │  ├─ generated-test-sources
+│  │  │  └─ test-annotations
+│  │  ├─ maven-archiver
+│  │  │  └─ pom.properties
+│  │  ├─ maven-status
+│  │  │  └─ maven-compiler-plugin
+│  │  │     ├─ compile
+│  │  │     │  └─ default-compile
+│  │  │     │     ├─ createdFiles.lst
+│  │  │     │     └─ inputFiles.lst
+│  │  │     └─ testCompile
+│  │  │        └─ default-testCompile
+│  │  │           ├─ createdFiles.lst
+│  │  │           └─ inputFiles.lst
+│  │  ├─ surefire-reports
+│  │  │  ├─ com.example.prmtool.PrmtoolApplicationTests.txt
+│  │  │  └─ TEST-com.example.prmtool.PrmtoolApplicationTests.xml
+│  │  ├─ test-classes
+│  │  │  └─ com
+│  │  │     └─ example
+│  │  │        └─ prmtool
+│  │  │           └─ PrmtoolApplicationTests.class
+│  │  ├─ prmtool-0.0.1-SNAPSHOT.jar
+│  │  └─ prmtool-0.0.1-SNAPSHOT.jar.original
 │  ├─ Dockerfile
 │  └─ pom.xml
+├─ docker
+│  └─ init
 ├─ frontend
 │  ├─ public
 │  │  ├─ favicon.ico
@@ -67,24 +243,40 @@ PRMtool
 │  │  ├─ components
 │  │  │  ├─ Navbar.css
 │  │  │  ├─ Navbar.js
-│  │  │  └─ PrivateRoute.js
+│  │  │  ├─ PrivateRoute.js
+│  │  │  ├─ Spreadsheet.css
+│  │  │  └─ Spreadsheet.js
 │  │  ├─ context
 │  │  │  └─ AuthContext.js
 │  │  ├─ pages
+│  │  │  ├─ Accounts.css
+│  │  │  ├─ Accounts.js
 │  │  │  ├─ Auth.css
+│  │  │  ├─ Commissions.css
+│  │  │  ├─ Commissions.js
 │  │  │  ├─ Dashboard.css
 │  │  │  ├─ Dashboard.js
+│  │  │  ├─ Invoices.css
+│  │  │  ├─ Invoices.js
+│  │  │  ├─ Login.css
 │  │  │  ├─ Login.js
+│  │  │  ├─ PartnerDashboard.css
+│  │  │  ├─ PartnerDashboard.js
 │  │  │  ├─ Partners.css
 │  │  │  ├─ Partners.js
+│  │  │  ├─ ProjectDetail.css
+│  │  │  ├─ ProjectDetail.js
 │  │  │  ├─ Projects.css
 │  │  │  ├─ Projects.js
 │  │  │  └─ Register.js
 │  │  ├─ services
 │  │  │  ├─ api.js
 │  │  │  ├─ authService.js
+│  │  │  ├─ commissionService.js
+│  │  │  ├─ invoiceService.js
 │  │  │  ├─ partnerService.js
-│  │  │  └─ projectService.js
+│  │  │  ├─ projectService.js
+│  │  │  └─ userService.js
 │  │  ├─ App.css
 │  │  ├─ App.js
 │  │  ├─ index.css
@@ -103,4 +295,5 @@ PRMtool
 ├─ mvnw.cmd
 ├─ README.md
 ├─ tree.txt
+├─ 開発者向けセットアップガイド.md
 └─ 要件定義書.md
