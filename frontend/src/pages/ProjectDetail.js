@@ -19,6 +19,7 @@ const ProjectDetail = () => {
   const [error, setError] = useState(''); // エラーメッセージの状態管理
   const [showEditModal, setShowEditModal] = useState(false); // 基本情報編集モーダルの表示状態管理
   const [showSidebar, setShowSidebar] = useState(false); // サイドバー表示状態
+  const [userSearchTerm, setUserSearchTerm] = useState(''); // 担当者検索キーワード
   // 編集フォームの状態管理
   const [editFormData, setEditFormData] = useState({
     name: '',
@@ -91,6 +92,7 @@ const ProjectDetail = () => {
   // 編集モーダルを閉じる
   const handleCloseEditModal = () => {
     setShowEditModal(false);
+    setUserSearchTerm(''); // 担当者検索キーワードをクリア
   };
 
   // 担当者の選択/解除
@@ -310,17 +312,37 @@ const ProjectDetail = () => {
                 {isAdmin && (
                   <div className="form-group">
                     <label>担当者 (複数選択可)</label>
+                    <div className="user-search-box">
+                      <input
+                        type="text"
+                        placeholder="担当者を検索..."
+                        value={userSearchTerm}
+                        onChange={(e) => setUserSearchTerm(e.target.value)}
+                        className="search-input"
+                      />
+                    </div>
                     <div className="users-list">
-                      {allUsers.map((u) => (
-                        <label key={u.id} className="user-checkbox">
-                          <input
-                            type="checkbox"
-                            checked={editFormData.assignedUserIds.includes(u.id)}
-                            onChange={() => handleUserToggle(u.id)}
-                          />
-                          <span>{u.name} ({u.loginId})</span>
-                        </label>
-                      ))}
+                      {allUsers
+                        .filter(u =>
+                          u.name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                          u.loginId.toLowerCase().includes(userSearchTerm.toLowerCase())
+                        )
+                        .map((u) => (
+                          <label key={u.id} className="user-checkbox">
+                            <input
+                              type="checkbox"
+                              checked={editFormData.assignedUserIds.includes(u.id)}
+                              onChange={() => handleUserToggle(u.id)}
+                            />
+                            <span>{u.name} ({u.loginId})</span>
+                          </label>
+                        ))}
+                      {allUsers.filter(u =>
+                        u.name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                        u.loginId.toLowerCase().includes(userSearchTerm.toLowerCase())
+                      ).length === 0 && (
+                          <p className="no-users-found">該当する担当者が見つかりません</p>
+                        )}
                     </div>
                   </div>
                 )}
