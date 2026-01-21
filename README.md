@@ -2,6 +2,11 @@
 
 パートナー企業との関係管理を効率化するためのWebアプリケーション
 
+[![Java](https://img.shields.io/badge/Java-17+-orange.svg)](https://www.oracle.com/java/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.9-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![React](https://img.shields.io/badge/React-19.2.3-blue.svg)](https://reactjs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
+
 ---
 
 ## 📋 目次
@@ -12,24 +17,30 @@
 - [必要要件](#必要要件)
 - [セットアップ](#セットアップ)
 - [使用方法](#使用方法)
+- [デプロイ](#デプロイ)
 - [プロジェクト構成](#プロジェクト構成)
-- [環境設定](#環境設定)
+- [API仕様](#api仕様)
 - [開発](#開発)
 - [トラブルシューティング](#トラブルシューティング)
+- [セキュリティ](#セキュリティ)
+- [ライセンス](#ライセンス)
 
 ---
 
 ## 概要
 
-PRM Tool（Partner Relationship Management Tool）は、パートナー企業との関係管理、案件管理、ユーザー管理を統合的に行うためのWebアプリケーションです。
+PRM Tool（Partner Relationship Management Tool）は、パートナー企業との関係管理、案件管理、手数料管理、請求管理を統合的に行うためのWebアプリケーションです。
 
 ### 特徴
 
-- 🏢 **パートナー管理**: パートナー企業の情報を一元管理
-- 📊 **案件管理**: 案件の進捗管理とスプレッドシート機能
-- 👥 **ユーザー管理**: ロールベースのアクセス制御
+- 🏢 **パートナー管理**: パートナー企業の情報を一元管理、複数連絡先対応
+- 📊 **案件管理**: 案件の進捗管理と担当者アサイン機能
+- 💰 **手数料管理**: 手数料の申請・承認・支払いワークフロー
+- 📄 **請求管理**: 請求書の作成と明細管理、消費税自動計算
+- 👥 **ユーザー管理**: ロールベースのアクセス制御（ADMIN, REP）
 - 🔒 **セキュリティ**: JWT認証による安全な認証・認可
 - 📥 **データ管理**: CSV入出力による柔軟なデータ管理
+- 📊 **ダッシュボード**: タブ形式の統計情報表示
 
 ---
 
@@ -37,23 +48,41 @@ PRM Tool（Partner Relationship Management Tool）は、パートナー企業と
 
 ### 1. アカウント管理
 - ユーザーの作成・編集・削除
-- ロールベースアクセス制御（ADMIN, REP）
-- パスワード確認機能付き
-- 検索・フィルター機能
+- ロールベースアクセス制御（SYSTEM, ADMIN, REP）
+- パスワード確認機能付きフォーム
+- 検索・フィルター機能（名前、ログインID、メール、電話番号、役職、ロール）
 
 ### 2. パートナー管理
 - パートナー企業の情報管理
 - 業種別フィルタリング
-- CSV入出力機能
-- 連絡先管理（複数登録可能）
+- CSV入出力機能（UTF-8 BOM対応）
+- 連絡先管理（複数登録可能、カンマ区切り）
+- パートナー別ダッシュボード
 
 ### 3. 案件管理
 - 案件の作成・編集・削除
 - ステータス管理（新規・進行中・完了）
-- 担当者アサイン機能
-- スプレッドシート形式での詳細管理
+- 担当者アサイン機能（チェックボックス選択 + 検索）
+- オーナー自動設定
 
-### 4. 認証・認可
+### 4. 手数料管理
+- 手数料の申請・承認・支払いフロー
+- ステータス管理（保留中・承認済み・支払済み）
+- 案件との紐付け
+- 金額・日付管理
+
+### 5. 請求管理
+- 請求書の作成・編集・削除
+- 請求明細の行単位管理
+- 消費税自動計算（税率10%）
+- 合計金額自動算出
+
+### 6. ダッシュボード
+- メインダッシュボード（タブ形式：概要・パートナー・案件・手数料・請求）
+- パートナー別ダッシュボード
+- 統計情報の可視化
+
+### 7. 認証・認可
 - JWT トークンベース認証
 - ロール別アクセス制御
 - セキュアなセッション管理
@@ -63,23 +92,31 @@ PRM Tool（Partner Relationship Management Tool）は、パートナー企業と
 ## 技術スタック
 
 ### Backend
-- **言語**: Java 17
-- **フレームワーク**: Spring Boot 3.x
-- **認証**: Spring Security + JWT
-- **ORM**: Hibernate (JPA)
-- **データベース**: PostgreSQL 15
-- **ビルドツール**: Maven
+| 項目 | 技術 | バージョン |
+|------|------|----------|
+| 言語 | Java | 17 |
+| フレームワーク | Spring Boot | 3.5.9 |
+| 認証 | Spring Security + JWT | - |
+| ORM | Hibernate (JPA) | - |
+| データベース | PostgreSQL | 16 |
+| ビルドツール | Maven | - |
+| CSV処理 | Apache Commons CSV | 1.10.0 |
 
 ### Frontend
-- **言語**: JavaScript (ES6+)
-- **ライブラリ**: React 18.x
-- **ルーティング**: React Router v6
-- **HTTP クライアント**: Axios
-- **スタイリング**: CSS3
+| 項目 | 技術 | バージョン |
+|------|------|----------|
+| 言語 | JavaScript | ES6+ |
+| ライブラリ | React | 19.2.3 |
+| ルーティング | React Router | 6.x |
+| HTTP クライアント | Axios | - |
+| スタイリング | CSS3 | - |
 
-### インフラ
-- **コンテナ**: Docker & Docker Compose
-- **データベース**: PostgreSQL (Docker)
+### インフラ・デプロイ
+| 項目 | 技術 |
+|------|------|
+| コンテナ | Docker |
+| 本番環境 | Render.com |
+| データベース | PostgreSQL (Render) |
 
 ---
 
@@ -88,8 +125,7 @@ PRM Tool（Partner Relationship Management Tool）は、パートナー企業と
 ### 開発環境
 - **Java**: 17以上
 - **Node.js**: 18.x以上
-- **Docker**: 20.x以上
-- **Docker Compose**: 2.x以上
+- **Docker**: 20.x以上（ローカル開発用）
 - **Maven**: 3.8以上
 
 ### 推奨環境
@@ -105,15 +141,18 @@ PRM Tool（Partner Relationship Management Tool）は、パートナー企業と
 ### 1. リポジトリのクローン
 
 ```bash
-git clone <repository-url>
-cd prmtool
+git clone https://github.com/Fulfill-ShimomuraKensuke/PRMtool.git
+cd PRMtool
 ```
 
-### 2. データベースの起動
+### 2. データベースの起動（ローカル開発用）
 
 ```bash
 # Docker ComposeでPostgreSQLを起動
 docker-compose up -d
+
+# データベースが起動したことを確認
+docker ps
 ```
 
 ### 3. Backendのセットアップ
@@ -122,10 +161,10 @@ docker-compose up -d
 cd backend
 
 # 依存関係のインストール
-mvn clean install
+./mvnw clean install
 
-# アプリケーションの起動
-mvn spring-boot:run
+# アプリケーションの起動（開発環境）
+./mvnw spring-boot:run
 ```
 
 Backend は `http://localhost:8080` で起動します。
@@ -152,9 +191,9 @@ Frontend は `http://localhost:3000` で起動します。
 
 1. **初回管理者の作成**
    - アプリケーション起動時に自動的にSYSTEM管理者が作成されます
-   - デフォルト認証情報:
+   - デフォルト認証情報（環境変数で設定可能）:
      - ログインID: `system`
-     - パスワード: `SystemPass123!`
+     - パスワード: 環境変数で設定したパスワード
 
 2. **ADMIN ユーザーの作成**
    - SYSTEM管理者でログイン
@@ -164,6 +203,7 @@ Frontend は `http://localhost:3000` で起動します。
 3. **通常運用**
    - ADMIN ユーザーでログイン
    - 必要に応じて REP ユーザーを作成
+   - パートナー、案件、手数料、請求の管理を開始
 
 ### ロール別の権限
 
@@ -172,116 +212,159 @@ Frontend は `http://localhost:3000` で起動します。
 | アカウント管理 | ✅ | ✅ | ❌ |
 | パートナー管理 | ❌ | ✅ | 閲覧のみ |
 | 案件管理 | ❌ | ✅ | ✅ |
+| 手数料管理 | ❌ | ✅ | ✅ |
+| 請求管理 | ❌ | ✅ | ✅ |
 | ダッシュボード | ❌ | ✅ | ✅ |
 
 **注意**: SYSTEMロールは初回セットアップ専用です。通常運用では使用しません。
 
 ---
 
+## デプロイ
+
+### Render.comへのデプロイ
+
+本プロジェクトはRender.comでの本番運用を想定しています。
+
+#### 必要なリソース
+
+1. **PostgreSQL Database**
+   - Region: Singapore (推奨)
+   - Plan: Free (1GB)
+
+2. **Web Service (Backend)**
+   - Language: Docker
+   - Root Directory: `backend`
+   - Dockerfile Path: `backend/Dockerfile`
+   - Instance Type: Free
+
+3. **Static Site (Frontend)**
+   - Root Directory: `frontend`
+   - Build Command: `npm install && npm run build`
+   - Publish Directory: `build`
+
+#### 環境変数設定
+
+**Backend**:
+```bash
+SPRING_PROFILES_ACTIVE=prod
+SERVER_PORT=8080
+DB_URL=jdbc:postgresql://[Render Database URL]
+DB_USERNAME=prmuser
+DB_PASSWORD=[Render Database Password]
+JWT_SECRET=[64文字以上のランダム文字列]
+JWT_EXPIRATION=86400000
+INITIAL_ADMIN_ENABLED=true
+INITIAL_ADMIN_LOGIN_ID=system
+INITIAL_ADMIN_PASSWORD=[強力なパスワード]
+```
+
+**Frontend**:
+```bash
+REACT_APP_API_BASE_URL=[Backend URL]
+```
+
+詳細なデプロイ手順は `RENDER_DEPLOYMENT_GUIDE.md` を参照してください。
+
+---
+
 ## プロジェクト構成
 
 ```
-prmtool/
-├── backend/                    # Springアプリケーション
+PRMtool/
+├── backend/                    # Spring Bootアプリケーション
 │   ├── src/
 │   │   ├── main/
-│   │   │   ├── java/
-│   │   │   │   └── com/example/prmtool/
-│   │   │   │       ├── config/          # 設定クラス
-│   │   │   │       ├── controller/      # REST API
-│   │   │   │       ├── dto/             # データ転送オブジェクト
-│   │   │   │       ├── entity/          # エンティティ
-│   │   │   │       ├── repository/      # データアクセス
-│   │   │   │       ├── service/         # ビジネスロジック
-│   │   │   │       └── util/            # ユーティリティ
+│   │   │   ├── java/com/example/prmtool/
+│   │   │   │   ├── config/          # 設定クラス（CORS、Security、JWT）
+│   │   │   │   ├── controller/      # REST APIコントローラー
+│   │   │   │   ├── dto/             # データ転送オブジェクト
+│   │   │   │   ├── entity/          # JPAエンティティ
+│   │   │   │   ├── repository/      # JPAリポジトリ
+│   │   │   │   ├── service/         # ビジネスロジック
+│   │   │   │   ├── security/        # JWT認証フィルター
+│   │   │   │   ├── init/            # データ初期化
+│   │   │   │   └── util/            # ユーティリティ
 │   │   │   └── resources/
 │   │   │       └── application.yml      # アプリケーション設定
 │   │   └── test/                        # テストコード
+│   ├── Dockerfile                       # Docker設定
 │   └── pom.xml                          # Maven設定
 │
 ├── frontend/                   # Reactアプリケーション
 │   ├── public/                 # 静的ファイル
 │   ├── src/
 │   │   ├── components/         # 再利用可能コンポーネント
-│   │   ├── context/            # Context API
+│   │   ├── context/            # Context API（認証）
 │   │   ├── pages/              # ページコンポーネント
+│   │   │   ├── Accounts.js             # アカウント管理
+│   │   │   ├── Partners.js             # パートナー管理
+│   │   │   ├── Projects.js             # 案件管理
+│   │   │   ├── Commissions.js          # 手数料管理
+│   │   │   ├── Invoices.js             # 請求管理
+│   │   │   ├── Dashboard.js            # メインダッシュボード
+│   │   │   └── PartnerDashboard.js     # パートナーダッシュボード
 │   │   ├── services/           # API通信
+│   │   │   └── api.js                  # Axios設定
 │   │   ├── App.js              # メインコンポーネント
 │   │   └── index.js            # エントリーポイント
 │   └── package.json            # npm設定
 │
-├── docker-compose.yml          # Docker Compose設定
-└── README.md                   # このファイル
+├── docker-compose.yml          # ローカル開発用Docker Compose
+├── README.md                   # このファイル
+└── 要件定義書.md               # システム要件定義書
 ```
 
 ---
 
-## 環境設定
+## API仕様
 
-### application.yml の設定
+### 認証エンドポイント
+- `POST /api/auth/login` - ログイン（JWT発行）
+- `POST /api/admin/bootstrap` - 初回管理者作成
 
-アプリケーションは3つのプロファイルをサポートしています：
+### アカウント管理
+- `GET /api/users` - ユーザー一覧取得
+- `GET /api/users/{id}` - ユーザー詳細取得
+- `POST /api/users` - ユーザー作成
+- `PUT /api/users/{id}` - ユーザー更新
+- `DELETE /api/users/{id}` - ユーザー削除
 
-#### 開発環境 (dev) - デフォルト
-```yaml
-spring:
-  profiles:
-    active: dev
-  datasource:
-    url: jdbc:postgresql://localhost:5432/prmdb
-    username: prmuser
-    password: devpassword123
-  jpa:
-    hibernate:
-      ddl-auto: update  # スキーマを自動更新
-```
+### パートナー管理
+- `GET /api/partners` - パートナー一覧取得
+- `GET /api/partners/{id}` - パートナー詳細取得
+- `POST /api/partners` - パートナー作成
+- `PUT /api/partners/{id}` - パートナー更新
+- `DELETE /api/partners/{id}` - パートナー削除
+- `POST /api/partners/import-csv` - CSV インポート
+- `GET /api/partners/export-csv` - CSV エクスポート
 
-#### 本番環境 (prod)
-```yaml
-spring:
-  profiles:
-    active: prod
-  jpa:
-    hibernate:
-      ddl-auto: validate  # スキーマ検証のみ
-```
+### 案件管理
+- `GET /api/projects` - 案件一覧取得
+- `GET /api/projects/{id}` - 案件詳細取得
+- `POST /api/projects` - 案件作成
+- `PUT /api/projects/{id}` - 案件更新
+- `DELETE /api/projects/{id}` - 案件削除
+- `POST /api/projects/import-csv` - CSV インポート
+- `GET /api/projects/export-csv` - CSV エクスポート
 
-#### テスト環境 (test)
-```yaml
-spring:
-  profiles:
-    active: test
-  datasource:
-    url: jdbc:h2:mem:testdb
-  jpa:
-    hibernate:
-      ddl-auto: create-drop  # テストごとにクリーン
-```
+### 手数料管理
+- `GET /api/commissions` - 手数料一覧取得
+- `GET /api/commissions/{id}` - 手数料詳細取得
+- `POST /api/commissions` - 手数料作成
+- `PUT /api/commissions/{id}` - 手数料更新
+- `DELETE /api/commissions/{id}` - 手数料削除
+- `POST /api/commissions/import-csv` - CSV インポート
+- `GET /api/commissions/export-csv` - CSV エクスポート
 
-### 環境変数
-
-以下の環境変数で設定を上書きできます：
-
-```bash
-# データベース接続
-DB_URL=jdbc:postgresql://localhost:5432/prmdb
-DB_USERNAME=prmuser
-DB_PASSWORD=your_password
-
-# JWT設定
-JWT_SECRET=your_jwt_secret_key
-JWT_EXPIRATION=86400000
-
-# サーバー設定
-SERVER_PORT=8080
-
-# 初回管理者設定
-INITIAL_ADMIN_ENABLED=true
-INITIAL_ADMIN_NAME=初期システム管理者
-INITIAL_ADMIN_LOGIN_ID=system
-INITIAL_ADMIN_EMAIL=system@example.com
-INITIAL_ADMIN_PASSWORD=SystemPass123!
-```
+### 請求管理
+- `GET /api/invoices` - 請求一覧取得
+- `GET /api/invoices/{id}` - 請求詳細取得
+- `POST /api/invoices` - 請求作成
+- `PUT /api/invoices/{id}` - 請求更新
+- `DELETE /api/invoices/{id}` - 請求削除
+- `POST /api/invoices/import-csv` - CSV インポート
+- `GET /api/invoices/export-csv` - CSV エクスポート
 
 ---
 
@@ -292,21 +375,21 @@ INITIAL_ADMIN_PASSWORD=SystemPass123!
 #### テストの実行
 ```bash
 cd backend
-mvn test
+./mvnw test
 ```
 
 #### ビルド
 ```bash
-mvn clean package
+./mvnw clean package
 ```
 
 #### 特定のプロファイルで起動
 ```bash
 # 本番環境で起動
-mvn spring-boot:run -Dspring-boot.run.profiles=prod
+./mvnw spring-boot:run -Dspring-boot.run.profiles=prod
 
 # テスト環境で起動
-mvn spring-boot:run -Dspring-boot.run.profiles=test
+./mvnw spring-boot:run -Dspring-boot.run.profiles=test
 ```
 
 ### Frontendの開発
@@ -326,39 +409,6 @@ npm run build
 ```bash
 npm run lint
 ```
-
----
-
-## API エンドポイント
-
-### 認証
-- `POST /api/auth/login` - ログイン
-- `POST /api/admin/bootstrap` - 初回管理者作成
-
-### ユーザー管理
-- `GET /api/users` - ユーザー一覧取得
-- `GET /api/users/{id}` - ユーザー詳細取得
-- `POST /api/users` - ユーザー作成
-- `PUT /api/users/{id}` - ユーザー更新
-- `DELETE /api/users/{id}` - ユーザー削除
-
-### パートナー管理
-- `GET /api/partners` - パートナー一覧取得
-- `GET /api/partners/{id}` - パートナー詳細取得
-- `POST /api/partners` - パートナー作成
-- `PUT /api/partners/{id}` - パートナー更新
-- `DELETE /api/partners/{id}` - パートナー削除
-- `POST /api/partners/import` - CSV インポート
-- `GET /api/partners/export` - CSV エクスポート
-
-### 案件管理
-- `GET /api/projects` - 案件一覧取得
-- `GET /api/projects/{id}` - 案件詳細取得
-- `POST /api/projects` - 案件作成
-- `PUT /api/projects/{id}` - 案件更新
-- `DELETE /api/projects/{id}` - 案件削除
-- `GET /api/projects/{id}/spreadsheet` - スプレッドシートデータ取得
-- `PUT /api/projects/{id}/spreadsheet` - スプレッドシートデータ更新
 
 ---
 
@@ -391,33 +441,28 @@ lsof -i :8080  # macOS/Linux
 netstat -ano | findstr :8080  # Windows
 
 # プロセスを停止するか、別のポートを使用
-SERVER_PORT=8081 mvn spring-boot:run
+SERVER_PORT=8081 ./mvnw spring-boot:run
 ```
 
-### スキーマの不一致
+### CORS エラー
 
-**問題**: エンティティとDBスキーマが一致しない
+**問題**: Frontend から Backend への通信が CORS エラーになる
 
 **解決策**:
-```bash
-# 開発環境の場合：ddl-auto を create-drop に変更して再起動
-# または、手動でテーブルを削除
+- `backend/src/main/java/com/example/prmtool/config/CorsConfig.java` でフロントエンドのURLが許可されているか確認
+- 本番環境では `https://*.onrender.com` ワイルドカードが設定されています
 
-# 本番環境の場合：マイグレーションスクリプトを作成
-```
+### JWT トークンエラー
 
-### Mavenキャッシュのクリア
-
-**問題**: 依存関係が正しくダウンロードされない
+**問題**: `WeakKeyException` または認証エラー
 
 **解決策**:
-```bash
-mvn clean install -U
-```
+- `JWT_SECRET` が64文字以上であることを確認
+- トークンの有効期限を確認（デフォルト24時間）
 
 ---
 
-## セキュリティに関する注意事項
+## セキュリティ
 
 ### 本番環境での必須対応
 
@@ -426,26 +471,28 @@ mvn clean install -U
    初回管理者のパスワードを必ず変更してください
    ```
 
-2. **JWT シークレットキーの変更**
+2. **JWT シークレットキーの生成**
    ```bash
-   # 強力なランダム文字列を生成
-   JWT_SECRET=<your-secure-random-string>
+   # 64文字以上のランダム文字列を生成
+   openssl rand -base64 64
    ```
 
-3. **データベースパスワードの変更**
+3. **データベースパスワードの管理**
    ```bash
+   # 環境変数で管理、直接コードに書かない
    DB_PASSWORD=<your-secure-password>
    ```
 
-4. **CORS設定の見直し**
-   ```java
-   // 本番環境では特定のドメインのみ許可
-   @CrossOrigin(origins = "https://your-domain.com")
-   ```
-
-5. **HTTPS の使用**
+4. **HTTPS の使用**
    ```
    本番環境では必ずHTTPSを使用してください
+   Render.comは自動的にHTTPSを有効化します
+   ```
+
+5. **環境変数の管理**
+   ```
+   機密情報は全て環境変数で管理
+   .envファイルはGitにコミットしない
    ```
 
 ---
@@ -468,21 +515,32 @@ mvn clean install -U
 
 ## 変更履歴
 
-### v1.0.0 (2026-01-16)
+### v1.0.0 (2026-01-21)
 - 初回リリース
 - ユーザー管理機能
 - パートナー管理機能
 - 案件管理機能
+- 手数料管理機能
+- 請求管理機能
 - JWT認証実装
 - CSV入出力機能実装
-- スプレッドシート機能実装
+- ダッシュボード機能実装
+- Render.comデプロイ対応
 
 ---
 
-## 開発者
+## 開発チーム
 
-開発チーム: [Your Team Name]
+**プロジェクトオーナー**: Fulfill-ShimomuraKensuke
 
 ---
 
-**Last Updated**: 2026-01-16
+## 関連ドキュメント
+
+- [要件定義書](./要件定義書.md)
+- [ユーザー用手引き](./ユーザー用手引き.pdf)
+- [Render.comデプロイガイド](./RENDER_DEPLOYMENT_GUIDE.md)
+
+---
+
+**Last Updated**: 2026-01-21
