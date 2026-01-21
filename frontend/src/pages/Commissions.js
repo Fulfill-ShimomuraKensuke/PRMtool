@@ -316,7 +316,7 @@ const Commissions = () => {
                     onChange={handleChange}
                     required
                     min="0"
-                    step="0.01"
+                    step="1"
                   />
                 </div>
                 <div className="form-group">

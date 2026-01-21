@@ -460,7 +460,7 @@ const Partners = () => {
                 <h2>{selectedPartner.name}</h2>
                 <button onClick={handleCloseDetailModal} className="btn-close">×</button>
               </div>
-
+              {error && <div className="error-message">{error}</div>}
               <div className="partner-detail-content">
                 <div className="detail-section">
                   <h3>基本情報</h3>
