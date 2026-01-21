@@ -21,7 +21,7 @@ PRMtool
 │  │  │  │           ├─ controller
 │  │  │  │           │  ├─ AdminBootstrapController.java
 │  │  │  │           │  ├─ AuthController.java
-│  │  │  │           │  ├─ CommissionController.java
+│  │  │  │           │  ├─ CommissionRuleController.java
 │  │  │  │           │  ├─ HealthController.java
 │  │  │  │           │  ├─ InvoiceController.java
 │  │  │  │           │  ├─ PartnerController.java
@@ -32,8 +32,8 @@ PRMtool
 │  │  │  │           ├─ dto
 │  │  │  │           │  ├─ AuthResponse.java
 │  │  │  │           │  ├─ BootstrapRequest.java
-│  │  │  │           │  ├─ CommissionRequest.java
-│  │  │  │           │  ├─ CommissionResponse.java
+│  │  │  │           │  ├─ CommissionRuleRequest.java
+│  │  │  │           │  ├─ CommissionRuleResponse.java
 │  │  │  │           │  ├─ InvoiceRequest.java
 │  │  │  │           │  ├─ InvoiceResponse.java
 │  │  │  │           │  ├─ LoginRequest.java
@@ -48,7 +48,7 @@ PRMtool
 │  │  │  │           │  ├─ UserRequest.java
 │  │  │  │           │  └─ UserResponse.java
 │  │  │  │           ├─ entity
-│  │  │  │           │  ├─ Commission.java
+│  │  │  │           │  ├─ CommissionRule.java
 │  │  │  │           │  ├─ Invoice.java
 │  │  │  │           │  ├─ InvoiceItem.java
 │  │  │  │           │  ├─ Partner.java
@@ -58,7 +58,8 @@ PRMtool
 │  │  │  │           │  ├─ ProjectTableData.java
 │  │  │  │           │  └─ User.java
 │  │  │  │           ├─ repository
-│  │  │  │           │  ├─ CommissionRepository.java
+│  │  │  │           │  ├─ CommissionRuleRepository.java
+│  │  │  │           │  ├─ InvoiceItemRepository.java
 │  │  │  │           │  ├─ InvoiceRepository.java
 │  │  │  │           │  ├─ PartnerContactRepository.java
 │  │  │  │           │  ├─ PartnerRepository.java
@@ -69,7 +70,8 @@ PRMtool
 │  │  │  │           ├─ service
 │  │  │  │           │  ├─ AdminBootstrapService.java
 │  │  │  │           │  ├─ AuthService.java
-│  │  │  │           │  ├─ CommissionService.java
+│  │  │  │           │  ├─ CommissionCalculationService.java
+│  │  │  │           │  ├─ CommissionRuleService.java
 │  │  │  │           │  ├─ InvoiceService.java
 │  │  │  │           │  ├─ PartnerCsvService.java
 │  │  │  │           │  ├─ PartnerDashboardService.java
@@ -106,7 +108,7 @@ PRMtool
 │  │  │  │        │  ├─ AdminBootstrapController$ErrorResponse.class
 │  │  │  │        │  ├─ AuthController.class
 │  │  │  │        │  ├─ AuthController$ErrorResponse.class
-│  │  │  │        │  ├─ CommissionController.class
+│  │  │  │        │  ├─ CommissionRuleController.class
 │  │  │  │        │  ├─ HealthController.class
 │  │  │  │        │  ├─ InvoiceController.class
 │  │  │  │        │  ├─ PartnerController.class
@@ -119,17 +121,15 @@ PRMtool
 │  │  │  │        │  ├─ AuthResponse$AuthResponseBuilder.class
 │  │  │  │        │  ├─ BootstrapRequest.class
 │  │  │  │        │  ├─ BootstrapRequest$BootstrapRequestBuilder.class
-│  │  │  │        │  ├─ CommissionRequest.class
-│  │  │  │        │  ├─ CommissionRequest$CommissionRequestBuilder.class
-│  │  │  │        │  ├─ CommissionResponse.class
-│  │  │  │        │  ├─ CommissionResponse$1.class
-│  │  │  │        │  ├─ CommissionResponse$CommissionResponseBuilder.class
+│  │  │  │        │  ├─ CommissionRuleRequest.class
+│  │  │  │        │  ├─ CommissionRuleRequest$CommissionRuleRequestBuilder.class
+│  │  │  │        │  ├─ CommissionRuleResponse.class
+│  │  │  │        │  ├─ CommissionRuleResponse$CommissionRuleResponseBuilder.class
 │  │  │  │        │  ├─ InvoiceRequest.class
 │  │  │  │        │  ├─ InvoiceRequest$InvoiceItemRequest.class
 │  │  │  │        │  ├─ InvoiceRequest$InvoiceItemRequest$InvoiceItemRequestBuilder.class
 │  │  │  │        │  ├─ InvoiceRequest$InvoiceRequestBuilder.class
 │  │  │  │        │  ├─ InvoiceResponse.class
-│  │  │  │        │  ├─ InvoiceResponse$1.class
 │  │  │  │        │  ├─ InvoiceResponse$InvoiceItemResponse.class
 │  │  │  │        │  ├─ InvoiceResponse$InvoiceItemResponse$InvoiceItemResponseBuilder.class
 │  │  │  │        │  ├─ InvoiceResponse$InvoiceResponseBuilder.class
@@ -156,12 +156,14 @@ PRMtool
 │  │  │  │        │  ├─ UserResponse.class
 │  │  │  │        │  └─ UserResponse$UserResponseBuilder.class
 │  │  │  │        ├─ entity
-│  │  │  │        │  ├─ Commission.class
-│  │  │  │        │  ├─ Commission$CommissionBuilder.class
-│  │  │  │        │  ├─ Commission$CommissionStatus.class
+│  │  │  │        │  ├─ CommissionRule.class
+│  │  │  │        │  ├─ CommissionRule$CommissionRuleBuilder.class
+│  │  │  │        │  ├─ CommissionRule$CommissionStatus.class
+│  │  │  │        │  ├─ CommissionRule$CommissionType.class
 │  │  │  │        │  ├─ Invoice.class
 │  │  │  │        │  ├─ Invoice$InvoiceBuilder.class
 │  │  │  │        │  ├─ Invoice$InvoiceStatus.class
+│  │  │  │        │  ├─ Invoice$TaxCategory.class
 │  │  │  │        │  ├─ InvoiceItem.class
 │  │  │  │        │  ├─ InvoiceItem$InvoiceItemBuilder.class
 │  │  │  │        │  ├─ Partner.class
@@ -179,7 +181,8 @@ PRMtool
 │  │  │  │        │  ├─ User$UserBuilder.class
 │  │  │  │        │  └─ User$UserRole.class
 │  │  │  │        ├─ repository
-│  │  │  │        │  ├─ CommissionRepository.class
+│  │  │  │        │  ├─ CommissionRuleRepository.class
+│  │  │  │        │  ├─ InvoiceItemRepository.class
 │  │  │  │        │  ├─ InvoiceRepository.class
 │  │  │  │        │  ├─ PartnerContactRepository.class
 │  │  │  │        │  ├─ PartnerRepository.class
@@ -190,8 +193,11 @@ PRMtool
 │  │  │  │        ├─ service
 │  │  │  │        │  ├─ AdminBootstrapService.class
 │  │  │  │        │  ├─ AuthService.class
-│  │  │  │        │  ├─ CommissionService.class
+│  │  │  │        │  ├─ CommissionCalculationService.class
+│  │  │  │        │  ├─ CommissionCalculationService$1.class
+│  │  │  │        │  ├─ CommissionRuleService.class
 │  │  │  │        │  ├─ InvoiceService.class
+│  │  │  │        │  ├─ InvoiceService$1.class
 │  │  │  │        │  ├─ PartnerCsvService.class
 │  │  │  │        │  ├─ PartnerDashboardService.class
 │  │  │  │        │  ├─ PartnerService.class
@@ -224,6 +230,7 @@ PRMtool
 │  │  │  └─ com
 │  │  │     └─ example
 │  │  │        └─ prmtool
+│  │  │           ├─ application-test.yml
 │  │  │           └─ PrmtoolApplicationTests.class
 │  │  ├─ prmtool-0.0.1-SNAPSHOT.jar
 │  │  └─ prmtool-0.0.1-SNAPSHOT.jar.original
@@ -252,6 +259,7 @@ PRMtool
 │  │  │  ├─ Accounts.css
 │  │  │  ├─ Accounts.js
 │  │  │  ├─ Auth.css
+│  │  │  ├─ CommissionRules.js
 │  │  │  ├─ Commissions.css
 │  │  │  ├─ Commissions.js
 │  │  │  ├─ Dashboard.css
@@ -272,6 +280,7 @@ PRMtool
 │  │  ├─ services
 │  │  │  ├─ api.js
 │  │  │  ├─ authService.js
+│  │  │  ├─ commissionRuleService.js
 │  │  │  ├─ commissionService.js
 │  │  │  ├─ invoiceService.js
 │  │  │  ├─ partnerService.js
@@ -285,6 +294,10 @@ PRMtool
 │  ├─ .gitignore
 │  ├─ package-lock.json
 │  └─ package.json
+├─ Materials
+│  ├─ ユーザー用手引き.md
+│  ├─ 開発者向けセットアップガイド.md
+│  └─ 要件定義書.md
 ├─ scripts
 │  └─ print-tree.mjs
 ├─ .env.example
@@ -294,6 +307,4 @@ PRMtool
 ├─ mvnw
 ├─ mvnw.cmd
 ├─ README.md
-├─ tree.txt
-├─ 開発者向けセットアップガイド.md
-└─ 要件定義書.md
+└─ tree.txt
