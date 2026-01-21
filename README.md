@@ -537,9 +537,10 @@ SERVER_PORT=8081 ./mvnw spring-boot:run
 
 ## 関連ドキュメント
 
-- [要件定義書](./要件定義書.md)
-- [ユーザー用手引き](./ユーザー用手引き.pdf)
-- [Render.comデプロイガイド](./RENDER_DEPLOYMENT_GUIDE.md)
+- [要件定義書](./Materials/要件定義書.md)
+- [ユーザー用手引き.pdf](./Materials/ユーザー用手引き.pdf)
+- [ユーザー用手引き.md](./Materials/ユーザー用手引き.md)
+- [Render.comデプロイガイド](./Materials/開発者向けセットアップガイド.md)
 
 ---
 
