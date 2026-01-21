@@ -3,11 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import projectService from '../services/projectService';
 import partnerService from '../services/partnerService';
-import commissionService from '../services/commissionService';
+// import commissionRuleService from '../services/commissionRuleService'; // 後で有効化
 import invoiceService from '../services/invoiceService';
 import './Dashboard.css';
 
-// ダッシュボードページコンポーネント
+/**
+ * ダッシュボードページコンポーネント
+ * 新設計対応版（手数料ルール統計は将来実装）
+ */
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -15,7 +18,7 @@ const Dashboard = () => {
   // 状態管理
   const [projects, setProjects] = useState([]);
   const [partners, setPartners] = useState([]);
-  const [commissions, setCommissions] = useState([]);
+  // const [commissionRules, setCommissionRules] = useState([]); // 将来実装
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -29,17 +32,15 @@ const Dashboard = () => {
       setLoading(true);
       setError('');
 
-      // 並列で全データを取得
-      const [projectsData, partnersData, commissionsData, invoicesData] = await Promise.all([
+      // 並列で全データを取得（手数料ルールは一旦除外）
+      const [projectsData, partnersData, invoicesData] = await Promise.all([
         projectService.getAll(user?.id),
         partnerService.getAll(),
-        commissionService.getAll(),
         invoiceService.getAll(),
       ]);
 
       setProjects(projectsData);
       setPartners(partnersData);
-      setCommissions(commissionsData);
       setInvoices(invoicesData);
     } catch (err) {
       setError('データの取得に失敗しました');
@@ -90,19 +91,6 @@ const Dashboard = () => {
     DONE: projects.filter(p => p.status === 'DONE')
   };
 
-  // ステータス別に手数料を分類して集計
-  const commissionsByStatus = {
-    PENDING: commissions.filter(c => c.status === 'PENDING'),
-    APPROVED: commissions.filter(c => c.status === 'APPROVED'),
-    PAID: commissions.filter(c => c.status === 'PAID')
-  };
-
-  // 手数料の総額計算
-  const totalCommissionAmount = commissions.reduce((sum, c) => sum + (c.amount || 0), 0);
-  const pendingCommissionAmount = commissionsByStatus.PENDING.reduce((sum, c) => sum + (c.amount || 0), 0);
-  const approvedCommissionAmount = commissionsByStatus.APPROVED.reduce((sum, c) => sum + (c.amount || 0), 0);
-  const paidCommissionAmount = commissionsByStatus.PAID.reduce((sum, c) => sum + (c.amount || 0), 0);
-
   // ステータス別に請求書を分類
   const invoicesByStatus = {
     DRAFT: invoices.filter(i => i.status === 'DRAFT'),
@@ -111,316 +99,242 @@ const Dashboard = () => {
     CANCELLED: invoices.filter(i => i.status === 'CANCELLED')
   };
 
-  // 請求書の総額計算
-  const totalInvoiceAmount = invoices.reduce((sum, i) => sum + (i.totalAmount || 0), 0);
+  // 請求書の合計金額を計算
+  const totalInvoiceAmount = invoices.reduce((sum, invoice) => sum + (invoice.totalAmount || 0), 0);
 
-  // タブ切り替えハンドラ
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
-  };
+  if (loading) {
+    return <div className="loading">読み込み中...</div>;
+  }
+
+  if (error) {
+    return <div className="error">{error}</div>;
+  }
 
   return (
-    <>
-      <div className="dashboard-container">
-        <div className="dashboard-header">
-          <h1>ダッシュボード</h1>
-          <p className="dashboard-subtitle">
-            ようこそ、{user?.name || user?.loginId} さん
-          </p>
+    <div className="dashboard-container">
+      <div className="dashboard-header">
+        <h1>📊 ダッシュボード</h1>
+        <p>ようこそ、{user?.name}さん</p>
+      </div>
+
+      {/* 統計カード */}
+      <div className="stats-grid">
+        <div className="stat-card" onClick={() => setActiveTab('projects')}>
+          <div className="stat-icon">📁</div>
+          <div className="stat-content">
+            <h3>総案件数</h3>
+            <p className="stat-number">{projects.length}</p>
+          </div>
         </div>
 
-        {error && <div className="error-message">{error}</div>}
+        <div className="stat-card" onClick={() => navigate('/partners')}>
+          <div className="stat-icon">🤝</div>
+          <div className="stat-content">
+            <h3>パートナー数</h3>
+            <p className="stat-number">{partners.length}</p>
+          </div>
+        </div>
 
-        {loading ? (
-          <div className="loading">読み込み中...</div>
-        ) : (
-          <>
-            {/* タブナビゲーション */}
-            <div className="tabs-container">
-              <button
-                className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
-                onClick={() => handleTabChange('overview')}
-              >
-                基本統計
-              </button>
-              <button
-                className={`tab-button ${activeTab === 'projects' ? 'active' : ''}`}
-                onClick={() => handleTabChange('projects')}
-              >
-                案件ステータス
-              </button>
-              <button
-                className={`tab-button ${activeTab === 'commissions' ? 'active' : ''}`}
-                onClick={() => handleTabChange('commissions')}
-              >
-                手数料ステータス
-              </button>
-              <button
-                className={`tab-button ${activeTab === 'invoices' ? 'active' : ''}`}
-                onClick={() => handleTabChange('invoices')}
-              >
-                請求書ステータス
-              </button>
+        {/* 手数料統計は将来実装 */}
+        {/* <div className="stat-card" onClick={() => setActiveTab('commission-rules')}>
+          <div className="stat-icon">💰</div>
+          <div className="stat-content">
+            <h3>手数料ルール数</h3>
+            <p className="stat-number">{commissionRules.length}</p>
+          </div>
+        </div> */}
+
+        <div className="stat-card" onClick={() => setActiveTab('invoices')}>
+          <div className="stat-icon">📄</div>
+          <div className="stat-content">
+            <h3>請求書数</h3>
+            <p className="stat-number">{invoices.length}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* タブナビゲーション */}
+      <div className="tabs">
+        <button
+          className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
+          onClick={() => setActiveTab('overview')}
+        >
+          基本統計
+        </button>
+        <button
+          className={`tab ${activeTab === 'projects' ? 'active' : ''}`}
+          onClick={() => setActiveTab('projects')}
+        >
+          案件ステータス
+        </button>
+        <button
+          className={`tab ${activeTab === 'invoices' ? 'active' : ''}`}
+          onClick={() => setActiveTab('invoices')}
+        >
+          請求書ステータス
+        </button>
+      </div>
+
+      {/* タブコンテンツ */}
+      <div className="tab-content">
+        {/* 基本統計タブ */}
+        {activeTab === 'overview' && (
+          <div className="overview-section">
+            <div className="overview-grid">
+              {/* 案件サマリー */}
+              <div className="overview-card">
+                <h3>📁 案件サマリー</h3>
+                <div className="overview-stats">
+                  <div className="overview-item">
+                    <span>新規</span>
+                    <strong>{projectsByStatus.NEW.length}件</strong>
+                  </div>
+                  <div className="overview-item">
+                    <span>進行中</span>
+                    <strong>{projectsByStatus.IN_PROGRESS.length}件</strong>
+                  </div>
+                  <div className="overview-item">
+                    <span>完了</span>
+                    <strong>{projectsByStatus.DONE.length}件</strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* 請求書サマリー */}
+              <div className="overview-card">
+                <h3>📄 請求書サマリー</h3>
+                <div className="overview-stats">
+                  <div className="overview-item">
+                    <span>総請求金額</span>
+                    <strong>{formatCurrency(totalInvoiceAmount)}</strong>
+                  </div>
+                  <div className="overview-item">
+                    <span>発行済</span>
+                    <strong>{invoicesByStatus.ISSUED.length}件</strong>
+                  </div>
+                  <div className="overview-item">
+                    <span>支払済</span>
+                    <strong>{invoicesByStatus.PAID.length}件</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 案件ステータスタブ */}
+        {activeTab === 'projects' && (
+          <div className="stats-section">
+            <div className="stats-cards">
+              <div className="stat-card stat-project-new">
+                <h3>新規</h3>
+                <p className="stat-number">{projectsByStatus.NEW.length}件</p>
+                <p className="stat-detail">未着手</p>
+              </div>
+              <div className="stat-card stat-project-progress">
+                <h3>進行中</h3>
+                <p className="stat-number">{projectsByStatus.IN_PROGRESS.length}件</p>
+                <p className="stat-detail">作業中</p>
+              </div>
+              <div className="stat-card stat-project-done">
+                <h3>完了</h3>
+                <p className="stat-number">{projectsByStatus.DONE.length}件</p>
+                <p className="stat-detail">終了</p>
+              </div>
             </div>
 
-            {/* タブコンテンツ */}
-            <div className="tab-content">
-              {/* 基本統計タブ */}
-              {activeTab === 'overview' && (
-                <div className="stats-section">
-                  <div className="stats-cards">
-                    <div className="stat-card stat-partners">
-                      <h3>パートナー数</h3>
-                      <p className="stat-number">{partners.length}</p>
-                      <button
-                        className="stat-link"
-                        onClick={() => navigate('/partners')}
-                      >
-                        一覧を見る →
-                      </button>
+            {/* 最近の案件 */}
+            <div className="recent-projects">
+              <h3>📋 最近の案件</h3>
+              <div className="project-list">
+                {projects.slice(0, 5).map(project => (
+                  <div
+                    key={project.id}
+                    className="project-card"
+                    onClick={() => handleProjectClick(project.id)}
+                  >
+                    <div className="project-header">
+                      <h4>{project.name}</h4>
+                      <span className={getProjectStatusClass(project.status)}>
+                        {getProjectStatusLabel(project.status)}
+                      </span>
                     </div>
-                    <div className="stat-card stat-projects">
-                      <h3>総案件数</h3>
-                      <p className="stat-number">{projects.length}</p>
-                      <button
-                        className="stat-link"
-                        onClick={() => navigate('/projects')}
-                      >
-                        一覧を見る →
-                      </button>
-                    </div>
-                    <div className="stat-card stat-commissions">
-                      <h3>総手数料</h3>
-                      <p className="stat-number">{formatCurrency(totalCommissionAmount)}</p>
-                      <button
-                        className="stat-link"
-                        onClick={() => navigate('/commissions')}
-                      >
-                        一覧を見る →
-                      </button>
-                    </div>
-                    <div className="stat-card stat-invoices">
-                      <h3>総請求金額</h3>
-                      <p className="stat-number">{formatCurrency(totalInvoiceAmount)}</p>
-                      <button
-                        className="stat-link"
-                        onClick={() => navigate('/invoices')}
-                      >
-                        一覧を見る →
-                      </button>
-                    </div>
+                    <p className="project-partner">
+                      パートナー: {project.partnerName}
+                    </p>
                   </div>
-
-                  {/* 最近の案件 */}
-                  <div className="recent-projects">
-                    <h2>最近の案件</h2>
-                    {projects.length === 0 ? (
-                      <p className="no-data">案件がありません</p>
-                    ) : (
-                      <div className="projects-list">
-                        {projects.slice(0, 5).map((project) => (
-                          <div
-                            key={project.id}
-                            className="project-item"
-                            onClick={() => handleProjectClick(project.id)}
-                            style={{ cursor: 'pointer' }}
-                          >
-                            <div className="project-item-header">
-                              <h3>{project.name}</h3>
-                              <span className={getProjectStatusClass(project.status)}>
-                                {getProjectStatusLabel(project.status)}
-                              </span>
-                            </div>
-                            <div className="project-item-details">
-                              <p>
-                                <strong>パートナー:</strong> {project.partnerName}
-                              </p>
-                              <p>
-                                <strong>担当者:</strong> {project.assignments ? project.assignments.length : 0}名
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* 案件ステータスタブ */}
-              {activeTab === 'projects' && (
-                <div className="stats-section">
-                  <div className="stats-cards">
-                    <div className="stat-card stat-new">
-                      <h3>新規案件</h3>
-                      <p className="stat-number">{projectsByStatus.NEW.length}</p>
-                      <p className="stat-detail">対応待ち</p>
-                    </div>
-                    <div className="stat-card stat-progress">
-                      <h3>進行中</h3>
-                      <p className="stat-number">{projectsByStatus.IN_PROGRESS.length}</p>
-                      <p className="stat-detail">作業中</p>
-                    </div>
-                    <div className="stat-card stat-done">
-                      <h3>完了</h3>
-                      <p className="stat-number">{projectsByStatus.DONE.length}</p>
-                      <p className="stat-detail">終了済み</p>
-                    </div>
-                  </div>
-
-                  {/* 案件一覧 */}
-                  <div className="recent-projects">
-                    <h2>案件一覧</h2>
-                    {projects.length === 0 ? (
-                      <p className="no-data">案件がありません</p>
-                    ) : (
-                      <div className="projects-list">
-                        {projects.map((project) => (
-                          <div
-                            key={project.id}
-                            className="project-item"
-                            onClick={() => handleProjectClick(project.id)}
-                            style={{ cursor: 'pointer' }}
-                          >
-                            <div className="project-item-header">
-                              <h3>{project.name}</h3>
-                              <span className={getProjectStatusClass(project.status)}>
-                                {getProjectStatusLabel(project.status)}
-                              </span>
-                            </div>
-                            <div className="project-item-details">
-                              <p>
-                                <strong>パートナー:</strong> {project.partnerName}
-                              </p>
-                              <p>
-                                <strong>担当者:</strong> {project.assignments ? project.assignments.length : 0}名
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* 手数料ステータスタブ */}
-              {activeTab === 'commissions' && (
-                <div className="stats-section">
-                  <div className="stats-cards">
-                    <div className="stat-card stat-commission-pending">
-                      <h3>未承認</h3>
-                      <p className="stat-number">{commissionsByStatus.PENDING.length}件</p>
-                      <p className="stat-amount">{formatCurrency(pendingCommissionAmount)}</p>
-                    </div>
-                    <div className="stat-card stat-commission-approved">
-                      <h3>承認済</h3>
-                      <p className="stat-number">{commissionsByStatus.APPROVED.length}件</p>
-                      <p className="stat-amount">{formatCurrency(approvedCommissionAmount)}</p>
-                    </div>
-                    <div className="stat-card stat-commission-paid">
-                      <h3>支払済</h3>
-                      <p className="stat-number">{commissionsByStatus.PAID.length}件</p>
-                      <p className="stat-amount">{formatCurrency(paidCommissionAmount)}</p>
-                    </div>
-                  </div>
-
-                  {/* 詳細情報 */}
-                  <div className="info-section">
-                    <div className="info-card">
-                      <h3>📊 手数料サマリー</h3>
-                      <div className="info-details">
-                        <div className="info-row">
-                          <span>総手数料額:</span>
-                          <strong>{formatCurrency(totalCommissionAmount)}</strong>
-                        </div>
-                        <div className="info-row">
-                          <span>総件数:</span>
-                          <strong>{commissions.length}件</strong>
-                        </div>
-                        <div className="info-row">
-                          <span>平均手数料:</span>
-                          <strong>
-                            {commissions.length > 0
-                              ? formatCurrency(totalCommissionAmount / commissions.length)
-                              : '¥0'}
-                          </strong>
-                        </div>
-                      </div>
-                      <button
-                        className="info-button"
-                        onClick={() => navigate('/commissions')}
-                      >
-                        手数料管理画面へ
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* 請求書ステータスタブ */}
-              {activeTab === 'invoices' && (
-                <div className="stats-section">
-                  <div className="stats-cards">
-                    <div className="stat-card stat-invoice-draft">
-                      <h3>下書き</h3>
-                      <p className="stat-number">{invoicesByStatus.DRAFT.length}件</p>
-                      <p className="stat-detail">未発行</p>
-                    </div>
-                    <div className="stat-card stat-invoice-issued">
-                      <h3>発行済</h3>
-                      <p className="stat-number">{invoicesByStatus.ISSUED.length}件</p>
-                      <p className="stat-detail">支払待ち</p>
-                    </div>
-                    <div className="stat-card stat-invoice-paid">
-                      <h3>支払済</h3>
-                      <p className="stat-number">{invoicesByStatus.PAID.length}件</p>
-                      <p className="stat-detail">完了</p>
-                    </div>
-                    <div className="stat-card stat-invoice-cancelled">
-                      <h3>キャンセル</h3>
-                      <p className="stat-number">{invoicesByStatus.CANCELLED.length}件</p>
-                      <p className="stat-detail">無効</p>
-                    </div>
-                  </div>
-
-                  {/* 詳細情報 */}
-                  <div className="info-section">
-                    <div className="info-card">
-                      <h3>📄 請求書サマリー</h3>
-                      <div className="info-details">
-                        <div className="info-row">
-                          <span>総請求金額:</span>
-                          <strong>{formatCurrency(totalInvoiceAmount)}</strong>
-                        </div>
-                        <div className="info-row">
-                          <span>総件数:</span>
-                          <strong>{invoices.length}件</strong>
-                        </div>
-                        <div className="info-row">
-                          <span>平均請求額:</span>
-                          <strong>
-                            {invoices.length > 0
-                              ? formatCurrency(totalInvoiceAmount / invoices.length)
-                              : '¥0'}
-                          </strong>
-                        </div>
-                      </div>
-                      <button
-                        className="info-button"
-                        onClick={() => navigate('/invoices')}
-                      >
-                        請求書管理画面へ
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
+                ))}
+              </div>
+              <button
+                className="info-button"
+                onClick={() => navigate('/projects')}
+              >
+                案件一覧を見る
+              </button>
             </div>
-          </>
+          </div>
+        )}
+
+        {/* 請求書ステータスタブ */}
+        {activeTab === 'invoices' && (
+          <div className="stats-section">
+            <div className="stats-cards">
+              <div className="stat-card stat-invoice-draft">
+                <h3>下書き</h3>
+                <p className="stat-number">{invoicesByStatus.DRAFT.length}件</p>
+                <p className="stat-detail">未発行</p>
+              </div>
+              <div className="stat-card stat-invoice-issued">
+                <h3>発行済</h3>
+                <p className="stat-number">{invoicesByStatus.ISSUED.length}件</p>
+                <p className="stat-detail">支払待ち</p>
+              </div>
+              <div className="stat-card stat-invoice-paid">
+                <h3>支払済</h3>
+                <p className="stat-number">{invoicesByStatus.PAID.length}件</p>
+                <p className="stat-detail">完了</p>
+              </div>
+              <div className="stat-card stat-invoice-cancelled">
+                <h3>キャンセル</h3>
+                <p className="stat-number">{invoicesByStatus.CANCELLED.length}件</p>
+                <p className="stat-detail">無効</p>
+              </div>
+            </div>
+
+            {/* 詳細情報 */}
+            <div className="info-section">
+              <div className="info-card">
+                <h3>📄 請求書サマリー</h3>
+                <div className="info-details">
+                  <div className="info-row">
+                    <span>総請求金額:</span>
+                    <strong>{formatCurrency(totalInvoiceAmount)}</strong>
+                  </div>
+                  <div className="info-row">
+                    <span>総件数:</span>
+                    <strong>{invoices.length}件</strong>
+                  </div>
+                  <div className="info-row">
+                    <span>平均請求額:</span>
+                    <strong>
+                      {invoices.length > 0
+                        ? formatCurrency(totalInvoiceAmount / invoices.length)
+                        : '¥0'}
+                    </strong>
+                  </div>
+                </div>
+                <button
+                  className="info-button"
+                  onClick={() => navigate('/invoices')}
+                >
+                  請求書管理画面へ
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

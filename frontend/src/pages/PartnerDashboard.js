@@ -3,7 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import partnerService from '../services/partnerService';
 import './PartnerDashboard.css';
 
-// パートナー別ダッシュボードページコンポーネント
+/**
+ * パートナー別ダッシュボード
+ * 新設計対応版（実績ベース統計）
+ */
 const PartnerDashboard = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -11,24 +14,23 @@ const PartnerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-const fetchDashboard = useCallback(async () => {
-  try {
-    setLoading(true);
-    const data = await partnerService.getDashboard(id);
-    setDashboard(data);
-    document.title = `${data.partnerName} - ダッシュボード - PRM Tool`;
-  } catch (err) {
-    setError('ダッシュボードの取得に失敗しました');
-    console.error(err);
-  } finally {
-    setLoading(false);
-  }
-}, [id]);
+  const fetchDashboard = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await partnerService.getDashboard(id);
+      setDashboard(data);
+      document.title = `${data.partnerName} - ダッシュボード - PRM Tool`;
+    } catch (err) {
+      setError('ダッシュボードの取得に失敗しました');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
 
-useEffect(() => {
-  fetchDashboard();
-}, [fetchDashboard]);
-
+  useEffect(() => {
+    fetchDashboard();
+  }, [fetchDashboard]);
 
   // 金額をフォーマット
   const formatCurrency = (amount) => {
@@ -62,12 +64,12 @@ useEffect(() => {
     <div className="partner-dashboard-container">
       {/* ヘッダー */}
       <div className="dashboard-header">
-        <div>
+        <div className="header-content">
           <h1>{dashboard.partnerName}</h1>
-          <p className="industry-tag">{dashboard.industry}</p>
+          <p className="industry-label">業種: {dashboard.industry}</p>
         </div>
-        <button onClick={() => navigate('/partners')} className="btn-secondary">
-          パートナー一覧に戻る
+        <button onClick={() => navigate('/partners')} className="btn-back">
+          ← 一覧に戻る
         </button>
       </div>
 
@@ -75,7 +77,7 @@ useEffect(() => {
       <div className="stats-grid">
         {/* 案件統計 */}
         <div className="stat-card">
-          <div className="stat-icon stat-icon-projects">
+          <div className="stat-icon stat-icon-project">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
             </svg>
@@ -89,7 +91,7 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* 手数料統計 */}
+        {/* 手数料統計（実績ベース） */}
         <div className="stat-card">
           <div className="stat-icon stat-icon-commission">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -97,13 +99,31 @@ useEffect(() => {
             </svg>
           </div>
           <div className="stat-content">
-            <p className="stat-label">総手数料</p>
+            <p className="stat-label">総手数料（実績）</p>
             <p className="stat-value">{formatCurrency(dashboard.totalCommission)}</p>
             <p className="stat-detail">
-              未承認: {formatCurrency(dashboard.pendingCommission)}
+              発行済: {formatCurrency(dashboard.issuedCommission)}
             </p>
           </div>
         </div>
+
+        {/* 手数料ルール統計（契約ベース） */}
+        {dashboard.totalCommissionRules !== undefined && (
+          <div className="stat-card">
+            <div className="stat-icon stat-icon-rule">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+            <div className="stat-content">
+              <p className="stat-label">手数料ルール数</p>
+              <p className="stat-value">{dashboard.totalCommissionRules}</p>
+              <p className="stat-detail">
+                確定済: {dashboard.confirmedRules}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* 請求書統計 */}
         <div className="stat-card">
@@ -138,18 +158,35 @@ useEffect(() => {
 
       {/* 詳細セクション */}
       <div className="details-grid">
-        {/* 手数料ステータス別内訳 */}
-        <div className="detail-card">
-          <h3>手数料ステータス別</h3>
-          <div className="detail-list">
-            {Object.entries(dashboard.commissionByStatus).map(([status, amount]) => (
-              <div key={status} className="detail-item">
-                <span className="detail-label">{status}</span>
-                <span className="detail-value">{formatCurrency(amount)}</span>
-              </div>
-            ))}
+        {/* 手数料ステータス別内訳（実績ベース） */}
+        {dashboard.commissionByInvoiceStatus && (
+          <div className="detail-card">
+            <h3>手数料ステータス別（実績）</h3>
+            <div className="detail-list">
+              {Object.entries(dashboard.commissionByInvoiceStatus).map(([status, amount]) => (
+                <div key={status} className="detail-item">
+                  <span className="detail-label">{status}</span>
+                  <span className="detail-value">{formatCurrency(amount)}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* 旧形式との互換性（commissionByStatus がある場合） */}
+        {dashboard.commissionByStatus && !dashboard.commissionByInvoiceStatus && (
+          <div className="detail-card">
+            <h3>手数料ステータス別</h3>
+            <div className="detail-list">
+              {Object.entries(dashboard.commissionByStatus).map(([status, amount]) => (
+                <div key={status} className="detail-item">
+                  <span className="detail-label">{status}</span>
+                  <span className="detail-value">{formatCurrency(amount)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 請求書ステータス別内訳 */}
         <div className="detail-card">
@@ -170,8 +207,8 @@ useEffect(() => {
         <button onClick={() => navigate(`/partners/${id}`)} className="btn-action">
           パートナー詳細を見る
         </button>
-        <button onClick={() => navigate(`/commissions`)} className="btn-action">
-          手数料一覧を見る
+        <button onClick={() => navigate(`/commission-rules`)} className="btn-action">
+          手数料ルール一覧を見る
         </button>
         <button onClick={() => navigate(`/invoices`)} className="btn-action">
           請求書一覧を見る

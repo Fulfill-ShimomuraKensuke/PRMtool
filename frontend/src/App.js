@@ -9,7 +9,7 @@ import Partners from './pages/Partners';
 import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
 import Accounts from './pages/Accounts';
-import Commissions from './pages/Commissions';
+import CommissionRules from './pages/CommissionRules';
 import Invoices from './pages/Invoices';
 import PartnerDashboard from './pages/PartnerDashboard';
 
@@ -93,7 +93,7 @@ function AppContent() {
           path="/commissions"
           element={
             <PrivateRoute systemRestricted={true}>
-              <Commissions />
+              <CommissionRules />
             </PrivateRoute>
           }
         />
