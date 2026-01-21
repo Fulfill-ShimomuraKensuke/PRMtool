@@ -1,11 +1,12 @@
 package com.example.prmtool.service;
 
 import com.example.prmtool.dto.PartnerDashboardResponse;
-import com.example.prmtool.entity.Commission;
+import com.example.prmtool.entity.CommissionRule;
 import com.example.prmtool.entity.Invoice;
 import com.example.prmtool.entity.Partner;
 import com.example.prmtool.entity.Project;
-import com.example.prmtool.repository.CommissionRepository;
+import com.example.prmtool.repository.CommissionRuleRepository;
+import com.example.prmtool.repository.InvoiceItemRepository;
 import com.example.prmtool.repository.InvoiceRepository;
 import com.example.prmtool.repository.PartnerRepository;
 import com.example.prmtool.repository.ProjectRepository;
@@ -19,16 +20,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * パートナーダッシュボードサービス
+ * 新設計に対応（実績ベース統計）
+ */
 @Service
 @RequiredArgsConstructor
 public class PartnerDashboardService {
 
   private final PartnerRepository partnerRepository;
   private final ProjectRepository projectRepository;
-  private final CommissionRepository commissionRepository;
+  private final CommissionRuleRepository commissionRuleRepository; // 新: ルール
   private final InvoiceRepository invoiceRepository;
+  private final InvoiceItemRepository invoiceItemRepository; // 新: 実績
 
-  // パートナー別ダッシュボードデータを取得
+  /**
+   * パートナー別ダッシュボードデータを取得
+   */
   @Transactional(readOnly = true)
   public PartnerDashboardResponse getPartnerDashboard(UUID partnerId) {
     // パートナーを取得
@@ -45,22 +53,35 @@ public class PartnerDashboardService {
         .filter(p -> p.getStatus() == Project.ProjectStatus.DONE)
         .count();
 
-    // 手数料統計を計算
-    BigDecimal totalCommission = commissionRepository.sumAmountByPartnerId(partnerId);
-    BigDecimal pendingCommission = commissionRepository.sumAmountByPartnerIdAndStatus(
-        partnerId, Commission.CommissionStatus.PENDING);
-    BigDecimal approvedCommission = commissionRepository.sumAmountByPartnerIdAndStatus(
-        partnerId, Commission.CommissionStatus.APPROVED);
-    BigDecimal paidCommission = commissionRepository.sumAmountByPartnerIdAndStatus(
-        partnerId, Commission.CommissionStatus.PAID);
+    // --- 手数料統計（実績ベース：実際に請求した金額）---
+    BigDecimal totalCommission = invoiceItemRepository.sumCommissionByPartnerId(partnerId);
+    BigDecimal draftCommission = invoiceItemRepository.sumCommissionByPartnerIdAndInvoiceStatus(
+        partnerId, Invoice.InvoiceStatus.DRAFT);
+    BigDecimal issuedCommission = invoiceItemRepository.sumCommissionByPartnerIdAndInvoiceStatus(
+        partnerId, Invoice.InvoiceStatus.ISSUED);
+    BigDecimal paidCommission = invoiceItemRepository.sumCommissionByPartnerIdAndInvoiceStatus(
+        partnerId, Invoice.InvoiceStatus.PAID);
 
-    // ステータス別手数料内訳
-    Map<String, BigDecimal> commissionByStatus = new HashMap<>();
-    commissionByStatus.put("未承認", pendingCommission);
-    commissionByStatus.put("承認済", approvedCommission);
-    commissionByStatus.put("支払済", paidCommission);
+    // ステータス別手数料内訳（実績ベース）
+    Map<String, BigDecimal> commissionByInvoiceStatus = new HashMap<>();
+    commissionByInvoiceStatus.put("下書き", draftCommission);
+    commissionByInvoiceStatus.put("発行済", issuedCommission);
+    commissionByInvoiceStatus.put("支払済", paidCommission);
 
-    // 請求書統計を計算
+    // --- 手数料ルール統計（契約ベース：任意）---
+    List<CommissionRule> rules = commissionRuleRepository.findAll().stream()
+        .filter(rule -> rule.getProject().getPartner().getId().equals(partnerId))
+        .toList();
+
+    long totalCommissionRules = rules.size();
+    long confirmedRules = rules.stream()
+        .filter(r -> r.getStatus() == CommissionRule.CommissionStatus.CONFIRMED)
+        .count();
+    long disabledRules = rules.stream()
+        .filter(r -> r.getStatus() == CommissionRule.CommissionStatus.DISABLED)
+        .count();
+
+    // --- 請求書統計 ---
     List<Invoice> invoices = invoiceRepository.findByPartnerId(partnerId);
     long totalInvoices = invoices.size();
     long draftInvoices = invoices.stream()
@@ -86,14 +107,21 @@ public class PartnerDashboardService {
         .partnerId(partner.getId())
         .partnerName(partner.getName())
         .industry(partner.getIndustry())
+        // 案件統計
         .totalProjects(totalProjects)
         .activeProjects(activeProjects)
         .completedProjects(completedProjects)
+        // 手数料統計（実績ベース）
         .totalCommission(totalCommission)
-        .pendingCommission(pendingCommission)
-        .approvedCommission(approvedCommission)
+        .draftCommission(draftCommission)
+        .issuedCommission(issuedCommission)
         .paidCommission(paidCommission)
-        .commissionByStatus(commissionByStatus)
+        .commissionByInvoiceStatus(commissionByInvoiceStatus)
+        // 手数料ルール統計（契約ベース）
+        .totalCommissionRules(totalCommissionRules)
+        .confirmedRules(confirmedRules)
+        .disabledRules(disabledRules)
+        // 請求書統計
         .totalInvoices(totalInvoices)
         .draftInvoices(draftInvoices)
         .issuedInvoices(issuedInvoices)
