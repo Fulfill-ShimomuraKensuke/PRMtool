@@ -12,6 +12,7 @@ import java.util.UUID;
 
 /**
  * 手数料ルールレスポンス
+ * API通信用のデータ転送オブジェクト
  */
 @Data
 @NoArgsConstructor

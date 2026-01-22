@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 /**
  * 手数料ルールサービス
- * 「ルール」の管理のみ。金額の確定はしない。
+ * 業務ロジックをControllerから分離し、CRUD操作を管理
  */
 @Service
 @RequiredArgsConstructor
@@ -115,6 +115,19 @@ public class CommissionRuleService {
   }
 
   /**
+   * ステータスを変更
+   */
+  @Transactional
+  public CommissionRuleResponse updateStatus(UUID id, CommissionRule.CommissionStatus status) {
+    CommissionRule rule = commissionRuleRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("手数料ルールが見つかりません: " + id));
+
+    rule.setStatus(status);
+    CommissionRule updated = commissionRuleRepository.save(rule);
+    return convertToResponse(updated);
+  }
+
+  /**
    * 手数料ルールを削除
    */
   @Transactional
@@ -123,19 +136,6 @@ public class CommissionRuleService {
       throw new RuntimeException("手数料ルールが見つかりません: " + id);
     }
     commissionRuleRepository.deleteById(id);
-  }
-
-  /**
-   * ステータスを変更（確定/無効化など）
-   */
-  @Transactional
-  public CommissionRuleResponse updateStatus(UUID id, CommissionRule.CommissionStatus newStatus) {
-    CommissionRule rule = commissionRuleRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("手数料ルールが見つかりません: " + id));
-
-    rule.setStatus(newStatus);
-    CommissionRule updated = commissionRuleRepository.save(rule);
-    return convertToResponse(updated);
   }
 
   /**

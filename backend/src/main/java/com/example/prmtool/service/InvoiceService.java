@@ -29,8 +29,8 @@ public class InvoiceService {
   private final CommissionRuleRepository commissionRuleRepository;
   private final CommissionCalculationService commissionCalculationService;
 
-  // 現在の消費税率（将来的には設定ファイルやDBから取得）
-  private static final BigDecimal DEFAULT_TAX_RATE = new BigDecimal("0.10"); // 10%
+  // 現在の消費税率
+  private static final BigDecimal DEFAULT_TAX_RATE = new BigDecimal("0.10");
 
   /**
    * 全請求書を取得
@@ -68,7 +68,7 @@ public class InvoiceService {
    */
   @Transactional
   public InvoiceResponse createInvoice(InvoiceRequest request) {
-    // バリデーション: 明細が最低1件必要
+    // バリデーション処理
     if (request.getItems() == null || request.getItems().isEmpty()) {
       throw new IllegalArgumentException("請求書には最低1件の明細が必要です");
     }
@@ -80,7 +80,7 @@ public class InvoiceService {
     // 請求書番号を生成
     String invoiceNumber = generateInvoiceNumber();
 
-    // 請求書エンティティを作成（金額は後で計算）
+    // 請求書エンティティを作成
     Invoice invoice = Invoice.builder()
         .invoiceNumber(invoiceNumber)
         .partner(partner)
@@ -135,7 +135,7 @@ public class InvoiceService {
           .quantity(itemRequest.getQuantity())
           .unitPrice(itemRequest.getUnitPrice())
           .productAmount(productAmount)
-          // 手数料ルールをコピー
+          // 手数料ルールをコピーして保持
           .appliedCommissionType(rule != null ? rule.getCommissionType() : null)
           .appliedRatePercent(rule != null ? rule.getRatePercent() : null)
           .appliedFixedAmount(rule != null ? rule.getFixedAmount() : null)
@@ -160,7 +160,7 @@ public class InvoiceService {
 
   /**
    * 請求書を更新
-   * 注意: 発行済・支払済の請求書は更新できない（業務ルール）
+   * 注意: 発行済・支払済の請求書は更新できない
    */
   @Transactional
   public InvoiceResponse updateInvoice(UUID id, InvoiceRequest request) {
@@ -314,7 +314,7 @@ public class InvoiceService {
         throw new IllegalArgumentException("未対応の消費税区分: " + invoice.getTaxCategory());
     }
 
-    // 合計金額 = 商品小計 + 手数料小計 + 消費税
+    // 合計金額を計算
     BigDecimal totalAmount = subtotal
         .add(commissionSubtotal)
         .add(taxAmount);
@@ -328,7 +328,7 @@ public class InvoiceService {
   }
 
   /**
-   * 請求書番号を生成（例: INV-2026-0001）
+   * 請求書番号を生成
    */
   private String generateInvoiceNumber() {
     String year = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy"));
