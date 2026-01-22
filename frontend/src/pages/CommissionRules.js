@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import commissionRuleService from '../services/commissionRuleService';
 import projectService from '../services/projectService';
-import './Commissions.css'; // 既存のCSSを流用
+import './CommissionRules.css';
 
 /**
  * 手数料ルール管理ページ
@@ -202,6 +202,15 @@ const CommissionRules = () => {
     }
   };
 
+  // フィルタークリア
+  const handleClearFilters = () => {
+    setStatusFilter('ALL');
+    setProjectFilter('ALL');
+  };
+
+  // フィルターが適用されているかチェック
+  const hasActiveFilters = statusFilter !== 'ALL' || projectFilter !== 'ALL';
+
   // ステータスラベル取得
   const getStatusLabel = (status) => {
     const labels = {
@@ -242,7 +251,7 @@ const CommissionRules = () => {
   }
 
   if (error) {
-    return <div className="error">{error}</div>;
+    return <div className="error-message">{error}</div>;
   }
 
   return (
@@ -254,42 +263,62 @@ const CommissionRules = () => {
         </button>
       </div>
 
-      {/* フィルター */}
-      <div className="filters">
-        <div className="filter-group">
-          <label>ステータス:</label>
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value="ALL">すべて</option>
+      {/* フィルターセクション */}
+      <div className="filter-section">
+        <div className="filters">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="filter-select"
+          >
+            <option value="ALL">全てのステータス</option>
             <option value="UNAPPROVED">未承認</option>
             <option value="REVIEWING">確認中</option>
             <option value="CONFIRMED">確定</option>
             <option value="PAID">支払済</option>
             <option value="DISABLED">使用不可</option>
           </select>
-        </div>
 
-        <div className="filter-group">
-          <label>案件:</label>
-          <select value={projectFilter} onChange={(e) => setProjectFilter(e.target.value)}>
-            <option value="ALL">すべて</option>
+          <select
+            value={projectFilter}
+            onChange={(e) => setProjectFilter(e.target.value)}
+            className="filter-select"
+          >
+            <option value="ALL">全ての案件</option>
             {projects.map(project => (
               <option key={project.id} value={project.id}>
                 {project.name}
               </option>
             ))}
           </select>
+
+          {hasActiveFilters && (
+            <button onClick={handleClearFilters} className="btn-clear-filters">
+              フィルターをクリア
+            </button>
+          )}
         </div>
+
+        {hasActiveFilters && (
+          <div className="search-results-info">
+            {filteredRules.length}件の手数料ルールが見つかりました
+          </div>
+        )}
       </div>
 
       {/* 手数料ルール一覧 */}
-      <div className="commissions-list">
-        {filteredRules.length === 0 ? (
-          <div className="empty-message">手数料ルールがありません</div>
-        ) : (
-          filteredRules.map(rule => (
+      {filteredRules.length === 0 ? (
+        <div className="no-data">
+          {hasActiveFilters
+            ? 'フィルター条件に一致する手数料ルールがありません'
+            : '手数料ルールがまだありません。新規作成してください。'}
+        </div>
+      ) : (
+        <div className="commissions-list">
+          {filteredRules.map(rule => (
             <div key={rule.id} className="commission-card">
               <div className="commission-header">
-                <div>
+                <div className="commission-title">
                   <h3>{rule.ruleName}</h3>
                   <p className="commission-project">案件: {rule.projectName}</p>
                 </div>
@@ -302,14 +331,14 @@ const CommissionRules = () => {
                 <div className="commission-info">
                   <div className="info-item">
                     <span className="info-label">タイプ:</span>
-                    <span className="info-value">{getTypeLabel(rule.commissionType)}</span>
+                    <span className="info-value type-badge">{getTypeLabel(rule.commissionType)}</span>
                   </div>
                   <div className="info-item">
                     <span className="info-label">手数料:</span>
-                    <span className="info-value">{formatCommission(rule)}</span>
+                    <span className="info-value commission-amount">{formatCommission(rule)}</span>
                   </div>
                   {rule.notes && (
-                    <div className="info-item">
+                    <div className="info-item full-width">
                       <span className="info-label">備考:</span>
                       <span className="info-value">{rule.notes}</span>
                     </div>
@@ -317,7 +346,6 @@ const CommissionRules = () => {
                 </div>
 
                 <div className="commission-actions">
-                  {/* ステータス変更ドロップダウン */}
                   <select
                     value={rule.status}
                     onChange={(e) => handleStatusChange(rule.id, e.target.value)}
@@ -330,13 +358,13 @@ const CommissionRules = () => {
                     <option value="DISABLED">使用不可</option>
                   </select>
                   <button
-                    className="btn-secondary"
+                    className="btn-edit"
                     onClick={() => handleOpenModal(rule)}
                   >
                     編集
                   </button>
                   <button
-                    className="btn-danger"
+                    className="btn-delete"
                     onClick={() => handleDelete(rule.id)}
                   >
                     削除
@@ -344,9 +372,9 @@ const CommissionRules = () => {
                 </div>
               </div>
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* モーダル */}
       {showModal && (
@@ -358,116 +386,126 @@ const CommissionRules = () => {
           <div className="modal-content">
             <div className="modal-header">
               <h2>{editingRule ? '手数料ルール編集' : '手数料ルール作成'}</h2>
-              <button className="btn-close" onClick={handleCloseModal}>
+              <button className="modal-close" onClick={handleCloseModal}>
                 ×
               </button>
             </div>
 
             <form onSubmit={handleSubmit}>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label>案件 *</label>
-                  <select
-                    name="projectId"
-                    value={formData.projectId}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="">選択してください</option>
-                    {projects.map(project => (
-                      <option key={project.id} value={project.id}>
-                        {project.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label>ルール名 *</label>
-                  <input
-                    type="text"
-                    name="ruleName"
-                    value={formData.ruleName}
-                    onChange={handleChange}
-                    placeholder="例: 初期契約"
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>手数料タイプ *</label>
-                  <select
-                    name="commissionType"
-                    value={formData.commissionType}
-                    onChange={handleTypeChange}
-                    required
-                  >
-                    <option value="RATE">%指定</option>
-                    <option value="FIXED">固定金額</option>
-                  </select>
-                </div>
-
-                {formData.commissionType === 'RATE' && (
-                  <div className="form-group">
-                    <label>手数料率（%） *</label>
-                    <input
-                      type="number"
-                      name="ratePercent"
-                      value={formData.ratePercent}
-                      onChange={handleChange}
-                      step="0.01"
-                      min="0"
-                      placeholder="例: 3.5"
-                      required
-                    />
-                  </div>
-                )}
-
-                {formData.commissionType === 'FIXED' && (
-                  <div className="form-group">
-                    <label>固定金額（円） *</label>
-                    <input
-                      type="number"
-                      name="fixedAmount"
-                      value={formData.fixedAmount}
-                      onChange={handleChange}
-                      min="0"
-                      placeholder="例: 5000"
-                      required
-                    />
-                  </div>
-                )}
-
-                <div className="form-group">
-                  <label>ステータス *</label>
-                  <select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="UNAPPROVED">未承認</option>
-                    <option value="REVIEWING">確認中</option>
-                    <option value="CONFIRMED">確定</option>
-                    <option value="PAID">支払済</option>
-                    <option value="DISABLED">使用不可</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label>備考</label>
-                  <textarea
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleChange}
-                    rows="3"
-                    placeholder="備考を入力"
-                  />
-                </div>
+              <div className="form-group">
+                <label>
+                  案件 <span className="required">*</span>
+                </label>
+                <select
+                  name="projectId"
+                  value={formData.projectId}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">選択してください</option>
+                  {projects.map(project => (
+                    <option key={project.id} value={project.id}>
+                      {project.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              <div className="modal-footer">
-                <button type="button" className="btn-secondary" onClick={handleCloseModal}>
+              <div className="form-group">
+                <label>
+                  ルール名 <span className="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="ruleName"
+                  value={formData.ruleName}
+                  onChange={handleChange}
+                  placeholder="例: 初期契約"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>
+                  手数料タイプ <span className="required">*</span>
+                </label>
+                <select
+                  name="commissionType"
+                  value={formData.commissionType}
+                  onChange={handleTypeChange}
+                  required
+                >
+                  <option value="RATE">%指定</option>
+                  <option value="FIXED">固定金額</option>
+                </select>
+              </div>
+
+              {formData.commissionType === 'RATE' && (
+                <div className="form-group conditional-field">
+                  <label>
+                    手数料率（%） <span className="required">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="ratePercent"
+                    value={formData.ratePercent}
+                    onChange={handleChange}
+                    step="0.01"
+                    min="0"
+                    placeholder="例: 3.5"
+                    required
+                  />
+                </div>
+              )}
+
+              {formData.commissionType === 'FIXED' && (
+                <div className="form-group conditional-field">
+                  <label>
+                    固定金額（円） <span className="required">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="fixedAmount"
+                    value={formData.fixedAmount}
+                    onChange={handleChange}
+                    min="0"
+                    placeholder="例: 5000"
+                    required
+                  />
+                </div>
+              )}
+
+              <div className="form-group">
+                <label>
+                  ステータス <span className="required">*</span>
+                </label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="UNAPPROVED">未承認</option>
+                  <option value="REVIEWING">確認中</option>
+                  <option value="CONFIRMED">確定</option>
+                  <option value="PAID">支払済</option>
+                  <option value="DISABLED">使用不可</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>備考</label>
+                <textarea
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleChange}
+                  rows="3"
+                  placeholder="備考を入力"
+                />
+              </div>
+
+              <div className="modal-actions">
+                <button type="button" className="btn-cancel" onClick={handleCloseModal}>
                   キャンセル
                 </button>
                 <button type="submit" className="btn-primary">
