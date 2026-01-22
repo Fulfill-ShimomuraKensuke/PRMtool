@@ -446,6 +446,7 @@ const CommissionRules = () => {
                     name="fixedAmount"
                     value={formData.fixedAmount}
                     onChange={handleChange}
+                    step="1"
                     min="0"
                     placeholder="例: 5000"
                     required
