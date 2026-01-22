@@ -77,6 +77,9 @@ public class InvoiceService {
     Partner partner = partnerRepository.findById(request.getPartnerId())
         .orElseThrow(() -> new RuntimeException("パートナーが見つかりません: " + request.getPartnerId()));
 
+    // ★★★ 追加: パートナー整合性チェック ★★★
+    validatePartnerConsistency(request.getPartnerId(), request.getItems());
+
     // 請求書番号を生成
     String invoiceNumber = generateInvoiceNumber();
 
@@ -167,15 +170,18 @@ public class InvoiceService {
     Invoice invoice = invoiceRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("請求書が見つかりません: " + id));
 
-    // 発行済・支払済の場合は更新不可
-    if (invoice.getStatus() == Invoice.InvoiceStatus.ISSUED ||
-        invoice.getStatus() == Invoice.InvoiceStatus.PAID) {
-      throw new IllegalStateException("発行済・支払済の請求書は更新できません");
+    // 編集可能かチェック（下書きのみ編集可能）
+    if (invoice.getStatus() != Invoice.InvoiceStatus.DRAFT) {
+      throw new IllegalStateException(
+          "下書き状態の請求書のみ編集可能です。現在のステータス: " + invoice.getStatus());
     }
 
     // パートナーを取得
     Partner partner = partnerRepository.findById(request.getPartnerId())
         .orElseThrow(() -> new RuntimeException("パートナーが見つかりません: " + request.getPartnerId()));
+
+    // ★★★ 追加: パートナー整合性チェック ★★★
+    validatePartnerConsistency(request.getPartnerId(), request.getItems());
 
     // 基本情報を更新
     invoice.setPartner(partner);
@@ -415,5 +421,42 @@ public class InvoiceService {
     invoice.setStatus(Invoice.InvoiceStatus.PAID);
     Invoice updated = invoiceRepository.save(invoice);
     return convertToResponse(updated);
+  }
+
+  /**
+   * パートナー整合性チェック
+   * 請求書のパートナーと手数料ルールの案件のパートナーが一致するか検証
+   * 
+   * 目的: 請求書のパートナーと異なるパートナー向けの手数料ルールが使用されることを防ぐ
+   * 例: パートナーAの請求書に、パートナーB向けの手数料ルールが使用されるのを防ぐ
+   * 
+   * @param invoicePartnerId 請求書のパートナーID
+   * @param items            請求明細リスト
+   * @throws IllegalArgumentException パートナーが一致しない場合
+   */
+  private void validatePartnerConsistency(UUID invoicePartnerId,
+      List<InvoiceRequest.InvoiceItemRequest> items) {
+    for (InvoiceRequest.InvoiceItemRequest itemRequest : items) {
+      // 手数料ルールが指定されている場合のみチェック
+      if (itemRequest.getCommissionRuleId() != null) {
+        CommissionRule rule = commissionRuleRepository.findById(itemRequest.getCommissionRuleId())
+            .orElseThrow(() -> new RuntimeException(
+                "手数料ルールが見つかりません: " + itemRequest.getCommissionRuleId()));
+
+        // 手数料ルールの案件のパートナーIDを取得
+        UUID rulePartnerId = rule.getProject().getPartner().getId();
+
+        // 請求書のパートナーIDと比較
+        if (!rulePartnerId.equals(invoicePartnerId)) {
+          Partner rulePartner = rule.getProject().getPartner();
+          throw new IllegalArgumentException(
+              String.format(
+                  "手数料ルール「%s」は案件「%s」（パートナー：%s）向けです。選択したパートナーとは異なります。",
+                  rule.getRuleName(),
+                  rule.getProject().getName(),
+                  rulePartner.getName()));
+        }
+      }
+    }
   }
 }

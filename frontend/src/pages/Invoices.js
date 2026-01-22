@@ -74,6 +74,22 @@ const Invoices = () => {
     }
   };
 
+  // 選択可能な手数料ルールをフィルタリング
+  // 請求書のパートナーに紐づく手数料ルールのみを表示
+  const getAvailableCommissionRules = () => {
+    if (!formData.partnerId) {
+      // パートナー未選択時は空配列を返す（選択不可）
+      return [];
+    }
+
+    // 選択したパートナーに紐づく手数料ルールのみ表示
+    return commissionRules.filter(rule => {
+      // 確定済みかつ、手数料ルールの案件のパートナーIDが請求書のパートナーIDと一致
+      return rule.status === 'CONFIRMED' &&
+        rule.projectPartnerId === formData.partnerId;
+    });
+  };
+
   // モーダル開閉処理（新規作成または編集）
   const handleOpenModal = (invoice = null) => {
     if (invoice) {
@@ -122,10 +138,24 @@ const Invoices = () => {
 
   // フォーム入力変更処理
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+
+    // パートナーが変更された場合、明細の手数料ルールをクリア
+    if (name === 'partnerId') {
+      setFormData({
+        ...formData,
+        partnerId: value,
+        items: formData.items.map(item => ({
+          ...item,
+          commissionRuleId: ''  // 手数料ルールをクリア
+        }))
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
 
   // 明細の変更処理
@@ -518,19 +548,36 @@ const Invoices = () => {
                         <label>手数料ルール</label>
                         <select
                           value={item.commissionRuleId}
-                          onChange={(e) =>
-                            handleItemChange(index, 'commissionRuleId', e.target.value)
-                          }
+                          onChange={(e) => handleItemChange(index, 'commissionRuleId', e.target.value)}
+                          disabled={!formData.partnerId}  // パートナー未選択時は無効化
                         >
-                          <option value="">なし</option>
-                          {commissionRules
-                            .filter((rule) => rule.status === 'CONFIRMED')
-                            .map((rule) => (
+                          <option value="">手数料ルールなし</option>
+                          {formData.partnerId ? (
+                            // パートナー選択済み：フィルタリングされたルールのみ表示
+                            getAvailableCommissionRules().map((rule) => (
                               <option key={rule.id} value={rule.id}>
-                                {rule.ruleName} - {rule.projectName}
+                                {rule.ruleName} - {rule.projectName} ({rule.projectPartnerName})
                               </option>
-                            ))}
+                            ))
+                          ) : (
+                            // パートナー未選択：選択肢なし
+                            <option value="" disabled>まずパートナーを選択してください</option>
+                          )}
                         </select>
+
+                        {/* パートナー未選択時の注意メッセージ */}
+                        {!formData.partnerId && (
+                          <small style={{ display: 'block', color: '#999', marginTop: '0.25rem', fontSize: '0.875rem' }}>
+                            ※手数料ルールを選択するには、まずパートナーを選択してください
+                          </small>
+                        )}
+
+                        {/* 選択可能なルールがない場合 */}
+                        {formData.partnerId && getAvailableCommissionRules().length === 0 && (
+                          <small style={{ display: 'block', color: '#e74c3c', marginTop: '0.25rem', fontSize: '0.875rem' }}>
+                            ※このパートナー向けの確定済手数料ルールがありません
+                          </small>
+                        )}
                       </div>
 
                       <div className="form-group">

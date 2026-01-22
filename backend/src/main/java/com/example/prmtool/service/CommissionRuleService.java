@@ -140,12 +140,15 @@ public class CommissionRuleService {
 
   /**
    * エンティティをレスポンスDTOに変換
+   * 案件のパートナー情報を含める（フロントエンドでの整合性チェック用）
    */
   private CommissionRuleResponse convertToResponse(CommissionRule rule) {
     return CommissionRuleResponse.builder()
         .id(rule.getId())
         .projectId(rule.getProject().getId())
         .projectName(rule.getProject().getName())
+        .projectPartnerId(rule.getProject().getPartner().getId()) // ★追加
+        .projectPartnerName(rule.getProject().getPartner().getName()) // ★追加
         .ruleName(rule.getRuleName())
         .commissionType(rule.getCommissionType())
         .ratePercent(rule.getRatePercent())
