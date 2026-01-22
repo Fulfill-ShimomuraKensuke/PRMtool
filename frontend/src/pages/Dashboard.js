@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import projectService from '../services/projectService';
 import partnerService from '../services/partnerService';
-// import commissionRuleService from '../services/commissionRuleService'; // 後で有効化
+import commissionRuleService from '../services/commissionRuleService';
 import invoiceService from '../services/invoiceService';
 import './Dashboard.css';
 
 /**
  * ダッシュボードページコンポーネント
- * 新設計対応版（手数料ルール統計は将来実装）
+ * 新設計対応版
  */
 const Dashboard = () => {
   const { user } = useAuth();
@@ -18,7 +18,7 @@ const Dashboard = () => {
   // 状態管理
   const [projects, setProjects] = useState([]);
   const [partners, setPartners] = useState([]);
-  // const [commissionRules, setCommissionRules] = useState([]); // 将来実装
+  const [commissionRules, setCommissionRules] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -32,15 +32,17 @@ const Dashboard = () => {
       setLoading(true);
       setError('');
 
-      // 並列で全データを取得（手数料ルールは一旦除外）
-      const [projectsData, partnersData, invoicesData] = await Promise.all([
+      // 並列で全データを取得
+      const [projectsData, partnersData, rulesData, invoicesData] = await Promise.all([
         projectService.getAll(user?.id),
         partnerService.getAll(),
+        commissionRuleService.getAll(),
         invoiceService.getAll(),
       ]);
 
       setProjects(projectsData);
       setPartners(partnersData);
+      setCommissionRules(rulesData);
       setInvoices(invoicesData);
     } catch (err) {
       setError('データの取得に失敗しました');
@@ -107,7 +109,7 @@ const Dashboard = () => {
   }
 
   if (error) {
-    return <div className="error">{error}</div>;
+    return <div className="error-message">{error}</div>;
   }
 
   return (
@@ -118,57 +120,48 @@ const Dashboard = () => {
       </div>
 
       {/* 統計カード */}
-      <div className="stats-grid">
-        <div className="stat-card" onClick={() => setActiveTab('projects')}>
-          <div className="stat-icon">📁</div>
-          <div className="stat-content">
-            <h3>総案件数</h3>
-            <p className="stat-number">{projects.length}</p>
-          </div>
+      <div className="stats-cards">
+        <div className="stat-card stat-partners" onClick={() => navigate('/partners')}>
+          <h3>パートナー数</h3>
+          <p className="stat-number">{partners.length}</p>
+          <p className="stat-detail">登録企業</p>
         </div>
 
-        <div className="stat-card" onClick={() => navigate('/partners')}>
-          <div className="stat-icon">🤝</div>
-          <div className="stat-content">
-            <h3>パートナー数</h3>
-            <p className="stat-number">{partners.length}</p>
-          </div>
+        <div className="stat-card stat-projects" onClick={() => setActiveTab('projects')}>
+          <h3>総案件数</h3>
+          <p className="stat-number">{projects.length}</p>
+          <p className="stat-detail">全ステータス</p>
         </div>
 
-        {/* 手数料統計は将来実装 */}
-        {/* <div className="stat-card" onClick={() => setActiveTab('commission-rules')}>
-          <div className="stat-icon">💰</div>
-          <div className="stat-content">
-            <h3>手数料ルール数</h3>
-            <p className="stat-number">{commissionRules.length}</p>
-          </div>
-        </div> */}
+        <div className="stat-card stat-commissions" onClick={() => navigate('/commissions')}>
+          <h3>手数料ルール数</h3>
+          <p className="stat-number">{commissionRules.length}</p>
+          <p className="stat-detail">登録ルール</p>
+        </div>
 
-        <div className="stat-card" onClick={() => setActiveTab('invoices')}>
-          <div className="stat-icon">📄</div>
-          <div className="stat-content">
-            <h3>請求書数</h3>
-            <p className="stat-number">{invoices.length}</p>
-          </div>
+        <div className="stat-card stat-invoices" onClick={() => setActiveTab('invoices')}>
+          <h3>請求書数</h3>
+          <p className="stat-number">{invoices.length}</p>
+          <p className="stat-detail">全ステータス</p>
         </div>
       </div>
 
       {/* タブナビゲーション */}
-      <div className="tabs">
+      <div className="tabs-container">
         <button
-          className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
+          className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
           onClick={() => setActiveTab('overview')}
         >
           基本統計
         </button>
         <button
-          className={`tab ${activeTab === 'projects' ? 'active' : ''}`}
+          className={`tab-button ${activeTab === 'projects' ? 'active' : ''}`}
           onClick={() => setActiveTab('projects')}
         >
           案件ステータス
         </button>
         <button
-          className={`tab ${activeTab === 'invoices' ? 'active' : ''}`}
+          className={`tab-button ${activeTab === 'invoices' ? 'active' : ''}`}
           onClick={() => setActiveTab('invoices')}
         >
           請求書ステータス
@@ -226,17 +219,17 @@ const Dashboard = () => {
         {activeTab === 'projects' && (
           <div className="stats-section">
             <div className="stats-cards">
-              <div className="stat-card stat-project-new">
+              <div className="stat-card stat-new">
                 <h3>新規</h3>
                 <p className="stat-number">{projectsByStatus.NEW.length}件</p>
                 <p className="stat-detail">未着手</p>
               </div>
-              <div className="stat-card stat-project-progress">
+              <div className="stat-card stat-progress">
                 <h3>進行中</h3>
                 <p className="stat-number">{projectsByStatus.IN_PROGRESS.length}件</p>
                 <p className="stat-detail">作業中</p>
               </div>
-              <div className="stat-card stat-project-done">
+              <div className="stat-card stat-done">
                 <h3>完了</h3>
                 <p className="stat-number">{projectsByStatus.DONE.length}件</p>
                 <p className="stat-detail">終了</p>
@@ -245,32 +238,38 @@ const Dashboard = () => {
 
             {/* 最近の案件 */}
             <div className="recent-projects">
-              <h3>📋 最近の案件</h3>
-              <div className="project-list">
-                {projects.slice(0, 5).map(project => (
-                  <div
-                    key={project.id}
-                    className="project-card"
-                    onClick={() => handleProjectClick(project.id)}
-                  >
-                    <div className="project-header">
-                      <h4>{project.name}</h4>
-                      <span className={getProjectStatusClass(project.status)}>
-                        {getProjectStatusLabel(project.status)}
-                      </span>
-                    </div>
-                    <p className="project-partner">
-                      パートナー: {project.partnerName}
-                    </p>
+              <h2>📋 最近の案件</h2>
+              {projects.length === 0 ? (
+                <p className="no-data">案件がまだありません</p>
+              ) : (
+                <>
+                  <div className="projects-list">
+                    {projects.slice(0, 5).map(project => (
+                      <div
+                        key={project.id}
+                        className="project-item"
+                        onClick={() => handleProjectClick(project.id)}
+                      >
+                        <div className="project-item-header">
+                          <h3>{project.name}</h3>
+                          <span className={getProjectStatusClass(project.status)}>
+                            {getProjectStatusLabel(project.status)}
+                          </span>
+                        </div>
+                        <div className="project-item-details">
+                          <p>パートナー: {project.partnerName}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <button
-                className="info-button"
-                onClick={() => navigate('/projects')}
-              >
-                案件一覧を見る
-              </button>
+                  <button
+                    className="info-button"
+                    onClick={() => navigate('/projects')}
+                  >
+                    案件一覧を見る
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}
