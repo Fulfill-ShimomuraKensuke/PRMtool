@@ -1,0 +1,416 @@
+/* 手数料ルール管理画面のスタイル */
+
+.commissions-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.commissions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.commissions-header h1 {
+  font-size: 2rem;
+  color: #333;
+  margin: 0;
+}
+
+/* フィルターセクション */
+.filter-section {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-select {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  background: white;
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.btn-clear-filters {
+  padding: 0.5rem 1rem;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+.btn-clear-filters:hover {
+  background: #5a6268;
+}
+
+.search-results-info {
+  margin-top: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* テーブルスタイル */
+.commissions-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.commissions-table thead {
+  background: #f8f9fa;
+}
+
+.commissions-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.commissions-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+  color: #555;
+}
+
+.commissions-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+/* ステータスバッジ */
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-unapproved {
+  background: #ffc107;
+  color: #856404;
+}
+
+.status-reviewing {
+  background: #17a2b8;
+  color: #0c5460;
+}
+
+.status-confirmed {
+  background: #28a745;
+  color: #155724;
+}
+
+.status-paid {
+  background: #6c757d;
+  color: #ffffff;
+}
+
+.status-disabled {
+  background: #dc3545;
+  color: #721c24;
+}
+
+/* タイプバッジ */
+.type-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: #e9ecef;
+  color: #495057;
+}
+
+/* アクションボタン */
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-edit,
+.btn-delete,
+.btn-status {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.btn-edit {
+  background: #007bff;
+  color: white;
+}
+
+.btn-edit:hover {
+  background: #0056b3;
+}
+
+.btn-delete {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-delete:hover {
+  background: #c82333;
+}
+
+.btn-status {
+  background: #17a2b8;
+  color: white;
+}
+
+.btn-status:hover {
+  background: #138496;
+}
+
+.btn-edit:disabled,
+.btn-delete:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* モーダル */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #999;
+  line-height: 1;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  color: #333;
+}
+
+/* フォームスタイル */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.required {
+  color: #dc3545;
+  margin-left: 0.25rem;
+}
+
+/* 条件付きフィールド */
+.conditional-field {
+  animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* モーダルアクション */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.btn-cancel {
+  padding: 0.75rem 1.5rem;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.btn-cancel:hover {
+  background: #5a6268;
+}
+
+.btn-primary {
+  padding: 0.75rem 1.5rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #0056b3;
+}
+
+/* エラーメッセージ */
+.error-message {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  border: 1px solid #f5c6cb;
+}
+
+/* ローディング */
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+/* データなし */
+.no-data {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+  font-size: 1rem;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .commissions-container {
+    padding: 1rem;
+  }
+
+  .commissions-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .filters {
+    flex-direction: column;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+
+  .commissions-table {
+    font-size: 0.85rem;
+  }
+
+  .commissions-table th,
+  .commissions-table td {
+    padding: 0.5rem;
+  }
+
+  .table-actions {
+    flex-direction: column;
+  }
+
+  .modal-content {
+    width: 95%;
+    padding: 1rem;
+  }
+}

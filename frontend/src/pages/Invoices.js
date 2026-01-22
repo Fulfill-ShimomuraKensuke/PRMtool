@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
 import invoiceService from '../services/invoiceService';
 import partnerService from '../services/partnerService';
-import commissionService from '../services/commissionService';
+import commissionRuleService from '../services/commissionRuleService';
 import './Invoices.css';
 
-// 請求書管理ページコンポーネント
+/**
+ * 請求書管理ページコンポーネント
+ * 手数料ルールを選択して請求書を作成
+ */
 const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
   const [filteredInvoices, setFilteredInvoices] = useState([]);
   const [partners, setPartners] = useState([]);
-  const [commissions, setCommissions] = useState([]);
+  const [commissionRules, setCommissionRules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -18,9 +21,10 @@ const Invoices = () => {
     partnerId: '',
     issueDate: '',
     dueDate: '',
+    taxCategory: 'TAX_INCLUDED',
     status: 'DRAFT',
     notes: '',
-    items: [{ commissionId: '', description: '', quantity: 1, unitPrice: '' }],
+    items: [{ commissionRuleId: '', description: '', quantity: 1, unitPrice: '' }],
   });
 
   // フィルター用のstate
@@ -53,15 +57,15 @@ const Invoices = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [invoicesData, partnersData, commissionsData] = await Promise.all([
+      const [invoicesData, partnersData, rulesData] = await Promise.all([
         invoiceService.getAll(),
         partnerService.getAll(),
-        commissionService.getAll(),
+        commissionRuleService.getAll(),
       ]);
       setInvoices(invoicesData);
       setFilteredInvoices(invoicesData);
       setPartners(partnersData);
-      setCommissions(commissionsData);
+      setCommissionRules(rulesData);
     } catch (err) {
       setError('データの取得に失敗しました');
       console.error(err);
@@ -78,10 +82,11 @@ const Invoices = () => {
         partnerId: invoice.partnerId,
         issueDate: invoice.issueDate,
         dueDate: invoice.dueDate,
+        taxCategory: invoice.taxCategory || 'TAX_INCLUDED',
         status: invoice.status,
         notes: invoice.notes || '',
         items: invoice.items.map(item => ({
-          commissionId: item.commissionId || '',
+          commissionRuleId: item.commissionRuleId || '',
           description: item.description,
           quantity: item.quantity,
           unitPrice: item.unitPrice,
@@ -99,9 +104,10 @@ const Invoices = () => {
         partnerId: '',
         issueDate: today,
         dueDate: dueDateStr,
+        taxCategory: 'TAX_INCLUDED',
         status: 'DRAFT',
         notes: '',
-        items: [{ commissionId: '', description: '', quantity: 1, unitPrice: '' }],
+        items: [{ commissionRuleId: '', description: '', quantity: 1, unitPrice: '' }],
       });
     }
     setShowModal(true);
@@ -136,7 +142,7 @@ const Invoices = () => {
   const handleAddItem = () => {
     setFormData({
       ...formData,
-      items: [...formData.items, { commissionId: '', description: '', quantity: 1, unitPrice: '' }],
+      items: [...formData.items, { commissionRuleId: '', description: '', quantity: 1, unitPrice: '' }],
     });
   };
 
@@ -197,6 +203,20 @@ const Invoices = () => {
         return 'キャンセル';
       default:
         return status;
+    }
+  };
+
+  // 消費税区分を日本語表示に変換
+  const getTaxCategoryLabel = (taxCategory) => {
+    switch (taxCategory) {
+      case 'TAX_INCLUDED':
+        return 'あり（商品＋手数料に課税）';
+      case 'TAX_ON_PRODUCT_ONLY':
+        return '手数料抜き（商品のみ課税）';
+      case 'TAX_EXEMPT':
+        return 'なし（非課税）';
+      default:
+        return taxCategory;
     }
   };
 
@@ -275,7 +295,9 @@ const Invoices = () => {
           <div className="loading">読み込み中...</div>
         ) : filteredInvoices.length === 0 ? (
           <p className="no-data">
-            {hasActiveFilters ? '検索条件に一致する請求書がありません' : '請求書がありません'}
+            {hasActiveFilters
+              ? 'フィルター条件に一致する請求書がありません'
+              : '請求書がまだありません。新規作成してください。'}
           </p>
         ) : (
           <table className="invoices-table">
@@ -285,6 +307,7 @@ const Invoices = () => {
                 <th>パートナー名</th>
                 <th>発行日</th>
                 <th>支払期限</th>
+                <th>消費税区分</th>
                 <th>合計金額</th>
                 <th>ステータス</th>
                 <th>操作</th>
@@ -297,160 +320,236 @@ const Invoices = () => {
                   <td>{invoice.partnerName}</td>
                   <td>{invoice.issueDate}</td>
                   <td>{invoice.dueDate}</td>
+                  <td>{getTaxCategoryLabel(invoice.taxCategory)}</td>
                   <td>{formatCurrency(invoice.totalAmount)}</td>
                   <td>
                     <span className={`status-badge status-${invoice.status.toLowerCase()}`}>
                       {getStatusLabel(invoice.status)}
                     </span>
                   </td>
-                  <td>
-                    <div className="table-actions">
-                      <button onClick={() => handleOpenModal(invoice)} className="btn-edit">
-                        編集
-                      </button>
-                      <button onClick={() => handleDelete(invoice.id)} className="btn-delete-small">
-                        削除
-                      </button>
-                    </div>
+                  <td className="table-actions">
+                    <button
+                      onClick={() => handleOpenModal(invoice)}
+                      className="btn-edit"
+                      disabled={invoice.status === 'ISSUED' || invoice.status === 'PAID'}
+                    >
+                      編集
+                    </button>
+                    <button
+                      onClick={() => handleDelete(invoice.id)}
+                      className="btn-delete"
+                      disabled={invoice.status === 'ISSUED' || invoice.status === 'PAID'}
+                    >
+                      削除
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
+      </div>
 
-        {showModal && (
-          <div className="modal-overlay">
-            <div className="modal-content modal-large">
-              <h2>{editingInvoice ? '請求書編集' : '新規請求書作成'}</h2>
-              {error && <div className="error-message">{error}</div>}
-              <form onSubmit={handleSubmit}>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>パートナー *</label>
-                    <select name="partnerId" value={formData.partnerId} onChange={handleChange} required>
-                      <option value="">選択してください</option>
-                      {partners.map((partner) => (
-                        <option key={partner.id} value={partner.id}>
-                          {partner.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>ステータス *</label>
-                    <select name="status" value={formData.status} onChange={handleChange} required>
-                      <option value="DRAFT">下書き</option>
-                      <option value="ISSUED">発行済</option>
-                      <option value="PAID">支払済</option>
-                      <option value="CANCELLED">キャンセル</option>
-                    </select>
-                  </div>
-                </div>
+      {/* モーダル */}
+      {showModal && (
+        <div className="modal-overlay" onClick={(e) => e.target.className === 'modal-overlay' && handleCloseModal()}>
+          <div className="modal-content large-modal">
+            <div className="modal-header">
+              <h2>{editingInvoice ? '請求書編集' : '請求書作成'}</h2>
+              <button className="modal-close" onClick={handleCloseModal}>
+                ×
+              </button>
+            </div>
 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>発行日 *</label>
-                    <input type="date" name="issueDate" value={formData.issueDate} onChange={handleChange} required />
-                  </div>
-                  <div className="form-group">
-                    <label>支払期限 *</label>
-                    <input type="date" name="dueDate" value={formData.dueDate} onChange={handleChange} required />
-                  </div>
+            {error && <div className="error-message">{error}</div>}
+
+            <form onSubmit={handleSubmit}>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>
+                    パートナー <span className="required">*</span>
+                  </label>
+                  <select
+                    name="partnerId"
+                    value={formData.partnerId}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">選択してください</option>
+                    {partners.map((partner) => (
+                      <option key={partner.id} value={partner.id}>
+                        {partner.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="form-group">
-                  <label>備考</label>
-                  <textarea name="notes" value={formData.notes} onChange={handleChange} rows="2" />
+                  <label>
+                    発行日 <span className="required">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    name="issueDate"
+                    value={formData.issueDate}
+                    onChange={handleChange}
+                    required
+                  />
                 </div>
 
-                <div className="invoice-items-section">
-                  <div className="items-header">
-                    <h3>請求明細</h3>
-                    <button type="button" className="btn-add-item" onClick={handleAddItem}>
-                      + 明細追加
-                    </button>
-                  </div>
+                <div className="form-group">
+                  <label>
+                    支払期限 <span className="required">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    name="dueDate"
+                    value={formData.dueDate}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
 
-                  {formData.items.map((item, index) => (
-                    <div key={index} className="invoice-item">
-                      <div className="item-header">
-                        <span>明細 {index + 1}</span>
-                        {formData.items.length > 1 && (
-                          <button
-                            type="button"
-                            className="btn-remove-item"
-                            onClick={() => handleRemoveItem(index)}
-                          >
-                            削除
-                          </button>
-                        )}
-                      </div>
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label>手数料（任意）</label>
-                          <select
-                            value={item.commissionId}
-                            onChange={(e) => handleItemChange(index, 'commissionId', e.target.value)}
-                          >
-                            <option value="">選択なし</option>
-                            {commissions.map((commission) => (
-                              <option key={commission.id} value={commission.id}>
-                                {commission.projectName} - {formatCurrency(commission.amount)}
+                <div className="form-group">
+                  <label>
+                    消費税区分 <span className="required">*</span>
+                  </label>
+                  <select
+                    name="taxCategory"
+                    value={formData.taxCategory}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="TAX_INCLUDED">あり（商品＋手数料に課税）</option>
+                    <option value="TAX_ON_PRODUCT_ONLY">手数料抜き（商品のみ課税）</option>
+                    <option value="TAX_EXEMPT">なし（非課税）</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>
+                    ステータス <span className="required">*</span>
+                  </label>
+                  <select name="status" value={formData.status} onChange={handleChange} required>
+                    <option value="DRAFT">下書き</option>
+                    <option value="ISSUED">発行済</option>
+                    <option value="PAID">支払済</option>
+                    <option value="CANCELLED">キャンセル</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>備考</label>
+                <textarea
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleChange}
+                  rows="3"
+                  placeholder="備考を入力してください"
+                />
+              </div>
+
+              {/* 明細セクション */}
+              <div className="items-section">
+                <div className="items-header">
+                  <h3>明細</h3>
+                  <button type="button" onClick={handleAddItem} className="btn-add-item">
+                    + 明細を追加
+                  </button>
+                </div>
+
+                {formData.items.map((item, index) => (
+                  <div key={index} className="item-row">
+                    <div className="item-number">{index + 1}</div>
+                    <div className="item-fields">
+                      <div className="form-group">
+                        <label>手数料ルール</label>
+                        <select
+                          value={item.commissionRuleId}
+                          onChange={(e) =>
+                            handleItemChange(index, 'commissionRuleId', e.target.value)
+                          }
+                        >
+                          <option value="">なし</option>
+                          {commissionRules
+                            .filter((rule) => rule.status === 'CONFIRMED')
+                            .map((rule) => (
+                              <option key={rule.id} value={rule.id}>
+                                {rule.ruleName} - {rule.projectName}
                               </option>
                             ))}
-                          </select>
-                        </div>
+                        </select>
                       </div>
+
                       <div className="form-group">
-                        <label>説明 *</label>
+                        <label>
+                          説明 <span className="required">*</span>
+                        </label>
                         <input
                           type="text"
                           value={item.description}
                           onChange={(e) => handleItemChange(index, 'description', e.target.value)}
+                          placeholder="商品・サービスの説明"
                           required
                         />
                       </div>
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label>数量 *</label>
-                          <input
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value))}
-                            required
-                            min="1"
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label>単価 *</label>
-                          <input
-                            type="number"
-                            value={item.unitPrice}
-                            onChange={(e) => handleItemChange(index, 'unitPrice', e.target.value)}
-                            required
-                            min="0"
-                            step="0.01"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
 
-                <div className="modal-actions">
-                  <button type="button" className="btn-cancel" onClick={handleCloseModal}>
-                    キャンセル
-                  </button>
-                  <button type="submit" className="btn-submit">
-                    {editingInvoice ? '更新' : '作成'}
-                  </button>
-                </div>
-              </form>
-            </div>
+                      <div className="form-group">
+                        <label>
+                          数量 <span className="required">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          value={item.quantity}
+                          onChange={(e) =>
+                            handleItemChange(index, 'quantity', parseInt(e.target.value))
+                          }
+                          min="1"
+                          required
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>
+                          単価 <span className="required">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          value={item.unitPrice}
+                          onChange={(e) => handleItemChange(index, 'unitPrice', e.target.value)}
+                          placeholder="0.00"
+                          step="0.01"
+                          min="0"
+                          required
+                        />
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveItem(index)}
+                        className="btn-remove-item"
+                        disabled={formData.items.length === 1}
+                      >
+                        削除
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="modal-actions">
+                <button type="button" onClick={handleCloseModal} className="btn-cancel">
+                  キャンセル
+                </button>
+                <button type="submit" className="btn-primary">
+                  {editingInvoice ? '更新' : '作成'}
+                </button>
+              </div>
+            </form>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </>
   );
 };
