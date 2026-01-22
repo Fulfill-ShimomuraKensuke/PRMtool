@@ -40,7 +40,7 @@ const partnerService = {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await api.post('/api/partners/import', formData, {
+    const response = await api.post('/api/partners/import-csv', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
