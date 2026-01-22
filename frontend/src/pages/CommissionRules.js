@@ -176,17 +176,6 @@ const CommissionRules = () => {
     }
   };
 
-  // ステータス変更
-  const handleStatusChange = async (id, newStatus) => {
-    try {
-      await commissionRuleService.updateStatus(id, newStatus);
-      fetchData();
-    } catch (err) {
-      console.error('Status update error:', err);
-      alert('ステータスの変更に失敗しました');
-    }
-  };
-
   // 削除処理
   const handleDelete = async (id) => {
     if (!window.confirm('この手数料ルールを削除してもよろしいですか？')) {
@@ -346,17 +335,6 @@ const CommissionRules = () => {
                 </div>
 
                 <div className="commission-actions">
-                  <select
-                    value={rule.status}
-                    onChange={(e) => handleStatusChange(rule.id, e.target.value)}
-                    className="status-select"
-                  >
-                    <option value="UNAPPROVED">未承認</option>
-                    <option value="REVIEWING">確認中</option>
-                    <option value="CONFIRMED">確定</option>
-                    <option value="PAID">支払済</option>
-                    <option value="DISABLED">使用不可</option>
-                  </select>
                   <button
                     className="btn-edit"
                     onClick={() => handleOpenModal(rule)}
