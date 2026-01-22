@@ -19,8 +19,60 @@
   margin: 0;
 }
 
-/* ステータスバッジのスタイル */
+/* フィルターセクション */
+.filter-section {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-select {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  background: white;
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.btn-clear-filters {
+  padding: 0.5rem 1rem;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+.btn-clear-filters:hover {
+  background: #5a6268;
+}
+
+.search-results-info {
+  margin-top: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* ステータスバッジ */
 .status-badge {
+  display: inline-block;
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
   font-size: 0.875rem;
@@ -47,7 +99,7 @@
   color: #991b1b;
 }
 
-/* テーブルのスタイル */
+/* テーブルスタイル */
 .invoices-table {
   width: 100%;
   border-collapse: collapse;
@@ -81,24 +133,157 @@
   background-color: #f9fafb;
 }
 
-/* モーダルのスタイル */
-.modal-large {
-  max-width: 800px;
+/* アクションボタン */
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-edit,
+.btn-delete {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.btn-edit {
+  background: #007bff;
+  color: white;
+}
+
+.btn-edit:hover {
+  background: #0056b3;
+}
+
+.btn-delete {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-delete:hover {
+  background: #c82333;
+}
+
+.btn-edit:disabled,
+.btn-delete:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* モーダル */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 90%;
   max-height: 90vh;
   overflow-y: auto;
 }
 
-/* フォーム行のスタイル */
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+.modal-large {
+  max-width: 800px;
 }
 
-/* 請求明細セクション */
-.invoice-items-section {
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #999;
+  line-height: 1;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  color: #333;
+}
+
+/* フォームスタイル */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.required {
+  color: #dc3545;
+  margin-left: 0.25rem;
+}
+
+/* 明細セクション */
+.items-section {
   margin-top: 2rem;
-  padding-top: 2rem;
+  padding: 1.5rem;
   border-top: 2px solid #e5e7eb;
 }
 
@@ -115,30 +300,6 @@
   color: #333;
 }
 
-/* 明細項目のスタイル */
-.invoice-item {
-  background-color: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
-.item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.item-header span {
-  font-weight: 600;
-  color: #374151;
-}
-
-/* ボタンのスタイル */
 .btn-add-item {
   padding: 0.5rem 1rem;
   background-color: #10b981;
@@ -154,8 +315,39 @@
   background-color: #059669;
 }
 
-.btn-remove-item {
+/* 明細項目 */
+.item-row {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.item-number {
+  display: inline-block;
+  background: #007bff;
+  color: white;
   padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.item-fields {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  align-items: end;
+}
+
+.item-fields .form-group {
+  margin-bottom: 0;
+}
+
+.btn-remove-item {
+  padding: 0.5rem 1rem;
   background-color: #ef4444;
   color: white;
   border: none;
@@ -163,10 +355,85 @@
   font-size: 0.875rem;
   cursor: pointer;
   transition: background-color 0.2s;
+  height: fit-content;
 }
 
 .btn-remove-item:hover {
   background-color: #dc2626;
+}
+
+.btn-remove-item:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* モーダルアクション */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.btn-cancel {
+  padding: 0.75rem 1.5rem;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.btn-cancel:hover {
+  background: #5a6268;
+}
+
+.btn-primary {
+  padding: 0.75rem 1.5rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #0056b3;
+}
+
+/* エラーメッセージ */
+.error-message {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 4px;
+  margin: 1rem 1.5rem;
+  border: 1px solid #f5c6cb;
+}
+
+/* ローディング */
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+/* データなし */
+.no-data {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+  font-size: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* レスポンシブ対応 */
@@ -181,6 +448,15 @@
     gap: 1rem;
   }
 
+  .filters {
+    flex-direction: column;
+  }
+
+  .filter-select {
+    width: 100%;
+    min-width: auto;
+  }
+
   .invoices-table {
     display: block;
     overflow-x: auto;
@@ -190,7 +466,21 @@
     max-width: 95%;
   }
 
-  .form-row {
+  .form-grid {
     grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+
+  .item-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-cancel {
+    width: 100%;
   }
 }

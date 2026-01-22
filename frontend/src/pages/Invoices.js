@@ -241,7 +241,7 @@ const Invoices = () => {
     <>
       <div className="invoices-container">
         <div className="invoices-header">
-          <h1>請求書管理</h1>
+          <h1>📄 請求書管理</h1>
           <button className="btn-primary" onClick={() => handleOpenModal()}>
             + 新規請求書作成
           </button>
@@ -353,7 +353,7 @@ const Invoices = () => {
       {/* モーダル */}
       {showModal && (
         <div className="modal-overlay" onClick={(e) => e.target.className === 'modal-overlay' && handleCloseModal()}>
-          <div className="modal-content large-modal">
+          <div className="modal-content modal-large">
             <div className="modal-header">
               <h2>{editingInvoice ? '請求書編集' : '請求書作成'}</h2>
               <button className="modal-close" onClick={handleCloseModal}>
@@ -439,7 +439,7 @@ const Invoices = () => {
                 </div>
               </div>
 
-              <div className="form-group">
+              <div className="form-group" style={{ padding: '0 1.5rem' }}>
                 <label>備考</label>
                 <textarea
                   name="notes"
@@ -461,7 +461,7 @@ const Invoices = () => {
 
                 {formData.items.map((item, index) => (
                   <div key={index} className="item-row">
-                    <div className="item-number">{index + 1}</div>
+                    <div className="item-number">明細 {index + 1}</div>
                     <div className="item-fields">
                       <div className="form-group">
                         <label>手数料ルール</label>
