@@ -9,9 +9,18 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * CORS設定
+ * クロスオリジンリクエストを許可するための設定
+ * フロントエンドからバックエンドへのアクセスを制御
+ */
 @Configuration
 public class CorsConfig {
 
+  /**
+   * CORS設定のソースを定義
+   * 許可するオリジン、メソッド、ヘッダーを設定
+   */
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
@@ -22,9 +31,9 @@ public class CorsConfig {
         "https://*.onrender.com" // Render本番環境（ワイルドカード対応）
     ));
 
-    // 許可するHTTPメソッド
+    // 許可するHTTPメソッド（PATCHを追加）
     configuration.setAllowedMethods(Arrays.asList(
-        "GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
     // 許可するヘッダー
     configuration.setAllowedHeaders(List.of("*"));
@@ -35,6 +44,7 @@ public class CorsConfig {
     // プリフライトリクエストのキャッシュ時間（秒）
     configuration.setMaxAge(3600L);
 
+    // すべてのパスに対してCORS設定を適用
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
 
