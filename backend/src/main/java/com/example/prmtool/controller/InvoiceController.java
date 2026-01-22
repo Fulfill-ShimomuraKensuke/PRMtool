@@ -16,7 +16,7 @@ import java.util.UUID;
 
 /**
  * 請求書Controller
- * Controller は薄く、ビジネスロジックは Service に集約
+ * ACCOUNTING権限を追加：作成・編集・ステータス変更が可能（削除は不可）
  */
 @RestController
 @RequestMapping("/api/invoices")
@@ -28,9 +28,10 @@ public class InvoiceController {
 
   /**
    * 全請求書を取得
+   * 権限: ADMIN, ACCOUNTING, REP
    */
   @GetMapping
-  @PreAuthorize("hasAnyRole('ADMIN', 'REP')")
+  @PreAuthorize("hasAnyRole('ADMIN', 'ACCOUNTING', 'REP')")
   public ResponseEntity<List<InvoiceResponse>> getAllInvoices() {
     List<InvoiceResponse> invoices = invoiceService.getAllInvoices();
     return ResponseEntity.ok(invoices);
@@ -38,9 +39,10 @@ public class InvoiceController {
 
   /**
    * IDで請求書を取得
+   * 権限: ADMIN, ACCOUNTING, REP
    */
   @GetMapping("/{id}")
-  @PreAuthorize("hasAnyRole('ADMIN', 'REP')")
+  @PreAuthorize("hasAnyRole('ADMIN', 'ACCOUNTING', 'REP')")
   public ResponseEntity<InvoiceResponse> getInvoiceById(@PathVariable UUID id) {
     InvoiceResponse invoice = invoiceService.getInvoiceById(id);
     return ResponseEntity.ok(invoice);
@@ -48,9 +50,10 @@ public class InvoiceController {
 
   /**
    * パートナーIDで請求書を取得
+   * 権限: ADMIN, ACCOUNTING, REP
    */
   @GetMapping("/by-partner/{partnerId}")
-  @PreAuthorize("hasAnyRole('ADMIN', 'REP')")
+  @PreAuthorize("hasAnyRole('ADMIN', 'ACCOUNTING', 'REP')")
   public ResponseEntity<List<InvoiceResponse>> getInvoicesByPartnerId(@PathVariable UUID partnerId) {
     List<InvoiceResponse> invoices = invoiceService.getInvoicesByPartnerId(partnerId);
     return ResponseEntity.ok(invoices);
@@ -58,10 +61,10 @@ public class InvoiceController {
 
   /**
    * 請求書を作成
-   * 手数料ルールの内容をコピーして確定結果を保存
+   * 権限: ADMIN, ACCOUNTING
    */
   @PostMapping
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasAnyRole('ADMIN', 'ACCOUNTING')")
   public ResponseEntity<InvoiceResponse> createInvoice(@Valid @RequestBody InvoiceRequest request) {
     InvoiceResponse created = invoiceService.createInvoice(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -69,10 +72,11 @@ public class InvoiceController {
 
   /**
    * 請求書を更新
-   * 注意: 発行済・支払済の請求書は更新できない
+   * 注意: 発行済・支払済の請求書は更新できない（Service層でガード）
+   * 権限: ADMIN, ACCOUNTING
    */
   @PutMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasAnyRole('ADMIN', 'ACCOUNTING')")
   public ResponseEntity<InvoiceResponse> updateInvoice(
       @PathVariable UUID id,
       @Valid @RequestBody InvoiceRequest request) {
@@ -82,9 +86,10 @@ public class InvoiceController {
 
   /**
    * ステータスを変更
+   * 権限: ADMIN, ACCOUNTING
    */
   @PatchMapping("/{id}/status")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasAnyRole('ADMIN', 'ACCOUNTING')")
   public ResponseEntity<InvoiceResponse> updateStatus(
       @PathVariable UUID id,
       @RequestParam Invoice.InvoiceStatus status) {
@@ -93,8 +98,21 @@ public class InvoiceController {
   }
 
   /**
+   * 請求書を「支払済」に変更する専用エンドポイント
+   * 発行済(ISSUED)状態の請求書のみ支払済(PAID)に変更可能
+   * 権限: ADMIN, ACCOUNTING
+   */
+  @PatchMapping("/{id}/mark-as-paid")
+  @PreAuthorize("hasAnyRole('ADMIN', 'ACCOUNTING')")
+  public ResponseEntity<InvoiceResponse> markAsPaid(@PathVariable UUID id) {
+    InvoiceResponse updated = invoiceService.markAsPaid(id);
+    return ResponseEntity.ok(updated);
+  }
+
+  /**
    * 請求書を削除
-   * 注意: 発行済・支払済の請求書は削除できない
+   * 注意: 発行済・支払済の請求書は削除できない（Service層でガード）
+   * 権限: ADMIN のみ
    */
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")

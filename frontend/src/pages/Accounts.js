@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import userService from '../services/userService';
 import './Accounts.css';
 
-// アカウント管理ページコンポーネント
+/**
+ * アカウント管理ページコンポーネント
+ * ユーザーの作成、編集、削除、検索、フィルタリング機能を提供
+ * ACCOUNTINGロール対応版
+ */
 const Accounts = () => {
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -154,7 +158,8 @@ const Accounts = () => {
 
   // アカウント削除処理
   const handleDelete = async (id) => {
-    if (!window.confirm('本当に削除しますか?')) return;
+    if (!window.confirm('本当に削除しますか?'))
+      return;
 
     try {
       await userService.delete(id);
@@ -172,6 +177,8 @@ const Accounts = () => {
         return 'システム管理者';
       case 'ADMIN':
         return '管理者';
+      case 'ACCOUNTING':
+        return '会計担当';
       case 'REP':
         return '担当者';
       default:
@@ -192,7 +199,7 @@ const Accounts = () => {
     <>
       <div className="accounts-container">
         <div className="accounts-header">
-          <h1>アカウント管理</h1>
+          <h1>👥 アカウント管理</h1>
           <button className="btn-primary" onClick={() => handleOpenModal()}>
             + 新規アカウント作成
           </button>
@@ -220,6 +227,7 @@ const Accounts = () => {
             >
               <option value="ALL">全てのロール</option>
               <option value="ADMIN">管理者</option>
+              <option value="ACCOUNTING">会計担当</option>
               <option value="REP">担当者</option>
             </select>
 
@@ -302,7 +310,14 @@ const Accounts = () => {
                 </div>
                 <div className="form-group">
                   <label>ログインID *</label>
-                  <input type="text" name="loginId" value={formData.loginId} onChange={handleChange} required disabled={editingUser !== null} />
+                  <input
+                    type="text"
+                    name="loginId"
+                    value={formData.loginId}
+                    onChange={handleChange}
+                    required
+                    disabled={editingUser !== null}
+                  />
                 </div>
                 <div className="form-group">
                   <label>パスワード {editingUser ? '' : '*'}</label>
@@ -312,7 +327,8 @@ const Accounts = () => {
                     value={formData.password}
                     onChange={handleChange}
                     required={!editingUser}
-                    placeholder={editingUser ? '変更する場合のみ入力' : ''} />
+                    placeholder={editingUser ? '変更する場合のみ入力' : ''}
+                  />
                 </div>
                 <div className="form-group">
                   <label>パスワード確認 {editingUser ? '' : '*'}</label>
@@ -327,7 +343,14 @@ const Accounts = () => {
                 </div>
                 <div className="form-group">
                   <label>メールアドレス *</label>
-                  <input type="email" name="email" value={formData.email} onChange={handleChange} required placeholder="example@example.com" />
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    placeholder="example@example.com"
+                  />
                 </div>
                 <div className="form-group">
                   <label>電話番号</label>
@@ -345,6 +368,7 @@ const Accounts = () => {
                   <label>役割 *</label>
                   <select name="role" value={formData.role} onChange={handleChange} required>
                     <option value="REP">担当者</option>
+                    <option value="ACCOUNTING">会計担当</option>
                     <option value="ADMIN">管理者</option>
                   </select>
                 </div>

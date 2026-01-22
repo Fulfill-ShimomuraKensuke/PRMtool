@@ -391,4 +391,29 @@ public class InvoiceService {
         .updatedAt(invoice.getUpdatedAt())
         .build();
   }
+
+  /**
+   * 請求書を「支払済」に変更する専用メソッド
+   * 発行済(ISSUED)状態の請求書のみ支払済(PAID)に変更可能
+   * 
+   * @param id 請求書ID
+   * @return 更新後の請求書レスポンス
+   * @throws RuntimeException      請求書が見つからない場合
+   * @throws IllegalStateException 発行済以外の状態の場合
+   */
+  @Transactional
+  public InvoiceResponse markAsPaid(UUID id) {
+    Invoice invoice = invoiceRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("請求書が見つかりません: " + id));
+
+    // 発行済状態のみ支払済に変更可能
+    if (invoice.getStatus() != Invoice.InvoiceStatus.ISSUED) {
+      throw new IllegalStateException(
+          "発行済の請求書のみ支払済に変更できます。現在のステータス: " + invoice.getStatus());
+    }
+
+    invoice.setStatus(Invoice.InvoiceStatus.PAID);
+    Invoice updated = invoiceRepository.save(invoice);
+    return convertToResponse(updated);
+  }
 }

@@ -177,6 +177,28 @@ const Invoices = () => {
     }
   };
 
+  // 請求書を「支払済」に変更する処理
+  const handleMarkAsPaid = async (invoice) => {
+    // 確認ダイアログを表示
+    const confirmed = window.confirm(
+      `請求書番号: ${invoice.invoiceNumber}\n` +
+      `パートナー: ${invoice.partnerName}\n` +
+      `金額: ${formatCurrency(invoice.totalAmount)}\n\n` +
+      `この請求書を支払済に変更しますか？\n` +
+      `※この操作は取り消せません。`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await invoiceService.markAsPaid(invoice.id);
+      await fetchData(); // データを再取得
+    } catch (err) {
+      setError(err.response?.data?.message || '支払済への変更に失敗しました');
+      console.error(err);
+    }
+  };
+
   // 請求書削除処理
   const handleDelete = async (id) => {
     if (!window.confirm('本当に削除しますか?')) return;
@@ -328,20 +350,38 @@ const Invoices = () => {
                     </span>
                   </td>
                   <td className="table-actions">
-                    <button
-                      onClick={() => handleOpenModal(invoice)}
-                      className="btn-edit"
-                      disabled={invoice.status === 'ISSUED' || invoice.status === 'PAID'}
-                    >
-                      編集
-                    </button>
-                    <button
-                      onClick={() => handleDelete(invoice.id)}
-                      className="btn-delete"
-                      disabled={invoice.status === 'ISSUED' || invoice.status === 'PAID'}
-                    >
-                      削除
-                    </button>
+                    {/* 下書きの場合：編集・削除が可能 */}
+                    {invoice.status === 'DRAFT' && (
+                      <>
+                        <button
+                          onClick={() => handleOpenModal(invoice)}
+                          className="btn-edit"
+                        >
+                          編集
+                        </button>
+                        <button
+                          onClick={() => handleDelete(invoice.id)}
+                          className="btn-delete"
+                        >
+                          削除
+                        </button>
+                      </>
+                    )}
+
+                    {/* 発行済の場合：支払済に変更ボタンのみ */}
+                    {invoice.status === 'ISSUED' && (
+                      <button
+                        onClick={() => handleMarkAsPaid(invoice)}
+                        className="btn-primary"
+                      >
+                        支払済に変更
+                      </button>
+                    )}
+
+                    {/* 支払済・キャンセルの場合：操作なし */}
+                    {(invoice.status === 'PAID' || invoice.status === 'CANCELLED') && (
+                      <span className="no-actions">-</span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -430,12 +470,23 @@ const Invoices = () => {
                   <label>
                     ステータス <span className="required">*</span>
                   </label>
-                  <select name="status" value={formData.status} onChange={handleChange} required>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    required
+                    disabled={editingInvoice?.status === 'ISSUED' || editingInvoice?.status === 'PAID'}
+                  >
                     <option value="DRAFT">下書き</option>
                     <option value="ISSUED">発行済</option>
                     <option value="PAID">支払済</option>
                     <option value="CANCELLED">キャンセル</option>
                   </select>
+                  {(editingInvoice?.status === 'ISSUED' || editingInvoice?.status === 'PAID') && (
+                    <small className="form-hint">
+                      発行済・支払済のステータスは「支払済に変更」ボタンから変更してください
+                    </small>
+                  )}
                 </div>
               </div>
 

@@ -11,6 +11,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * ユーザーエンティティ
+ * システムを利用するユーザーの情報を管理
+ */
 @Entity
 @Table(name = "users")
 @Data
@@ -58,10 +62,17 @@ public class User {
   @Column(nullable = false)
   private LocalDateTime updatedAt; // 更新日時
 
-  // ユーザーの役割を定義
+  /**
+   * ユーザーの役割を定義
+   * SYSTEM: システム管理者（アカウント管理のみ可能）
+   * ADMIN: 管理者（全ての機能にアクセス可能、削除権限あり）
+   * ACCOUNTING: 会計担当（手数料ルール・請求書の作成・編集・確定が可能、削除は不可）
+   * REP: 担当者（限定的な機能にアクセス可能）
+   */
   public enum UserRole {
-    SYSTEM, // システム管理者：アカウント管理のみ可能、案件・パートナーへのアクセス不可
-    ADMIN,  // 管理者：全ての機能にアクセス可能
-    REP     // 担当者：限定的な機能にアクセス可能
+    SYSTEM,     // システム管理者：アカウント管理のみ可能、案件・パートナーへのアクセス不可
+    ADMIN,      // 管理者：全ての機能にアクセス可能
+    ACCOUNTING, // 会計担当：手数料ルール・請求書の作成・編集・確定が可能、削除は不可
+    REP         // 担当者：限定的な機能にアクセス可能
   }
 }

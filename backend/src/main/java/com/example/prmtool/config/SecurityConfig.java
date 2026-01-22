@@ -18,7 +18,10 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
  * Spring Security設定
- * 新設計に対応（CommissionRule + Invoice）
+ * 役割ベースのアクセス制御を実装
+ * ADMIN: 全権限
+ * ACCOUNTING: 手数料ルール・請求書の作成・編集・確定（削除不可）
+ * REP: 限定的なアクセス
  */
 @Configuration
 @EnableWebSecurity
@@ -91,41 +94,46 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.DELETE, "/api/projects/*").hasRole("ADMIN")
 
             // ========================================
-            // 【変更】手数料ルール管理
-            // - エンドポイント: /api/commissions → /api/commission-rules
-            // - 閲覧: ADMIN, REP
-            // - 作成・編集・削除: ADMIN のみ
+            // 手数料ルール管理
+            // - 閲覧: ADMIN, ACCOUNTING, REP
+            // - 作成・編集・確定: ADMIN, ACCOUNTING
+            // - 削除: ADMIN のみ
             // ========================================
             .requestMatchers(HttpMethod.GET, "/api/commission-rules", "/api/commission-rules/**")
-            .hasAnyRole("ADMIN", "REP")
+            .hasAnyRole("ADMIN", "ACCOUNTING", "REP")
             .requestMatchers(HttpMethod.POST, "/api/commission-rules")
-            .hasRole("ADMIN")
+            .hasAnyRole("ADMIN", "ACCOUNTING")
             .requestMatchers(HttpMethod.PUT, "/api/commission-rules/*")
-            .hasRole("ADMIN")
+            .hasAnyRole("ADMIN", "ACCOUNTING")
             .requestMatchers(HttpMethod.PATCH, "/api/commission-rules/*/status")
-            .hasRole("ADMIN")
+            .hasAnyRole("ADMIN", "ACCOUNTING")
             .requestMatchers(HttpMethod.DELETE, "/api/commission-rules/*")
             .hasRole("ADMIN")
 
             // ========================================
-            // 【変更】請求書管理
-            // - 閲覧: ADMIN, REP
-            // - 作成・編集・削除: ADMIN のみ
+            // 請求書管理
+            // - 閲覧: ADMIN, ACCOUNTING, REP
+            // - 作成・編集: ADMIN, ACCOUNTING
+            // - ステータス変更: ADMIN, ACCOUNTING
+            // - 支払済に変更: ADMIN, ACCOUNTING（専用エンドポイント）
+            // - 削除: ADMIN のみ
             // ========================================
             .requestMatchers(HttpMethod.GET, "/api/invoices", "/api/invoices/**")
-            .hasAnyRole("ADMIN", "REP")
+            .hasAnyRole("ADMIN", "ACCOUNTING", "REP")
             .requestMatchers(HttpMethod.POST, "/api/invoices")
-            .hasRole("ADMIN")
+            .hasAnyRole("ADMIN", "ACCOUNTING")
             .requestMatchers(HttpMethod.PUT, "/api/invoices/*")
-            .hasRole("ADMIN")
+            .hasAnyRole("ADMIN", "ACCOUNTING")
             .requestMatchers(HttpMethod.PATCH, "/api/invoices/*/status")
-            .hasRole("ADMIN")
+            .hasAnyRole("ADMIN", "ACCOUNTING")
+            .requestMatchers(HttpMethod.PATCH, "/api/invoices/*/mark-as-paid")
+            .hasAnyRole("ADMIN", "ACCOUNTING")
             .requestMatchers(HttpMethod.DELETE, "/api/invoices/*")
             .hasRole("ADMIN")
 
             // ========================================
-            // 【変更】パートナー別ダッシュボード
-            // - GETのみ（POST/PUT/DELETEは削除）
+            // パートナー別ダッシュボード
+            // - GETのみ
             // ========================================
             .requestMatchers(HttpMethod.GET, "/api/partners/*/dashboard")
             .hasAnyRole("ADMIN", "REP")

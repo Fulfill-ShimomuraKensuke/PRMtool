@@ -1,7 +1,10 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import authService from '../services/authService';
 
-// 認証コンテキストの作成
+/**
+ * 認証コンテキスト
+ * ユーザー情報と各ロールの判定フラグを提供
+ */
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -41,16 +44,20 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     isAuthenticated: authService.isAuthenticated,
-    isSystem: user?.role === 'SYSTEM', // SYSTEMロール判定（アカウント管理のみ）
-    isAdmin: user?.role === 'ADMIN',   // ADMINロール判定（全機能アクセス可能）
-    isRep: user?.role === 'REP',       // REPロール判定（限定的な機能のみ）
+    isSystem: user?.role === 'SYSTEM',       // SYSTEMロール判定（アカウント管理のみ）
+    isAdmin: user?.role === 'ADMIN',         // ADMINロール判定（全機能アクセス可能）
+    isAccounting: user?.role === 'ACCOUNTING', // ACCOUNTINGロール判定（手数料・請求書の作成・編集・確定）
+    isRep: user?.role === 'REP',             // REPロール判定（限定的な機能のみ）
     loading,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// カスタムフックでコンテキストを利用
+/**
+ * カスタムフックでコンテキストを利用
+ * 各コンポーネントで認証情報とロール判定にアクセス可能
+ */
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

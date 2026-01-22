@@ -3,8 +3,12 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
+/**
+ * ナビゲーションバーコンポーネント
+ * ロールに応じてメニュー表示を制御
+ */
 const Navbar = () => {
-  const { user, logout, isSystem, isAdmin, isRep } = useAuth();
+  const { user, logout, isSystem, isAdmin, isAccounting, isRep } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -26,6 +30,8 @@ const Navbar = () => {
         return 'システム管理者';
       case 'ADMIN':
         return '管理者';
+      case 'ACCOUNTING':
+        return '会計担当';
       case 'REP':
         return '担当者';
       default:
@@ -48,8 +54,8 @@ const Navbar = () => {
             </Link>
           )}
 
-          {/* ADMIN と REP はダッシュボード、パートナー、案件にアクセス可能 */}
-          {(isAdmin || isRep) && (
+          {/* ADMIN、ACCOUNTING、REP はダッシュボード、パートナー、案件にアクセス可能 */}
+          {(isAdmin || isAccounting || isRep) && (
             <>
               <Link to="/" className={`navbar-link ${getActiveClass('/')}`}>
                 ダッシュボード
