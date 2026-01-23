@@ -215,40 +215,21 @@
   color: #333;
 }
 
-.modal-close {
-  background: none;
-  border: none;
-  font-size: 2rem;
-  cursor: pointer;
-  color: #999;
-  line-height: 1;
-  padding: 0;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-close:hover {
-  color: #333;
-}
-
 /* フォームスタイル */
-.form-group {
+.invoices-form {
   margin-bottom: 1.5rem;
 }
 
-.form-group label {
+.invoices-form label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
   color: #333;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
+.invoices-form input,
+.invoices-form select,
+.invoices-form textarea {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid #ddd;
@@ -256,23 +237,30 @@
   font-size: 1rem;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.invoices-form input:focus,
+.invoices-form select:focus,
+.invoices-form textarea:focus {
   outline: none;
   border-color: #007bff;
 }
 
-.form-group textarea {
+.invoices-form textarea {
   resize: vertical;
   min-height: 100px;
 }
 
-.form-grid {
+.invoices-form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   padding: 1.5rem;
+}
+
+.invoices-form-group {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  align-items: end;
 }
 
 .required {
@@ -337,12 +325,12 @@
 
 .item-fields {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(1, 1fr);
   gap: 1rem;
   align-items: end;
 }
 
-.item-fields .form-group {
+.item-fields .invoices-form {
   margin-bottom: 0;
 }
 
@@ -466,7 +454,7 @@
     max-width: 95%;
   }
 
-  .form-grid {
+  .invoices-form-grid {
     grid-template-columns: 1fr;
     padding: 1rem;
   }

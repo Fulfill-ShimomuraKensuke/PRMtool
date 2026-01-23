@@ -422,20 +422,17 @@ const Invoices = () => {
 
       {/* モーダル */}
       {showModal && (
-        <div className="modal-overlay" onClick={(e) => e.target.className === 'modal-overlay' && handleCloseModal()}>
+        <div className="modal-overlay">
           <div className="modal-content modal-large">
             <div className="modal-header">
               <h2>{editingInvoice ? '請求書編集' : '請求書作成'}</h2>
-              <button className="modal-close" onClick={handleCloseModal}>
-                ×
-              </button>
             </div>
 
             {error && <div className="error-message">{error}</div>}
 
             <form onSubmit={handleSubmit}>
-              <div className="form-grid">
-                <div className="form-group">
+              <div className="invoices-form-grid">
+                <div className="invoices-form">
                   <label>
                     パートナー <span className="required">*</span>
                   </label>
@@ -454,7 +451,7 @@ const Invoices = () => {
                   </select>
                 </div>
 
-                <div className="form-group">
+                <div className="invoices-form">
                   <label>
                     発行日 <span className="required">*</span>
                   </label>
@@ -467,7 +464,7 @@ const Invoices = () => {
                   />
                 </div>
 
-                <div className="form-group">
+                <div className="invoices-form">
                   <label>
                     支払期限 <span className="required">*</span>
                   </label>
@@ -480,7 +477,7 @@ const Invoices = () => {
                   />
                 </div>
 
-                <div className="form-group">
+                <div className="invoices-form">
                   <label>
                     消費税区分 <span className="required">*</span>
                   </label>
@@ -496,7 +493,7 @@ const Invoices = () => {
                   </select>
                 </div>
 
-                <div className="form-group">
+                <div className="invoices-form">
                   <label>
                     ステータス <span className="required">*</span>
                   </label>
@@ -513,14 +510,14 @@ const Invoices = () => {
                     <option value="CANCELLED">キャンセル</option>
                   </select>
                   {(editingInvoice?.status === 'ISSUED' || editingInvoice?.status === 'PAID') && (
-                    <small className="form-hint">
+                    <small className="invoices-form-hint">
                       発行済・支払済のステータスは「支払済に変更」ボタンから変更してください
                     </small>
                   )}
                 </div>
               </div>
 
-              <div className="form-group" style={{ padding: '0 1.5rem' }}>
+              <div className="invoices-form" style={{ padding: '0 1.5rem' }}>
                 <label>備考</label>
                 <textarea
                   name="notes"
@@ -544,7 +541,38 @@ const Invoices = () => {
                   <div key={index} className="item-row">
                     <div className="item-number">明細 {index + 1}</div>
                     <div className="item-fields">
-                      <div className="form-group">
+                      <div className='invoices-form-group'>
+                        <div className="invoices-form">
+                          <label>
+                            数量 <span className="required">*</span>
+                          </label>
+                          <input
+                            type="number"
+                            value={item.quantity}
+                            onChange={(e) =>
+                              handleItemChange(index, 'quantity', parseInt(e.target.value))
+                            }
+                            min="1"
+                            required
+                          />
+                        </div>
+
+                      <div className="invoices-form">
+                        <label>
+                          単価 <span className="required">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          value={item.unitPrice}
+                          onChange={(e) => handleItemChange(index, 'unitPrice', e.target.value)}
+                          placeholder="0.00"
+                          step="0.01"
+                          min="0"
+                          required
+                        />
+                      </div>
+                      </div>
+                      <div className="invoices-form">
                         <label>手数料ルール</label>
                         <select
                           value={item.commissionRuleId}
@@ -580,7 +608,7 @@ const Invoices = () => {
                         )}
                       </div>
 
-                      <div className="form-group">
+                      <div className="invoices-form">
                         <label>
                           説明 <span className="required">*</span>
                         </label>
@@ -593,35 +621,7 @@ const Invoices = () => {
                         />
                       </div>
 
-                      <div className="form-group">
-                        <label>
-                          数量 <span className="required">*</span>
-                        </label>
-                        <input
-                          type="number"
-                          value={item.quantity}
-                          onChange={(e) =>
-                            handleItemChange(index, 'quantity', parseInt(e.target.value))
-                          }
-                          min="1"
-                          required
-                        />
-                      </div>
-
-                      <div className="form-group">
-                        <label>
-                          単価 <span className="required">*</span>
-                        </label>
-                        <input
-                          type="number"
-                          value={item.unitPrice}
-                          onChange={(e) => handleItemChange(index, 'unitPrice', e.target.value)}
-                          placeholder="0.00"
-                          step="0.01"
-                          min="0"
-                          required
-                        />
-                      </div>
+                      
 
                       <button
                         type="button"

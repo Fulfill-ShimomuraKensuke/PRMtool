@@ -356,17 +356,10 @@ const CommissionRules = () => {
 
       {/* モーダル */}
       {showModal && (
-        <div className="modal-overlay" onClick={(e) => {
-          if (e.target.className === 'modal-overlay') {
-            handleCloseModal();
-          }
-        }}>
+        <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h2>{editingRule ? '手数料ルール編集' : '手数料ルール作成'}</h2>
-              <button className="modal-close" onClick={handleCloseModal}>
-                ×
-              </button>
             </div>
 
             <form onSubmit={handleSubmit}>
