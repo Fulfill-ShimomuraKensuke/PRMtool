@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ユーザー用手引き.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="prm-tool-%E3%83%A6%E3%83%BC%E3%82%B6%E3%83%BC%E6%89%8B%E5%BC%95%E6%9B%B8">PRM Tool ユーザー手引書</h1>
+<p><strong>Partner Relationship Management System</strong><br>
+<strong>バージョン</strong>: 2.0.0<br>
+<strong>最終更新日</strong>: 2026年1月22日</p>
+<hr>
+<h2 id="%F0%9F%93%9A-%E7%9B%AE%E6%AC%A1">📚 目次</h2>
+<ol>
+<li><a href="#1-%E3%81%AF%E3%81%98%E3%82%81%E3%81%AB">はじめに</a></li>
+<li><a href="#2-%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0%E3%81%AE%E6%A6%82%E8%A6%81">システムの概要</a></li>
+<li><a href="#3-%E3%83%AD%E3%82%B0%E3%82%A4%E3%83%B3%E3%81%A8%E3%83%AD%E3%82%B0%E3%82%A2%E3%82%A6%E3%83%88">ログインとログアウト</a></li>
+<li><a href="#4-%E3%83%A6%E3%83%BC%E3%82%B6%E3%83%BC%E3%83%AD%E3%83%BC%E3%83%AB%E3%81%A8%E6%A8%A9%E9%99%90">ユーザーロールと権限</a></li>
+<li><a href="#5-%E3%82%A2%E3%82%AB%E3%82%A6%E3%83%B3%E3%83%88%E7%AE%A1%E7%90%86">アカウント管理</a></li>
+<li><a href="#6-%E3%83%91%E3%83%BC%E3%83%88%E3%83%8A%E3%83%BC%E7%AE%A1%E7%90%86">パートナー管理</a></li>
+<li><a href="#7-%E6%A1%88%E4%BB%B6%E7%AE%A1%E7%90%86">案件管理</a></li>
+<li><a href="#8-%E6%89%8B%E6%95%B0%E6%96%99%E3%83%AB%E3%83%BC%E3%83%AB%E7%AE%A1%E7%90%86">手数料ルール管理</a></li>
+<li><a href="#9-%E8%AB%8B%E6%B1%82%E6%9B%B8%E7%AE%A1%E7%90%86">請求書管理</a></li>
+<li><a href="#10-%E3%83%80%E3%83%83%E3%82%B7%E3%83%A5%E3%83%9C%E3%83%BC%E3%83%89">ダッシュボード</a></li>
+<li><a href="#11-%E3%82%88%E3%81%8F%E3%81%82%E3%82%8B%E8%B3%AA%E5%95%8Ffaq">よくある質問（FAQ）</a></li>
+<li><a href="#12-%E3%83%88%E3%83%A9%E3%83%96%E3%83%AB%E3%82%B7%E3%83%A5%E3%83%BC%E3%83%86%E3%82%A3%E3%83%B3%E3%82%B0">トラブルシューティング</a></li>
+</ol>
+<hr>
+<h2 id="1-%E3%81%AF%E3%81%98%E3%82%81%E3%81%AB">1. はじめに</h2>
+<h3 id="11-%E6%9C%AC%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">1.1 本システムについて</h3>
+<p>PRM Tool（Partner Relationship Management Tool）は、パートナー企業との関係管理を効率化するための統合Webアプリケーションです。</p>
+<h3 id="12-%E4%B8%BB%E3%81%AA%E6%A9%9F%E8%83%BD">1.2 主な機能</h3>
+<ul>
+<li>👥 <strong>アカウント管理</strong>: ユーザーの作成・編集・削除、ロール管理</li>
+<li>🏢 <strong>パートナー管理</strong>: パートナー企業の情報管理</li>
+<li>📊 <strong>案件管理</strong>: 案件の進捗管理と担当者アサイン</li>
+<li>💰 <strong>手数料ルール管理</strong>: 手数料ルールの作成・確定</li>
+<li>📄 <strong>請求書管理</strong>: 請求書の作成・発行・支払管理</li>
+<li>📈 <strong>ダッシュボード</strong>: 統計情報の可視化</li>
+</ul>
+<h3 id="13-%E6%8E%A8%E5%A5%A8%E7%92%B0%E5%A2%83">1.3 推奨環境</h3>
+<ul>
+<li><strong>ブラウザ</strong>: Google Chrome（最新版）、Microsoft Edge（最新版）、Safari（最新版）</li>
+<li><strong>画面解像度</strong>: 1366x768 以上</li>
+<li><strong>インターネット接続</strong>: 必須</li>
+</ul>
+<hr>
+<h2 id="2-%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0%E3%81%AE%E6%A6%82%E8%A6%81">2. システムの概要</h2>
+<h3 id="21-%E7%94%BB%E9%9D%A2%E6%A7%8B%E6%88%90">2.1 画面構成</h3>
+<p>システムは以下の画面で構成されています：</p>
+<ol>
+<li><strong>ログイン画面</strong>: システムへのログイン</li>
+<li><strong>ダッシュボード</strong>: 統計情報の表示</li>
+<li><strong>パートナー管理画面</strong>: パートナー企業の管理</li>
+<li><strong>案件管理画面</strong>: 案件の管理</li>
+<li><strong>手数料ルール管理画面</strong>: 手数料ルールの管理</li>
+<li><strong>請求書管理画面</strong>: 請求書の管理</li>
+<li><strong>アカウント管理画面</strong>: ユーザーアカウントの管理</li>
+</ol>
+<h3 id="22-%E3%83%8A%E3%83%93%E3%82%B2%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%83%90%E3%83%BC">2.2 ナビゲーションバー</h3>
+<p>画面上部のナビゲーションバーから各機能にアクセスできます。</p>
+<pre class="hljs"><code><div>┌─────────────────────────────────────────────────────────────┐
+│ PRM Tool │ ダッシュボード │ パートナー │ 案件 │ 手数料管理 │ 請求書 │ アカウント管理 │ [ユーザー名] ログアウト │
+└─────────────────────────────────────────────────────────────┘
+</div></code></pre>
+<p><strong>注意</strong>: 表示されるメニューはユーザーのロールによって異なります。</p>
+<hr>
+<h2 id="3-%E3%83%AD%E3%82%B0%E3%82%A4%E3%83%B3%E3%81%A8%E3%83%AD%E3%82%B0%E3%82%A2%E3%82%A6%E3%83%88">3. ログインとログアウト</h2>
+<h3 id="31-%E3%83%AD%E3%82%B0%E3%82%A4%E3%83%B3%E6%96%B9%E6%B3%95">3.1 ログイン方法</h3>
+<ol>
+<li>ブラウザでシステムのURLにアクセスします</li>
+<li>ログイン画面が表示されます</li>
+<li><strong>ログインID</strong>と<strong>パスワード</strong>を入力します</li>
+<li><strong>ログイン</strong>ボタンをクリックします</li>
+</ol>
+<pre class="hljs"><code><div>┌──────────────────────────┐
+│   PRM Tool ログイン      │
+├──────────────────────────┤
+│ ログインID: [_________] │
+│ パスワード: [_________] │
+│                          │
+│      [ログイン]          │
+└──────────────────────────┘
+</div></code></pre>
+<p><strong>初回ログイン時の注意</strong>:</p>
+<ul>
+<li>システム管理者から提供されたログインIDとパスワードを使用してください</li>
+<li>初回ログイン後、必ずパスワードを変更してください</li>
+</ul>
+<h3 id="32-%E3%83%AD%E3%82%B0%E3%82%A2%E3%82%A6%E3%83%88%E6%96%B9%E6%B3%95">3.2 ログアウト方法</h3>
+<ol>
+<li>画面右上の<strong>ログアウト</strong>ボタンをクリックします</li>
+<li>ログイン画面に戻ります</li>
+</ol>
+<p><strong>セキュリティのために</strong>:</p>
+<ul>
+<li>作業を終えたら必ずログアウトしてください</li>
+<li>長時間席を離れる場合もログアウトしてください</li>
+</ul>
+<hr>
+<h2 id="4-%E3%83%A6%E3%83%BC%E3%82%B6%E3%83%BC%E3%83%AD%E3%83%BC%E3%83%AB%E3%81%A8%E6%A8%A9%E9%99%90">4. ユーザーロールと権限</h2>
+<h3 id="41-%E3%83%AD%E3%83%BC%E3%83%AB%E3%81%AE%E7%A8%AE%E9%A1%9E">4.1 ロールの種類</h3>
+<p>本システムには4つのロールがあります：</p>
+<table>
+<thead>
+<tr>
+<th>ロール</th>
+<th>表示名</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SYSTEM</td>
+<td>システム管理者</td>
+<td>初期セットアップ専用（通常使用しない）</td>
+</tr>
+<tr>
+<td>ADMIN</td>
+<td>管理者</td>
+<td>すべての機能にアクセス可能</td>
+</tr>
+<tr>
+<td>ACCOUNTING</td>
+<td>会計担当</td>
+<td>手数料ルール・請求書の作成・編集・確定が可能</td>
+</tr>
+<tr>
+<td>REP</td>
+<td>担当者</td>
+<td>限定的な機能にアクセス可能</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42-%E3%83%AD%E3%83%BC%E3%83%AB%E5%88%A5%E6%A8%A9%E9%99%90%E4%B8%80%E8%A6%A7">4.2 ロール別権限一覧</h3>
+<table>
+<thead>
+<tr>
+<th>機能</th>
+<th>SYSTEM</th>
+<th>ADMIN</th>
+<th>ACCOUNTING</th>
+<th>REP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>アカウント管理</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>- 閲覧</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>- 作成・編集・削除</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>パートナー管理</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>- 閲覧</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>- 作成・編集</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>- 削除</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>案件管理</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>- 閲覧</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>- 作成・編集</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>- 削除</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>手数料ルール管理</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>- 閲覧</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>- 作成・編集</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>- 確定</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>- 削除</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>請求書管理</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>- 閲覧</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>- 作成・編集</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>- 発行・支払済変更</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>- 削除</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>ダッシュボード</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>- 閲覧</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="43-%E6%A8%A9%E9%99%90%E3%81%AB%E3%82%88%E3%82%8B%E7%94%BB%E9%9D%A2%E8%A1%A8%E7%A4%BA%E3%81%AE%E9%81%95%E3%81%84">4.3 権限による画面表示の違い</h3>
+<p>ナビゲーションバーに表示されるメニューは、ログインユーザーのロールによって異なります。</p>
+<p><strong>ADMIN（管理者）の場合</strong>:</p>
+<pre class="hljs"><code><div>ダッシュボード │ パートナー │ 案件 │ 手数料管理 │ 請求書 │ アカウント管理
+</div></code></pre>
+<p><strong>ACCOUNTING（会計担当）の場合</strong>:</p>
+<pre class="hljs"><code><div>ダッシュボード │ パートナー │ 案件 │ 手数料管理 │ 請求書
+</div></code></pre>
+<p><strong>REP（担当者）の場合</strong>:</p>
+<pre class="hljs"><code><div>ダッシュボード │ パートナー │ 案件 │ 手数料管理 │ 請求書
+</div></code></pre>
+<hr>
+<h2 id="5-%E3%82%A2%E3%82%AB%E3%82%A6%E3%83%B3%E3%83%88%E7%AE%A1%E7%90%86">5. アカウント管理</h2>
+<p><strong>対象ロール</strong>: SYSTEM、ADMIN</p>
+<h3 id="51-%E3%82%A2%E3%82%AB%E3%82%A6%E3%83%B3%E3%83%88%E4%B8%80%E8%A6%A7%E3%81%AE%E8%A1%A8%E7%A4%BA">5.1 アカウント一覧の表示</h3>
+<ol>
+<li>ナビゲーションバーから<strong>アカウント管理</strong>をクリックします</li>
+<li>登録されているユーザーの一覧が表示されます</li>
+</ol>
+<p>表示される情報：</p>
+<ul>
+<li>名前</li>
+<li>ログインID</li>
+<li>メールアドレス</li>
+<li>電話番号</li>
+<li>役職</li>
+<li>ロール</li>
+</ul>
+<h3 id="52-%E3%82%A2%E3%82%AB%E3%82%A6%E3%83%B3%E3%83%88%E3%81%AE%E6%A4%9C%E7%B4%A2%E3%81%A8%E3%83%95%E3%82%A3%E3%83%AB%E3%82%BF%E3%83%BC">5.2 アカウントの検索とフィルター</h3>
+<h4 id="%E6%A4%9C%E7%B4%A2%E6%A9%9F%E8%83%BD">検索機能</h4>
+<p>検索バーにキーワードを入力すると、以下の項目で検索できます：</p>
+<ul>
+<li>名前</li>
+<li>ログインID</li>
+<li>メールアドレス</li>
+<li>電話番号</li>
+<li>役職</li>
+</ul>
+<h4 id="%E3%83%95%E3%82%A3%E3%83%AB%E3%82%BF%E3%83%BC%E6%A9%9F%E8%83%BD">フィルター機能</h4>
+<p>ロールでフィルタリングできます：</p>
+<ul>
+<li>全てのロール</li>
+<li>管理者</li>
+<li>会計担当</li>
+<li>担当者</li>
+</ul>
+<p><strong>フィルタークリア</strong>: 「フィルターをクリア」ボタンで検索条件をリセットできます。</p>
+<h3 id="53-%E6%96%B0%E8%A6%8F%E3%82%A2%E3%82%AB%E3%82%A6%E3%83%B3%E3%83%88%E3%81%AE%E4%BD%9C%E6%88%90">5.3 新規アカウントの作成</h3>
+<ol>
+<li><strong>+ 新規アカウント作成</strong>ボタンをクリックします</li>
+<li>以下の情報を入力します：</li>
+</ol>
+<p><strong>必須項目（*印）</strong>:</p>
+<ul>
+<li>名前 *</li>
+<li>ログインID *</li>
+<li>パスワード *</li>
+<li>パスワード確認 *</li>
+<li>メールアドレス *</li>
+<li>役割 *</li>
+</ul>
+<p><strong>任意項目</strong>:</p>
+<ul>
+<li>電話番号</li>
+<li>住所</li>
+<li>役職</li>
+</ul>
+<ol start="3">
+<li>
+<p><strong>役割</strong>を選択します：</p>
+<ul>
+<li>担当者（REP）</li>
+<li>会計担当（ACCOUNTING）</li>
+<li>管理者（ADMIN）</li>
+</ul>
+</li>
+<li>
+<p><strong>作成</strong>ボタンをクリックします</p>
+</li>
+</ol>
+<p><strong>注意事項</strong>:</p>
+<ul>
+<li>ログインIDは一意である必要があります（重複不可）</li>
+<li>パスワードは8文字以上を推奨します</li>
+<li>パスワードとパスワード確認は一致している必要があります</li>
+</ul>
+<h3 id="54-%E3%82%A2%E3%82%AB%E3%82%A6%E3%83%B3%E3%83%88%E3%81%AE%E7%B7%A8%E9%9B%86">5.4 アカウントの編集</h3>
+<ol>
+<li>編集したいユーザーの行の<strong>編集</strong>ボタンをクリックします</li>
+<li>情報を修正します</li>
+<li><strong>更新</strong>ボタンをクリックします</li>
+</ol>
+<p><strong>パスワード変更時の注意</strong>:</p>
+<ul>
+<li>パスワードを変更しない場合は、パスワード欄を空欄のままにします</li>
+<li>パスワードを変更する場合は、新しいパスワードを入力します</li>
+</ul>
+<p><strong>ログインIDの変更</strong>:</p>
+<ul>
+<li>ログインIDは編集できません（セキュリティ上の理由）</li>
+</ul>
+<h3 id="55-%E3%82%A2%E3%82%AB%E3%82%A6%E3%83%B3%E3%83%88%E3%81%AE%E5%89%8A%E9%99%A4">5.5 アカウントの削除</h3>
+<ol>
+<li>削除したいユーザーの行の<strong>削除</strong>ボタンをクリックします</li>
+<li>確認ダイアログが表示されます</li>
+<li><strong>OK</strong>をクリックすると削除されます</li>
+</ol>
+<p><strong>削除の制限</strong>:</p>
+<ul>
+<li>「保護されたアカウント」と表示されているユーザーは削除できません</li>
+<li>自分自身のアカウントは削除できません</li>
+</ul>
+<hr>
+<h2 id="6-%E3%83%91%E3%83%BC%E3%83%88%E3%83%8A%E3%83%BC%E7%AE%A1%E7%90%86">6. パートナー管理</h2>
+<p><strong>対象ロール</strong>: ADMIN、ACCOUNTING、REP（閲覧のみ）</p>
+<h3 id="61-%E3%83%91%E3%83%BC%E3%83%88%E3%83%8A%E3%83%BC%E4%B8%80%E8%A6%A7%E3%81%AE%E8%A1%A8%E7%A4%BA">6.1 パートナー一覧の表示</h3>
+<ol>
+<li>ナビゲーションバーから<strong>パートナー</strong>をクリックします</li>
+<li>登録されているパートナー企業の一覧が表示されます</li>
+</ol>
+<p>表示される情報：</p>
+<ul>
+<li>企業名</li>
+<li>業種</li>
+<li>代表電話</li>
+<li>住所</li>
+<li>担当者数</li>
+</ul>
+<h3 id="62-%E3%83%91%E3%83%BC%E3%83%88%E3%83%8A%E3%83%BC%E3%81%AE%E6%A4%9C%E7%B4%A2%E3%81%A8%E3%83%95%E3%82%A3%E3%83%AB%E3%82%BF%E3%83%BC">6.2 パートナーの検索とフィルター</h3>
+<h4 id="%E6%A4%9C%E7%B4%A2%E6%A9%9F%E8%83%BD">検索機能</h4>
+<p>検索バーにキーワードを入力すると、以下の項目で検索できます：</p>
+<ul>
+<li>企業名</li>
+<li>業種</li>
+<li>代表電話</li>
+<li>住所</li>
+</ul>
+<h4 id="%E3%83%95%E3%82%A3%E3%83%AB%E3%82%BF%E3%83%BC%E6%A9%9F%E8%83%BD">フィルター機能</h4>
+<p>業種でフィルタリングできます。</p>
+<h3 id="63-%E3%83%91%E3%83%BC%E3%83%88%E3%83%8A%E3%83%BC%E3%81%AE%E8%A9%B3%E7%B4%B0%E8%A1%A8%E7%A4%BA">6.3 パートナーの詳細表示</h3>
+<ol>
+<li>パートナーの行をクリックします</li>
+<li>詳細情報がモーダルで表示されます</li>
+</ol>
+<p>表示される情報：</p>
+<ul>
+<li>基本情報（企業名、業種、代表電話、住所）</li>
+<li>担当者一覧（氏名、連絡先）</li>
+</ul>
+<p><strong>パートナー別ダッシュボード</strong>:</p>
+<ul>
+<li><strong>📊 ダッシュボードを見る</strong>ボタンをクリックすると、そのパートナーに関連する統計情報が表示されます</li>
+</ul>
+<h3 id="64-%E6%96%B0%E8%A6%8F%E3%83%91%E3%83%BC%E3%83%88%E3%83%8A%E3%83%BC%E3%81%AE%E4%BD%9C%E6%88%90">6.4 新規パートナーの作成</h3>
+<p><strong>対象ロール</strong>: ADMIN のみ</p>
+<ol>
+<li><strong>+ 新規パートナー</strong>ボタンをクリックします</li>
+<li>以下の情報を入力します：</li>
+</ol>
+<p><strong>必須項目（*印）</strong>:</p>
+<ul>
+<li>企業名 *</li>
+</ul>
+<p><strong>任意項目</strong>:</p>
+<ul>
+<li>業種</li>
+<li>代表電話</li>
+<li>住所</li>
+</ul>
+<ol start="3">
+<li>
+<p><strong>担当者情報</strong>を追加します：</p>
+<ul>
+<li>「+ 担当者を追加」ボタンをクリックします</li>
+<li>氏名と連絡先を入力します</li>
+<li>複数の担当者を登録できます</li>
+</ul>
+</li>
+<li>
+<p><strong>作成</strong>ボタンをクリックします</p>
+</li>
+</ol>
+<h3 id="65-%E3%83%91%E3%83%BC%E3%83%88%E3%83%8A%E3%83%BC%E3%81%AE%E7%B7%A8%E9%9B%86">6.5 パートナーの編集</h3>
+<p><strong>対象ロール</strong>: ADMIN のみ</p>
+<ol>
+<li>パートナーの詳細を表示します</li>
+<li><strong>編集</strong>ボタンをクリックします</li>
+<li>情報を修正します</li>
+<li><strong>更新</strong>ボタンをクリックします</li>
+</ol>
+<h3 id="66-%E3%83%91%E3%83%BC%E3%83%88%E3%83%8A%E3%83%BC%E3%81%AE%E5%89%8A%E9%99%A4">6.6 パートナーの削除</h3>
+<p><strong>対象ロール</strong>: ADMIN のみ</p>
+<ol>
+<li>パートナーの詳細を表示します</li>
+<li><strong>削除</strong>ボタンをクリックします</li>
+<li>確認ダイアログが表示されます</li>
+<li><strong>OK</strong>をクリックすると削除されます</li>
+</ol>
+<p><strong>削除の注意</strong>:</p>
+<ul>
+<li>関連する案件や請求書がある場合、削除できない可能性があります</li>
+</ul>
+<hr>
+<h2 id="7-%E6%A1%88%E4%BB%B6%E7%AE%A1%E7%90%86">7. 案件管理</h2>
+<p><strong>対象ロール</strong>: ADMIN、ACCOUNTING、REP</p>
+<h3 id="71-%E6%A1%88%E4%BB%B6%E4%B8%80%E8%A6%A7%E3%81%AE%E8%A1%A8%E7%A4%BA">7.1 案件一覧の表示</h3>
+<ol>
+<li>ナビゲーションバーから<strong>案件</strong>をクリックします</li>
+<li>登録されている案件の一覧が表示されます</li>
+</ol>
+<p>表示される情報：</p>
+<ul>
+<li>案件名</li>
+<li>パートナー名</li>
+<li>ステータス</li>
+<li>開始日</li>
+<li>終了日</li>
+<li>担当者数</li>
+</ul>
+<h3 id="72-%E6%A1%88%E4%BB%B6%E3%81%AE%E6%A4%9C%E7%B4%A2%E3%81%A8%E3%83%95%E3%82%A3%E3%83%AB%E3%82%BF%E3%83%BC">7.2 案件の検索とフィルター</h3>
+<h4 id="%E6%A4%9C%E7%B4%A2%E6%A9%9F%E8%83%BD">検索機能</h4>
+<p>検索バーにキーワードを入力すると、以下の項目で検索できます：</p>
+<ul>
+<li>案件名</li>
+<li>パートナー名</li>
+</ul>
+<h4 id="%E3%83%95%E3%82%A3%E3%83%AB%E3%82%BF%E3%83%BC%E6%A9%9F%E8%83%BD">フィルター機能</h4>
+<p>ステータスとパートナーでフィルタリングできます：</p>
+<ul>
+<li>ステータス: 全て / 新規 / 進行中 / 完了 / キャンセル</li>
+<li>パートナー: 全てのパートナー / 特定のパートナー</li>
+</ul>
+<h3 id="73-%E6%A1%88%E4%BB%B6%E3%81%AE%E8%A9%B3%E7%B4%B0%E8%A1%A8%E7%A4%BA">7.3 案件の詳細表示</h3>
+<ol>
+<li>案件の行の<strong>編集</strong>ボタンをクリックします</li>
+<li>詳細情報がモーダルで表示されます</li>
+</ol>
+<h3 id="74-%E6%96%B0%E8%A6%8F%E6%A1%88%E4%BB%B6%E3%81%AE%E4%BD%9C%E6%88%90">7.4 新規案件の作成</h3>
+<p><strong>対象ロール</strong>: ADMIN、ACCOUNTING、REP</p>
+<ol>
+<li><strong>+ 新規案件</strong>ボタンをクリックします</li>
+<li>以下の情報を入力します：</li>
+</ol>
+<p><strong>必須項目（*印）</strong>:</p>
+<ul>
+<li>案件名 *</li>
+<li>パートナー * （ドロップダウンから選択）</li>
+<li>開始日 *</li>
+<li>ステータス *</li>
+</ul>
+<p><strong>任意項目</strong>:</p>
+<ul>
+<li>終了日</li>
+<li>メモ</li>
+</ul>
+<ol start="3">
+<li>
+<p><strong>担当者をアサイン</strong>します：</p>
+<ul>
+<li>検索バーでユーザーを検索できます</li>
+<li>チェックボックスで複数の担当者を選択できます</li>
+</ul>
+</li>
+<li>
+<p><strong>作成</strong>ボタンをクリックします</p>
+</li>
+</ol>
+<p><strong>注意事項</strong>:</p>
+<ul>
+<li>案件を作成したユーザーが自動的に「オーナー」として設定されます</li>
+<li>オーナーは担当者一覧に自動的に含まれます</li>
+</ul>
+<h3 id="75-%E6%A1%88%E4%BB%B6%E3%81%AE%E7%B7%A8%E9%9B%86">7.5 案件の編集</h3>
+<p><strong>対象ロール</strong>: ADMIN、ACCOUNTING、REP</p>
+<ol>
+<li>案件の行の<strong>編集</strong>ボタンをクリックします</li>
+<li>情報を修正します</li>
+<li><strong>更新</strong>ボタンをクリックします</li>
+</ol>
+<h3 id="76-%E6%A1%88%E4%BB%B6%E3%81%AE%E5%89%8A%E9%99%A4">7.6 案件の削除</h3>
+<p><strong>対象ロール</strong>: ADMIN のみ</p>
+<ol>
+<li>案件の行の<strong>削除</strong>ボタンをクリックします</li>
+<li>確認ダイアログが表示されます</li>
+<li><strong>OK</strong>をクリックすると削除されます</li>
+</ol>
+<hr>
+<h2 id="8-%E6%89%8B%E6%95%B0%E6%96%99%E3%83%AB%E3%83%BC%E3%83%AB%E7%AE%A1%E7%90%86">8. 手数料ルール管理</h2>
+<p><strong>対象ロール</strong>: ADMIN、ACCOUNTING（作成・編集・確定）、REP（閲覧のみ）</p>
+<h3 id="81-%E6%89%8B%E6%95%B0%E6%96%99%E3%83%AB%E3%83%BC%E3%83%AB%E4%B8%80%E8%A6%A7%E3%81%AE%E8%A1%A8%E7%A4%BA">8.1 手数料ルール一覧の表示</h3>
+<ol>
+<li>ナビゲーションバーから<strong>手数料管理</strong>をクリックします</li>
+<li>登録されている手数料ルールの一覧が表示されます</li>
+</ol>
+<p>表示される情報：</p>
+<ul>
+<li>ルール名</li>
+<li>案件名</li>
+<li>手数料タイプ（料率 / 固定額）</li>
+<li>料率 / 固定額</li>
+<li>ステータス（未承認 / 確定済）</li>
+</ul>
+<h3 id="82-%E6%89%8B%E6%95%B0%E6%96%99%E3%83%AB%E3%83%BC%E3%83%AB%E3%81%AE%E6%A4%9C%E7%B4%A2%E3%81%A8%E3%83%95%E3%82%A3%E3%83%AB%E3%82%BF%E3%83%BC">8.2 手数料ルールの検索とフィルター</h3>
+<h4 id="%E3%83%95%E3%82%A3%E3%83%AB%E3%82%BF%E3%83%BC%E6%A9%9F%E8%83%BD">フィルター機能</h4>
+<p>ステータスと案件でフィルタリングできます：</p>
+<ul>
+<li>ステータス: 全て / 未承認 / 確定済</li>
+<li>案件: 全ての案件 / 特定の案件</li>
+</ul>
+<h3 id="83-%E6%96%B0%E8%A6%8F%E6%89%8B%E6%95%B0%E6%96%99%E3%83%AB%E3%83%BC%E3%83%AB%E3%81%AE%E4%BD%9C%E6%88%90">8.3 新規手数料ルールの作成</h3>
+<p><strong>対象ロール</strong>: ADMIN、ACCOUNTING</p>
+<ol>
+<li><strong>+ 新規手数料ルール</strong>ボタンをクリックします</li>
+<li>以下の情報を入力します：</li>
+</ol>
+<p><strong>必須項目（*印）</strong>:</p>
+<ul>
+<li>案件 * （ドロップダウンから選択）</li>
+<li>ルール名 *</li>
+<li>手数料タイプ * （料率 / 固定額）</li>
+<li>ステータス * （未承認 / 確定済）</li>
+</ul>
+<p><strong>手数料タイプが「料率」の場合</strong>:</p>
+<ul>
+<li>料率（%） * を入力</li>
+</ul>
+<p><strong>手数料タイプが「固定額」の場合</strong>:</p>
+<ul>
+<li>固定額 * を入力</li>
+</ul>
+<p><strong>任意項目</strong>:</p>
+<ul>
+<li>備考</li>
+</ul>
+<ol start="3">
+<li><strong>作成</strong>ボタンをクリックします</li>
+</ol>
+<p><strong>手数料タイプの選択</strong>:</p>
+<ul>
+<li><strong>料率</strong>: 商品金額に対して一定の割合を手数料とします（例: 10%）</li>
+<li><strong>固定額</strong>: 商品金額に関わらず一定額を手数料とします（例: 10,000円）</li>
+</ul>
+<h3 id="84-%E6%89%8B%E6%95%B0%E6%96%99%E3%83%AB%E3%83%BC%E3%83%AB%E3%81%AE%E7%B7%A8%E9%9B%86">8.4 手数料ルールの編集</h3>
+<p><strong>対象ロール</strong>: ADMIN、ACCOUNTING</p>
+<ol>
+<li>手数料ルールの行の<strong>編集</strong>ボタンをクリックします</li>
+<li>情報を修正します</li>
+<li><strong>更新</strong>ボタンをクリックします</li>
+</ol>
+<p><strong>ステータス変更の注意</strong>:</p>
+<ul>
+<li>「未承認」から「確定済」に変更すると、請求書で使用できるようになります</li>
+<li><strong>確定済のルールは編集できません</strong></li>
+</ul>
+<h3 id="85-%E6%89%8B%E6%95%B0%E6%96%99%E3%83%AB%E3%83%BC%E3%83%AB%E3%81%AE%E7%A2%BA%E5%AE%9A">8.5 手数料ルールの確定</h3>
+<p><strong>対象ロール</strong>: ADMIN、ACCOUNTING</p>
+<p>確定済のルールのみ請求書で使用できます。</p>
+<ol>
+<li>ステータスを「確定済」に変更します</li>
+<li>確定後、そのルールは編集不可になります</li>
+</ol>
+<p><strong>確定のタイミング</strong>:</p>
+<ul>
+<li>請求書を作成する前に、使用する手数料ルールを確定してください</li>
+</ul>
+<h3 id="86-%E6%89%8B%E6%95%B0%E6%96%99%E3%83%AB%E3%83%BC%E3%83%AB%E3%81%AE%E5%89%8A%E9%99%A4">8.6 手数料ルールの削除</h3>
+<p><strong>対象ロール</strong>: ADMIN のみ</p>
+<ol>
+<li>手数料ルールの行の<strong>削除</strong>ボタンをクリックします</li>
+<li>確認ダイアログが表示されます</li>
+<li><strong>OK</strong>をクリックすると削除されます</li>
+</ol>
+<p><strong>削除の制限</strong>:</p>
+<ul>
+<li>請求書で使用されているルールは削除できません</li>
+</ul>
+<hr>
+<h2 id="9-%E8%AB%8B%E6%B1%82%E6%9B%B8%E7%AE%A1%E7%90%86">9. 請求書管理</h2>
+<p><strong>対象ロール</strong>: ADMIN、ACCOUNTING（作成・編集・発行・支払済変更）、REP（閲覧のみ）</p>
+<h3 id="91-%E8%AB%8B%E6%B1%82%E6%9B%B8%E4%B8%80%E8%A6%A7%E3%81%AE%E8%A1%A8%E7%A4%BA">9.1 請求書一覧の表示</h3>
+<ol>
+<li>ナビゲーションバーから<strong>請求書</strong>をクリックします</li>
+<li>登録されている請求書の一覧が表示されます</li>
+</ol>
+<p>表示される情報：</p>
+<ul>
+<li>請求書番号</li>
+<li>パートナー名</li>
+<li>発行日</li>
+<li>支払期限</li>
+<li>合計金額</li>
+<li>ステータス（下書き / 発行済 / 支払済 / キャンセル）</li>
+</ul>
+<h3 id="92-%E8%AB%8B%E6%B1%82%E6%9B%B8%E3%81%AE%E6%A4%9C%E7%B4%A2%E3%81%A8%E3%83%95%E3%82%A3%E3%83%AB%E3%82%BF%E3%83%BC">9.2 請求書の検索とフィルター</h3>
+<h4 id="%E3%83%95%E3%82%A3%E3%83%AB%E3%82%BF%E3%83%BC%E6%A9%9F%E8%83%BD">フィルター機能</h4>
+<p>ステータスとパートナーでフィルタリングできます：</p>
+<ul>
+<li>ステータス: 全て / 下書き / 発行済 / 支払済 / キャンセル</li>
+<li>パートナー: 全てのパートナー / 特定のパートナー</li>
+</ul>
+<h3 id="93-%E6%96%B0%E8%A6%8F%E8%AB%8B%E6%B1%82%E6%9B%B8%E3%81%AE%E4%BD%9C%E6%88%90">9.3 新規請求書の作成</h3>
+<p><strong>対象ロール</strong>: ADMIN、ACCOUNTING</p>
+<ol>
+<li><strong>+ 新規請求書作成</strong>ボタンをクリックします</li>
+<li>以下の情報を入力します：</li>
+</ol>
+<p><strong>基本情報</strong>:</p>
+<ul>
+<li>パートナー * （ドロップダウンから選択）</li>
+<li>発行日 *</li>
+<li>支払期限 *</li>
+<li>消費税区分 *
+<ul>
+<li>あり（商品＋手数料に課税）</li>
+<li>手数料抜き（商品部分のみ課税）</li>
+<li>なし（非課税）</li>
+</ul>
+</li>
+<li>ステータス *</li>
+<li>備考</li>
+</ul>
+<p><strong>請求明細</strong>:
+各明細行に以下を入力します：</p>
+<ul>
+<li>手数料ルール（ドロップダウンから選択、確定済のみ表示）</li>
+<li>説明 *</li>
+<li>数量 *</li>
+<li>単価 *</li>
+</ul>
+<p><strong>明細の追加</strong>:</p>
+<ul>
+<li>「+ 明細を追加」ボタンをクリックすると、新しい明細行が追加されます</li>
+</ul>
+<p><strong>明細の削除</strong>:</p>
+<ul>
+<li>各明細行の「× 削除」ボタンをクリックすると削除されます</li>
+</ul>
+<ol start="3">
+<li><strong>作成</strong>ボタンをクリックします</li>
+</ol>
+<p><strong>金額の自動計算</strong>:</p>
+<ul>
+<li>商品金額 = 単価 × 数量</li>
+<li>手数料金額 = 手数料ルールに基づいて自動計算</li>
+<li>消費税 = 消費税区分に基づいて自動計算</li>
+<li>合計金額 = 商品金額 + 手数料金額 + 消費税</li>
+</ul>
+<h3 id="94-%E8%AB%8B%E6%B1%82%E6%9B%B8%E3%81%AE%E7%B7%A8%E9%9B%86">9.4 請求書の編集</h3>
+<p><strong>対象ロール</strong>: ADMIN、ACCOUNTING</p>
+<p><strong>編集可能な請求書</strong>:</p>
+<ul>
+<li>ステータスが「下書き」の請求書のみ編集可能</li>
+<li>発行済・支払済の請求書は編集できません</li>
+</ul>
+<ol>
+<li>編集したい請求書の行の<strong>編集</strong>ボタンをクリックします</li>
+<li>情報を修正します</li>
+<li><strong>更新</strong>ボタンをクリックします</li>
+</ol>
+<h3 id="95-%E8%AB%8B%E6%B1%82%E6%9B%B8%E3%81%AE%E7%99%BA%E8%A1%8C">9.5 請求書の発行</h3>
+<p><strong>対象ロール</strong>: ADMIN、ACCOUNTING</p>
+<p>請求書を発行するには、ステータスを「発行済」に変更します。</p>
+<ol>
+<li>下書きの請求書を編集します</li>
+<li>ステータスを「発行済」に変更します</li>
+<li><strong>更新</strong>ボタンをクリックします</li>
+</ol>
+<p><strong>発行後の注意</strong>:</p>
+<ul>
+<li>発行済の請求書は編集できません</li>
+<li>訂正が必要な場合は、キャンセルして新しい請求書を作成してください</li>
+</ul>
+<h3 id="96-%E8%AB%8B%E6%B1%82%E6%9B%B8%E3%82%92%E6%94%AF%E6%89%95%E6%B8%88%E3%81%AB%E5%A4%89%E6%9B%B4">9.6 請求書を支払済に変更</h3>
+<p><strong>対象ロール</strong>: ADMIN、ACCOUNTING
+<strong>新機能</strong>: v2.0.0</p>
+<p>発行済の請求書を支払済に変更する専用機能です。</p>
+<ol>
+<li>請求書一覧で、ステータスが「発行済」の請求書を探します</li>
+<li>該当する請求書の行に**「支払済に変更」**ボタンが表示されます</li>
+<li>ボタンをクリックします</li>
+<li>確認ダイアログが表示されます：<pre class="hljs"><code><div>請求書番号: INV-2026-0001
+パートナー: 株式会社サンプル
+金額: ¥1,100,000
+
+この請求書を支払済に変更しますか?
+※この操作は取り消せません。
+</div></code></pre>
+</li>
+<li><strong>OK</strong>をクリックすると、ステータスが「支払済」に変更されます</li>
+</ol>
+<p><strong>支払済変更の制約</strong>:</p>
+<ul>
+<li>発行済（ISSUED）の請求書のみ変更可能</li>
+<li>下書き、キャンセル、既に支払済の請求書は変更できません</li>
+<li>一度支払済にすると、元に戻せません</li>
+</ul>
+<p><strong>操作ボタンの表示</strong>:</p>
+<ul>
+<li><strong>下書き</strong>: 編集・削除ボタンが表示</li>
+<li><strong>発行済</strong>: 支払済に変更ボタンが表示</li>
+<li><strong>支払済</strong>: 操作ボタンなし（閲覧のみ）</li>
+<li><strong>キャンセル</strong>: 操作ボタンなし（閲覧のみ）</li>
+</ul>
+<h3 id="97-%E8%AB%8B%E6%B1%82%E6%9B%B8%E3%81%AE%E5%89%8A%E9%99%A4">9.7 請求書の削除</h3>
+<p><strong>対象ロール</strong>: ADMIN のみ</p>
+<p><strong>削除可能な請求書</strong>:</p>
+<ul>
+<li>ステータスが「下書き」の請求書のみ削除可能</li>
+<li>発行済・支払済の請求書は削除できません</li>
+</ul>
+<ol>
+<li>削除したい請求書の行の<strong>削除</strong>ボタンをクリックします</li>
+<li>確認ダイアログが表示されます</li>
+<li><strong>OK</strong>をクリックすると削除されます</li>
+</ol>
+<hr>
+<h2 id="10-%E3%83%80%E3%83%83%E3%82%B7%E3%83%A5%E3%83%9C%E3%83%BC%E3%83%89">10. ダッシュボード</h2>
+<p><strong>対象ロール</strong>: ADMIN、ACCOUNTING、REP</p>
+<h3 id="101-%E3%83%A1%E3%82%A4%E3%83%B3%E3%83%80%E3%83%83%E3%82%B7%E3%83%A5%E3%83%9C%E3%83%BC%E3%83%89">10.1 メインダッシュボード</h3>
+<ol>
+<li>ナビゲーションバーから<strong>ダッシュボード</strong>をクリックします</li>
+<li>統計情報がタブ形式で表示されます</li>
+</ol>
+<p><strong>タブの種類</strong>:</p>
+<ol>
+<li><strong>基本統計</strong>: システム全体の統計情報</li>
+<li><strong>パートナー統計</strong>: パートナー別の統計情報</li>
+<li><strong>案件統計</strong>: 案件別の統計情報</li>
+<li><strong>手数料統計</strong>: 手数料別の統計情報</li>
+<li><strong>請求統計</strong>: 請求書別の統計情報</li>
+</ol>
+<h3 id="102-%E3%83%91%E3%83%BC%E3%83%88%E3%83%8A%E3%83%BC%E5%88%A5%E3%83%80%E3%83%83%E3%82%B7%E3%83%A5%E3%83%9C%E3%83%BC%E3%83%89">10.2 パートナー別ダッシュボード</h3>
+<p>特定のパートナーに関連する統計情報を表示します。</p>
+<ol>
+<li>パートナー管理画面でパートナーの詳細を表示します</li>
+<li><strong>📊 ダッシュボードを見る</strong>ボタンをクリックします</li>
+<li>そのパートナーに関連する統計情報が表示されます</li>
+</ol>
+<p>表示される情報：</p>
+<ul>
+<li>関連案件数</li>
+<li>手数料総額</li>
+<li>請求書総額</li>
+<li>支払状況</li>
+</ul>
+<hr>
+<h2 id="11-%E3%82%88%E3%81%8F%E3%81%82%E3%82%8B%E8%B3%AA%E5%95%8Ffaq">11. よくある質問（FAQ）</h2>
+<h3 id="q1-%E3%83%91%E3%82%B9%E3%83%AF%E3%83%BC%E3%83%89%E3%82%92%E5%BF%98%E3%82%8C%E3%81%9F%E5%A0%B4%E5%90%88%E3%81%AF%E3%81%A9%E3%81%86%E3%81%99%E3%82%8C%E3%81%B0%E3%81%84%E3%81%84%E3%81%A7%E3%81%99%E3%81%8B">Q1. パスワードを忘れた場合はどうすればいいですか？</h3>
+<p>A1. システム管理者（ADMIN権限を持つユーザー）に連絡して、パスワードのリセットを依頼してください。</p>
+<h3 id="q2-%E8%87%AA%E5%88%86%E3%81%AE%E3%83%91%E3%82%B9%E3%83%AF%E3%83%BC%E3%83%89%E3%82%92%E5%A4%89%E6%9B%B4%E3%81%A7%E3%81%8D%E3%81%BE%E3%81%99%E3%81%8B">Q2. 自分のパスワードを変更できますか？</h3>
+<p>A2. 現在のバージョンでは、パスワード変更機能は提供されていません。管理者に依頼して変更してもらってください。</p>
+<h3 id="q3-%E7%99%BA%E8%A1%8C%E6%B8%88%E3%81%AE%E8%AB%8B%E6%B1%82%E6%9B%B8%E3%82%92%E4%BF%AE%E6%AD%A3%E3%81%97%E3%81%9F%E3%81%84%E5%A0%B4%E5%90%88%E3%81%AF%E3%81%A9%E3%81%86%E3%81%99%E3%82%8C%E3%81%B0%E3%81%84%E3%81%84%E3%81%A7%E3%81%99%E3%81%8B">Q3. 発行済の請求書を修正したい場合はどうすればいいですか？</h3>
+<p>A3. 発行済の請求書は編集できません。以下の手順で対応してください：</p>
+<ol>
+<li>元の請求書をキャンセル</li>
+<li>新しい請求書を作成</li>
+</ol>
+<h3 id="q4-%E6%89%8B%E6%95%B0%E6%96%99%E3%83%AB%E3%83%BC%E3%83%AB%E3%82%92%E7%A2%BA%E5%AE%9A%E5%BE%8C%E3%81%AB%E5%A4%89%E6%9B%B4%E3%81%A7%E3%81%8D%E3%81%BE%E3%81%99%E3%81%8B">Q4. 手数料ルールを確定後に変更できますか？</h3>
+<p>A4. 確定済の手数料ルールは編集できません。新しいルールを作成してください。</p>
+<h3 id="q5-%E6%8B%85%E5%BD%93%E8%80%85%E3%83%AD%E3%83%BC%E3%83%ABrep%E3%81%A7%E4%BD%95%E3%81%8C%E3%81%A7%E3%81%8D%E3%81%BE%E3%81%99%E3%81%8B">Q5. 担当者ロール（REP）で何ができますか？</h3>
+<p>A5. REPロールでは以下が可能です：</p>
+<ul>
+<li>パートナー、案件、手数料ルール、請求書の<strong>閲覧</strong></li>
+<li>案件の<strong>作成・編集</strong></li>
+<li>ダッシュボードの閲覧</li>
+</ul>
+<p>作成・編集・削除の権限は制限されています。</p>
+<h3 id="q6-%E4%BC%9A%E8%A8%88%E6%8B%85%E5%BD%93%E3%83%AD%E3%83%BC%E3%83%ABaccounting%E3%81%A7%E4%BD%95%E3%81%8C%E3%81%A7%E3%81%8D%E3%81%BE%E3%81%99%E3%81%8B">Q6. 会計担当ロール（ACCOUNTING）で何ができますか？</h3>
+<p>A6. ACCOUNTINGロールでは以下が可能です：</p>
+<ul>
+<li>パートナー、案件、手数料ルール、請求書の<strong>閲覧</strong></li>
+<li>案件の<strong>作成・編集</strong></li>
+<li>手数料ルールの<strong>作成・編集・確定</strong></li>
+<li>請求書の<strong>作成・編集・発行・支払済変更</strong></li>
+</ul>
+<p>削除の権限はADMINのみです。</p>
+<h3 id="q7-csv%E5%BD%A2%E5%BC%8F%E3%81%A7%E3%83%87%E3%83%BC%E3%82%BF%E3%82%92%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%9D%E3%83%BC%E3%83%88%E3%82%A4%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%88%E3%81%A7%E3%81%8D%E3%81%BE%E3%81%99%E3%81%8B">Q7. CSV形式でデータをエクスポート/インポートできますか？</h3>
+<p>A7. 現在のバージョン（v2.0.0）では、CSV入出力機能は一部の機能で利用可能です。詳細は管理者に確認してください。</p>
+<hr>
+<h2 id="12-%E3%83%88%E3%83%A9%E3%83%96%E3%83%AB%E3%82%B7%E3%83%A5%E3%83%BC%E3%83%86%E3%82%A3%E3%83%B3%E3%82%B0">12. トラブルシューティング</h2>
+<h3 id="%E5%95%8F%E9%A1%8C1-%E3%83%AD%E3%82%B0%E3%82%A4%E3%83%B3%E3%81%A7%E3%81%8D%E3%81%AA%E3%81%84">問題1: ログインできない</h3>
+<p><strong>症状</strong>: ログインIDとパスワードを入力してもログインできない</p>
+<p><strong>原因と対処法</strong>:</p>
+<ol>
+<li>
+<p><strong>入力ミス</strong></p>
+<ul>
+<li>ログインIDとパスワードを再確認してください</li>
+<li>大文字・小文字を正確に入力してください</li>
+</ul>
+</li>
+<li>
+<p><strong>アカウントが無効</strong></p>
+<ul>
+<li>システム管理者に連絡して、アカウントの状態を確認してください</li>
+</ul>
+</li>
+<li>
+<p><strong>セッションエラー</strong></p>
+<ul>
+<li>ブラウザのキャッシュをクリアしてください</li>
+<li>ブラウザを再起動してください</li>
+</ul>
+</li>
+</ol>
+<h3 id="%E5%95%8F%E9%A1%8C2-%E7%94%BB%E9%9D%A2%E3%81%8C%E6%AD%A3%E3%81%97%E3%81%8F%E8%A1%A8%E7%A4%BA%E3%81%95%E3%82%8C%E3%81%AA%E3%81%84">問題2: 画面が正しく表示されない</h3>
+<p><strong>症状</strong>: レイアウトが崩れる、ボタンが表示されない</p>
+<p><strong>対処法</strong>:</p>
+<ol>
+<li>ブラウザを最新版にアップデートしてください</li>
+<li>ブラウザのキャッシュをクリアしてください</li>
+<li>ページを再読み込みしてください（Ctrl + F5 または Cmd + Shift + R）</li>
+</ol>
+<h3 id="%E5%95%8F%E9%A1%8C3-%E6%93%8D%E4%BD%9C%E3%83%9C%E3%82%BF%E3%83%B3%E3%81%8C%E8%A1%A8%E7%A4%BA%E3%81%95%E3%82%8C%E3%81%AA%E3%81%84">問題3: 操作ボタンが表示されない</h3>
+<p><strong>症状</strong>: 編集ボタンや削除ボタンが表示されない</p>
+<p><strong>原因</strong>: ロールによる権限制限</p>
+<p><strong>確認方法</strong>:</p>
+<ul>
+<li>画面右上に表示されているロールを確認してください</li>
+<li>必要な権限がない場合は、管理者に権限の付与を依頼してください</li>
+</ul>
+<h3 id="%E5%95%8F%E9%A1%8C4-%E3%83%87%E3%83%BC%E3%82%BF%E3%81%8C%E4%BF%9D%E5%AD%98%E3%81%95%E3%82%8C%E3%81%AA%E3%81%84">問題4: データが保存されない</h3>
+<p><strong>症状</strong>: 作成・編集したデータが保存されない</p>
+<p><strong>対処法</strong>:</p>
+<ol>
+<li>必須項目（*印）がすべて入力されているか確認してください</li>
+<li>エラーメッセージが表示されていないか確認してください</li>
+<li>ネットワーク接続を確認してください</li>
+</ol>
+<h3 id="%E5%95%8F%E9%A1%8C5-%E8%AB%8B%E6%B1%82%E6%9B%B8%E3%82%92%E6%94%AF%E6%89%95%E6%B8%88%E3%81%AB%E5%A4%89%E6%9B%B4%E3%81%A7%E3%81%8D%E3%81%AA%E3%81%84">問題5: 請求書を支払済に変更できない</h3>
+<p><strong>症状</strong>: 「支払済に変更」ボタンが表示されない、またはエラーになる</p>
+<p><strong>原因と対処法</strong>:</p>
+<ol>
+<li>
+<p><strong>ボタンが表示されない</strong></p>
+<ul>
+<li>請求書のステータスが「発行済」であることを確認してください</li>
+<li>下書き、支払済、キャンセルの請求書では表示されません</li>
+</ul>
+</li>
+<li>
+<p><strong>エラーが表示される</strong></p>
+<ul>
+<li>権限を確認してください（ADMIN、ACCOUNTINGのみ可能）</li>
+<li>請求書のステータスを確認してください</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="%F0%9F%93%9E-%E3%82%B5%E3%83%9D%E3%83%BC%E3%83%88">📞 サポート</h2>
+<h3 id="%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0%E3%81%AB%E9%96%A2%E3%81%99%E3%82%8B%E3%81%8A%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B">システムに関するお問い合わせ</h3>
+<p>本システムの使い方で不明な点がある場合は、以下の連絡先にお問い合わせください：</p>
+<ul>
+<li><strong>システム管理者</strong>: [管理者の連絡先]</li>
+<li><strong>技術サポート</strong>: [サポート連絡先]</li>
+</ul>
+<h3 id="%E3%83%95%E3%82%A3%E3%83%BC%E3%83%89%E3%83%90%E3%83%83%E3%82%AF">フィードバック</h3>
+<p>システムの改善提案やバグ報告は、システム管理者までご連絡ください。</p>
+<hr>
+<h2 id="%F0%9F%93%9D-%E6%9B%B4%E6%96%B0%E5%B1%A5%E6%AD%B4">📝 更新履歴</h2>
+<h3 id="v200-2026-01-22">v2.0.0 (2026-01-22)</h3>
+<ul>
+<li><strong>新機能</strong>: ACCOUNTING（会計担当）ロールを追加</li>
+<li><strong>新機能</strong>: 請求書「支払済に変更」機能を追加</li>
+<li><strong>改善</strong>: ロール別権限を詳細化</li>
+<li><strong>改善</strong>: 請求書ワークフローを改善</li>
+</ul>
+<h3 id="v100-2026-01-21">v1.0.0 (2026-01-21)</h3>
+<ul>
+<li>初回リリース</li>
+<li>基本機能実装</li>
+</ul>
+<hr>
+<p><strong>PRM Tool - Partner Relationship Management System</strong>
+<strong>Copyright © 2026 Fulfill-ShimomuraKensuke</strong>
+<strong>All Rights Reserved</strong></p>
+
+</body>
+</html>
