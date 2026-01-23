@@ -49,7 +49,7 @@ const PartnerDashboard = () => {
     return (
       <div className="error-container">
         <div className="error-message">{error}</div>
-        <button onClick={() => navigate('/partners')} className="btn-primary">
+        <button onClick={() => navigate('/partners')} className="btn-action">
           パートナー一覧に戻る
         </button>
       </div>
@@ -68,7 +68,7 @@ const PartnerDashboard = () => {
           <h1>{dashboard.partnerName}</h1>
           <p className="industry-label">業種: {dashboard.industry}</p>
         </div>
-        <button onClick={() => navigate('/partners')} className="btn-back">
+        <button onClick={() => navigate('/partners')} className="btn-action">
           ← 一覧に戻る
         </button>
       </div>
