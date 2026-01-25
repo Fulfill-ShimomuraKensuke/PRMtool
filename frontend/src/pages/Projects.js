@@ -207,7 +207,7 @@ const Projects = () => {
           <h1>案件管理</h1>
           <div className="header-buttons">
             <button onClick={() => handleOpenModal()} className="btn-primary">
-              新規案件
+              + 新規案件作成
             </button>
           </div>
         </div>
@@ -290,7 +290,7 @@ const Projects = () => {
                 <div
                   key={project.id}
                   className="project-card"
-                  onClick={() => handleProjectClick(project.id)}
+                  onDoubleClick={() => handleProjectClick(project.id)}
                 >
                   <h3>{project.name}</h3>
                   <div className={getStatusClass(project.status)}>
@@ -305,6 +305,12 @@ const Projects = () => {
                   <p className="project-assignments">
                     <strong>担当者:</strong> {project.assignments ? project.assignments.length : 0}名
                   </p>
+                  <button
+                    onClick={() => handleProjectClick(project.id)}
+                    className="btn-detail"
+                  >
+                    詳細
+                  </button>
                 </div>
               ))
             )}

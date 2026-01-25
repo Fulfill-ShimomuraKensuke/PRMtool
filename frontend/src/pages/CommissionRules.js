@@ -248,7 +248,7 @@ const CommissionRules = () => {
       <div className="commissions-header">
         <h1>💰 手数料ルール管理</h1>
         <button className="btn-primary" onClick={() => handleOpenModal()}>
-          + 新規作成
+          + 新規手数料ルール作成
         </button>
       </div>
 

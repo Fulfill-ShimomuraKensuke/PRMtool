@@ -388,7 +388,7 @@ const Partners = () => {
               CSVエクスポート
             </button>
             <button onClick={handleOpenCreateModal} className="btn-primary">
-              新規パートナー
+              + 新規パートナー作成
             </button>
           </div>
         </div>
