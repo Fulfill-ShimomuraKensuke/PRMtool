@@ -72,6 +72,9 @@ const Navbar = () => {
               <Link to="/invoices" className={`navbar-link ${getActiveClass('/invoices')}`}>
                 請求書
               </Link>
+              <Link to="/invoice-templates" className={`navbar-link ${getActiveClass('/invoice-templates')}`}>
+                テンプレート
+              </Link>
             </>
           )}
 

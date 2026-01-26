@@ -11,6 +11,7 @@ import ProjectDetail from './pages/ProjectDetail';
 import Accounts from './pages/Accounts';
 import CommissionRules from './pages/CommissionRules';
 import Invoices from './pages/Invoices';
+import InvoiceTemplates from './pages/InvoiceTemplates';
 import PartnerDashboard from './pages/PartnerDashboard';
 
 import './App.css';
@@ -104,6 +105,16 @@ function AppContent() {
           element={
             <PrivateRoute systemRestricted={true}>
               <Invoices />
+            </PrivateRoute>
+          }
+        />
+
+        {/* 請求書テンプレート管理（SYSTEMロールは制限） */}
+        <Route
+          path="/invoice-templates"
+          element={
+            <PrivateRoute systemRestricted={true}>
+              <InvoiceTemplates />
             </PrivateRoute>
           }
         />
