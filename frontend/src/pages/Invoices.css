@@ -472,3 +472,25 @@
     width: 100%;
   }
 }
+
+/* ヘッダーのボタングループ */
+.header-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+/* セカンダリボタン（テンプレート管理用） */
+.btn-secondary {
+  background-color: #95a5a6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.btn-secondary:hover {
+  background-color: #7f8c8d;
+}

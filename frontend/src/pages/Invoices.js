@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import invoiceService from '../services/invoiceService';
 import partnerService from '../services/partnerService';
 import commissionRuleService from '../services/commissionRuleService';
@@ -9,6 +10,7 @@ import './Invoices.css';
  * 手数料ルールを選択して請求書を作成
  */
 const Invoices = () => {
+  const navigate = useNavigate();
   const [invoices, setInvoices] = useState([]);
   const [filteredInvoices, setFilteredInvoices] = useState([]);
   const [partners, setPartners] = useState([]);
@@ -72,6 +74,11 @@ const Invoices = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // テンプレート管理画面へ遷移
+  const handleNavigateToTemplates = () => {
+    navigate('/invoice-templates');
   };
 
   // 選択可能な手数料ルールをフィルタリング
@@ -294,9 +301,14 @@ const Invoices = () => {
       <div className="invoices-container">
         <div className="invoices-header">
           <h1>📄 請求書管理</h1>
-          <button className="btn-primary" onClick={() => handleOpenModal()}>
-            + 新規請求書作成
-          </button>
+          <div className="header-buttons">
+            <button className="btn-secondary" onClick={handleNavigateToTemplates}>
+              📋 テンプレート管理
+            </button>
+            <button className="btn-primary" onClick={() => handleOpenModal()}>
+              + 新規請求書作成
+            </button>
+          </div>
         </div>
 
         {/* フィルターエリア */}
@@ -557,20 +569,20 @@ const Invoices = () => {
                           />
                         </div>
 
-                      <div className="invoices-form">
-                        <label>
-                          単価 <span className="required">*</span>
-                        </label>
-                        <input
-                          type="number"
-                          value={item.unitPrice}
-                          onChange={(e) => handleItemChange(index, 'unitPrice', e.target.value)}
-                          placeholder="0.00"
-                          step="0.01"
-                          min="0"
-                          required
-                        />
-                      </div>
+                        <div className="invoices-form">
+                          <label>
+                            単価 <span className="required">*</span>
+                          </label>
+                          <input
+                            type="number"
+                            value={item.unitPrice}
+                            onChange={(e) => handleItemChange(index, 'unitPrice', e.target.value)}
+                            placeholder="0.00"
+                            step="0.01"
+                            min="0"
+                            required
+                          />
+                        </div>
                       </div>
                       <div className="invoices-form">
                         <label>手数料ルール</label>
@@ -621,7 +633,7 @@ const Invoices = () => {
                         />
                       </div>
 
-                      
+
 
                       <button
                         type="button"
