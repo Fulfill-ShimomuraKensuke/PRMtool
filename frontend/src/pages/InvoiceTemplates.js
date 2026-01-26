@@ -1,24 +1,21 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useState, useEffect, useCallback } from 'react';
 import invoiceTemplateService from '../services/invoiceTemplateService';
+import { useAuth } from '../context/AuthContext';
 import './InvoiceTemplates.css';
 
 /**
- * InvoiceTemplatesページ
- * テンプレートの一覧表示、作成、編集、削除を管理
+ * 請求書テンプレート管理ページ
+ * テンプレートの作成、編集、削除、プレビュー機能を提供
  */
 const InvoiceTemplates = () => {
   const { user } = useAuth();
-  const isAdmin = user?.role === 'ADMIN';
-
-  // 状態管理
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewPdfUrl, setPreviewPdfUrl] = useState(null);
-  const [editingTemplate, setEditingTemplate] = useState(null);
   const [formData, setFormData] = useState({
     templateName: '',
     description: '',
@@ -28,44 +25,62 @@ const InvoiceTemplates = () => {
     companyEmail: '',
     companyWebsite: '',
     logoUrl: '',
-    primaryColor: '#000000',
-    secondaryColor: '#666666',
+    primaryColor: '#2c3e50',
+    secondaryColor: '#3498db',
     fontFamily: 'Arial',
+    layoutSettings: '{}',
+    headerText: '',
     footerText: '',
     bankInfo: '',
     paymentTerms: '',
-    isDefault: false
+    notes: '',
+    isDefault: false,
   });
 
-  /**
-   * 初回レンダリング時にテンプレート一覧を取得
-   */
   useEffect(() => {
     document.title = '請求書テンプレート管理 - PRM Tool';
     fetchTemplates();
   }, []);
 
-  /**
-   * テンプレート一覧を取得
-   */
+  // プレビューを閉じる（useCallbackでラップして最適化）
+  const handleClosePreview = useCallback(() => {
+    setShowPreviewModal(false);
+    if (previewPdfUrl) {
+      URL.revokeObjectURL(previewPdfUrl);
+      setPreviewPdfUrl(null);
+    }
+  }, [previewPdfUrl]);
+
+  // プレビュー表示時にESCキーで閉じる
+  useEffect(() => {
+    const handleEsc = (event) => {
+      if (event.key === 'Escape' && showPreviewModal) {
+        handleClosePreview();
+      }
+    };
+
+    window.addEventListener('keydown', handleEsc);
+
+    return () => {
+      window.removeEventListener('keydown', handleEsc);
+    };
+  }, [showPreviewModal, handleClosePreview]);
+
+  // テンプレート一覧を取得
   const fetchTemplates = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
       const data = await invoiceTemplateService.getAll();
       setTemplates(data);
-      setError('');
     } catch (err) {
       setError('テンプレートの取得に失敗しました');
-      console.error('Fetch templates error:', err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  /**
-   * モーダルを開く
-   * 新規作成または編集モードで開く
-   */
+  // モーダルを開く（新規作成または編集）
   const handleOpenModal = (template = null) => {
     if (template) {
       setEditingTemplate(template);
@@ -78,13 +93,16 @@ const InvoiceTemplates = () => {
         companyEmail: template.companyEmail || '',
         companyWebsite: template.companyWebsite || '',
         logoUrl: template.logoUrl || '',
-        primaryColor: template.primaryColor || '#000000',
-        secondaryColor: template.secondaryColor || '#666666',
+        primaryColor: template.primaryColor || '#2c3e50',
+        secondaryColor: template.secondaryColor || '#3498db',
         fontFamily: template.fontFamily || 'Arial',
+        layoutSettings: template.layoutSettings || '{}',
+        headerText: template.headerText || '',
         footerText: template.footerText || '',
         bankInfo: template.bankInfo || '',
         paymentTerms: template.paymentTerms || '',
-        isDefault: template.isDefault || false
+        notes: template.notes || '',
+        isDefault: template.isDefault || false,
       });
     } else {
       setEditingTemplate(null);
@@ -97,30 +115,38 @@ const InvoiceTemplates = () => {
         companyEmail: '',
         companyWebsite: '',
         logoUrl: '',
-        primaryColor: '#000000',
-        secondaryColor: '#666666',
+        primaryColor: '#2c3e50',
+        secondaryColor: '#3498db',
         fontFamily: 'Arial',
+        layoutSettings: '{}',
+        headerText: '',
         footerText: '',
         bankInfo: '',
         paymentTerms: '',
-        isDefault: false
+        notes: '',
+        isDefault: false,
       });
     }
     setShowModal(true);
   };
 
-  /**
-   * モーダルを閉じる
-   */
+  // モーダルを閉じる
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingTemplate(null);
+    setError('');
   };
 
-  /**
-   * フォーム送信処理
-   * テンプレートの作成または更新を実行
-   */
+  // フォーム入力変更
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value,
+    });
+  };
+
+  // フォーム送信（作成または更新）
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -131,179 +157,156 @@ const InvoiceTemplates = () => {
       } else {
         await invoiceTemplateService.create(formData);
       }
+      await fetchTemplates();
       handleCloseModal();
-      fetchTemplates();
     } catch (err) {
-      setError(err.response?.data?.message || 'テンプレートの保存に失敗しました');
-      console.error('Save template error:', err);
+      setError(err.response?.data?.message || 'テンプレート操作に失敗しました');
     }
   };
 
-  /**
-   * テンプレート削除処理
-   */
-  const handleDelete = async (id, templateName) => {
-    if (window.confirm(`テンプレート「${templateName}」を削除してもよろしいですか？`)) {
-      try {
-        await invoiceTemplateService.delete(id);
-        fetchTemplates();
-      } catch (err) {
-        setError(err.response?.data?.message || 'テンプレートの削除に失敗しました');
-        console.error('Delete template error:', err);
-      }
+  // テンプレート削除
+  const handleDelete = async (id) => {
+    if (!window.confirm('本当に削除しますか?')) return;
+
+    try {
+      await invoiceTemplateService.delete(id);
+      await fetchTemplates();
+    } catch (err) {
+      setError('テンプレートの削除に失敗しました');
+      console.error(err);
     }
   };
 
-  /**
-   * デフォルトテンプレートに設定
-   */
-  const handleSetDefault = async (id, templateName) => {
-    if (window.confirm(`テンプレート「${templateName}」をデフォルトに設定しますか？`)) {
-      try {
-        await invoiceTemplateService.setAsDefault(id);
-        fetchTemplates();
-      } catch (err) {
-        setError(err.response?.data?.message || 'デフォルト設定に失敗しました');
-        console.error('Set default error:', err);
-      }
+  // デフォルトテンプレートに設定
+  const handleSetDefault = async (id) => {
+    try {
+      await invoiceTemplateService.setDefault(id);
+      await fetchTemplates();
+    } catch (err) {
+      setError('デフォルト設定に失敗しました');
+      console.error(err);
     }
   };
 
-  /**
-   * プレビューPDFを表示
-   * テンプレートのデザインをサンプルデータで確認
-   */
+  // プレビューを表示
   const handlePreview = async (id) => {
     try {
-      setError('');
       const pdfBlob = await invoiceTemplateService.getPreviewPdf(id);
       const url = URL.createObjectURL(pdfBlob);
       setPreviewPdfUrl(url);
       setShowPreviewModal(true);
     } catch (err) {
-      setError(err.response?.data?.message || 'プレビューの生成に失敗しました');
-      console.error('Preview error:', err);
+      setError('プレビューの表示に失敗しました');
+      console.error(err);
     }
   };
 
-  /**
-   * プレビューモーダルを閉じる
-   * URLオブジェクトをクリーンアップ
-   */
-  const handleClosePreview = () => {
-    if (previewPdfUrl) {
-      URL.revokeObjectURL(previewPdfUrl);
-      setPreviewPdfUrl(null);
-    }
-    setShowPreviewModal(false);
-  };
-
-  /**
-   * 入力フィールドの変更処理
-   */
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
-
-  if (loading) {
-    return <div className="loading">読み込み中...</div>;
-  }
+  // 管理者権限チェック
+  const isAdmin = user?.role === 'ADMIN';
 
   return (
-    <div className="invoice-templates-container">
-      <div className="page-header">
-        <h1>請求書テンプレート管理</h1>
-        <button className="btn btn-primary" onClick={() => handleOpenModal()}>
-          新規テンプレート作成
-        </button>
-      </div>
-
-      {error && <div className="alert alert-danger">{error}</div>}
-
-      <div className="templates-grid">
-        {templates.map(template => (
-          <div key={template.id} className="template-card">
-            <div className="template-header">
-              <h3>{template.templateName}</h3>
-              {template.isDefault && <span className="badge-default">デフォルト</span>}
-            </div>
-
-            <div className="template-info">
-              <p className="template-description">{template.description}</p>
-              <div className="template-meta">
-                <span>作成者: {template.createdByName}</span>
-                <span>作成日: {new Date(template.createdAt).toLocaleDateString()}</span>
-              </div>
-            </div>
-
-            <div className="template-actions">
-              <button className="btn btn-sm btn-secondary" onClick={() => handleOpenModal(template)}>
-                編集
-              </button>
-              <button className="btn btn-sm btn-info" onClick={() => handlePreview(template.id)}>
-                プレビュー
-              </button>
-              {!template.isDefault && isAdmin && (
-                <>
-                  <button
-                    className="btn btn-sm btn-info"
-                    onClick={() => handleSetDefault(template.id, template.templateName)}
-                  >
-                    デフォルトに設定
-                  </button>
-                  <button
-                    className="btn btn-sm btn-danger"
-                    onClick={() => handleDelete(template.id, template.templateName)}
-                  >
-                    削除
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {templates.length === 0 && (
-        <div className="empty-state">
-          <p>テンプレートがありません</p>
+    <>
+      <div className="invoice-templates-container">
+        <div className="page-header">
+          <h1>📋 請求書テンプレート管理</h1>
           <button className="btn btn-primary" onClick={() => handleOpenModal()}>
-            最初のテンプレートを作成
+            + 新規テンプレート作成
           </button>
         </div>
-      )}
 
+        {error && <div className="alert alert-danger">{error}</div>}
+
+        {loading ? (
+          <div className="loading">読み込み中...</div>
+        ) : templates.length === 0 ? (
+          <div className="empty-state">
+            <p>テンプレートがまだありません。新規作成してください。</p>
+          </div>
+        ) : (
+          <div className="templates-grid">
+            {templates.map((template) => (
+              <div key={template.id} className="template-card">
+                <div className="template-header">
+                  <h3>{template.templateName}</h3>
+                  {template.isDefault && (
+                    <span className="badge-default">デフォルト</span>
+                  )}
+                </div>
+                <p className="template-description">{template.description}</p>
+                <div className="template-info">
+                  <p>作成者: {template.createdByName}</p>
+                  <p>
+                    作成日: {new Date(template.createdAt).toLocaleDateString('ja-JP')}
+                  </p>
+                </div>
+                <div className="template-actions">
+                  <button
+                    onClick={() => handleOpenModal(template)}
+                    className="btn btn-primary btn-sm"
+                  >
+                    編集
+                  </button>
+                  <button
+                    onClick={() => handlePreview(template.id)}
+                    className="btn btn-info btn-sm"
+                  >
+                    プレビュー
+                  </button>
+                  {!template.isDefault && isAdmin && (
+                    <button
+                      onClick={() => handleSetDefault(template.id)}
+                      className="btn btn-secondary btn-sm"
+                    >
+                      デフォルトに設定
+                    </button>
+                  )}
+                  {!template.isDefault && isAdmin && (
+                    <button
+                      onClick={() => handleDelete(template.id)}
+                      className="btn btn-danger btn-sm"
+                    >
+                      削除
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 作成・編集モーダル */}
       {showModal && (
         <div className="modal-overlay" onClick={handleCloseModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{editingTemplate ? 'テンプレート編集' : '新規テンプレート作成'}</h2>
-              <button className="close-button" onClick={handleCloseModal}>×</button>
             </div>
+
+            {error && <div className="alert alert-danger">{error}</div>}
 
             <form onSubmit={handleSubmit}>
               <div className="form-section">
                 <h3>基本情報</h3>
                 <div className="form-group">
-                  <label>テンプレート名 *</label>
+                  <label>
+                    テンプレート名 *
+                  </label>
                   <input
                     type="text"
                     name="templateName"
                     value={formData.templateName}
-                    onChange={handleInputChange}
+                    onChange={handleChange}
                     required
                   />
                 </div>
+
                 <div className="form-group">
                   <label>説明</label>
                   <textarea
                     name="description"
                     value={formData.description}
-                    onChange={handleInputChange}
+                    onChange={handleChange}
                     rows="3"
                   />
                 </div>
@@ -311,60 +314,65 @@ const InvoiceTemplates = () => {
 
               <div className="form-section">
                 <h3>会社情報</h3>
-                <div className="form-group">
-                  <label>会社名</label>
-                  <input
-                    type="text"
-                    name="companyName"
-                    value={formData.companyName}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>住所</label>
-                  <input
-                    type="text"
-                    name="companyAddress"
-                    value={formData.companyAddress}
-                    onChange={handleInputChange}
-                  />
-                </div>
                 <div className="form-row">
+                  <div className="form-group">
+                    <label>会社名</label>
+                    <input
+                      type="text"
+                      name="companyName"
+                      value={formData.companyName}
+                      onChange={handleChange}
+                    />
+                  </div>
+
                   <div className="form-group">
                     <label>電話番号</label>
                     <input
-                      type="tel"
+                      type="text"
                       name="companyPhone"
                       value={formData.companyPhone}
-                      onChange={handleInputChange}
+                      onChange={handleChange}
                     />
                   </div>
+
                   <div className="form-group">
                     <label>メールアドレス</label>
                     <input
                       type="email"
                       name="companyEmail"
                       value={formData.companyEmail}
-                      onChange={handleInputChange}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>ウェブサイト</label>
+                    <input
+                      type="url"
+                      name="companyWebsite"
+                      value={formData.companyWebsite}
+                      onChange={handleChange}
                     />
                   </div>
                 </div>
+
                 <div className="form-group">
-                  <label>ウェブサイト</label>
+                  <label>住所</label>
                   <input
-                    type="url"
-                    name="companyWebsite"
-                    value={formData.companyWebsite}
-                    onChange={handleInputChange}
+                    type="text"
+                    name="companyAddress"
+                    value={formData.companyAddress}
+                    onChange={handleChange}
                   />
                 </div>
+
                 <div className="form-group">
                   <label>ロゴURL</label>
                   <input
                     type="url"
                     name="logoUrl"
                     value={formData.logoUrl}
-                    onChange={handleInputChange}
+                    onChange={handleChange}
                   />
                 </div>
               </div>
@@ -378,79 +386,74 @@ const InvoiceTemplates = () => {
                       type="color"
                       name="primaryColor"
                       value={formData.primaryColor}
-                      onChange={handleInputChange}
+                      onChange={handleChange}
                     />
                   </div>
+
                   <div className="form-group">
                     <label>セカンダリカラー</label>
                     <input
                       type="color"
                       name="secondaryColor"
                       value={formData.secondaryColor}
-                      onChange={handleInputChange}
+                      onChange={handleChange}
                     />
                   </div>
+
                   <div className="form-group">
                     <label>フォント</label>
                     <select
                       name="fontFamily"
                       value={formData.fontFamily}
-                      onChange={handleInputChange}
+                      onChange={handleChange}
                     >
                       <option value="Arial">Arial</option>
+                      <option value="Helvetica">Helvetica</option>
                       <option value="Times New Roman">Times New Roman</option>
                       <option value="Courier New">Courier New</option>
-                      <option value="Verdana">Verdana</option>
                     </select>
                   </div>
                 </div>
               </div>
 
               <div className="form-section">
-                <h3>フッター情報</h3>
-                <div className="form-group">
-                  <label>フッターテキスト</label>
-                  <textarea
-                    name="footerText"
-                    value={formData.footerText}
-                    onChange={handleInputChange}
-                    rows="2"
-                  />
-                </div>
+                <h3>フッター設定</h3>
                 <div className="form-group">
                   <label>振込先情報</label>
                   <textarea
                     name="bankInfo"
                     value={formData.bankInfo}
-                    onChange={handleInputChange}
+                    onChange={handleChange}
                     rows="3"
+                    placeholder="銀行名、支店名、口座番号など"
                   />
                 </div>
+
                 <div className="form-group">
                   <label>支払条件</label>
                   <textarea
                     name="paymentTerms"
                     value={formData.paymentTerms}
-                    onChange={handleInputChange}
+                    onChange={handleChange}
                     rows="2"
+                    placeholder="例: 発行日より30日以内にお振込みください"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>フッターテキスト</label>
+                  <textarea
+                    name="footerText"
+                    value={formData.footerText}
+                    onChange={handleChange}
+                    rows="2"
+                    placeholder="その他の備考やメッセージ"
                   />
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    name="isDefault"
-                    checked={formData.isDefault}
-                    onChange={handleInputChange}
-                  />
-                  デフォルトテンプレートに設定
-                </label>
-              </div>
-
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>
+                <button type="button" onClick={handleCloseModal} className="btn btn-secondary">
                   キャンセル
                 </button>
                 <button type="submit" className="btn btn-primary">
@@ -462,33 +465,33 @@ const InvoiceTemplates = () => {
         </div>
       )}
 
+      {/* プレビューモーダル - フルスクリーン版 */}
       {showPreviewModal && (
-        <div className="modal-overlay" onClick={handleClosePreview}>
-          <div className="modal-content preview-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay">
+          <div className="modal-content preview-modal">
             <div className="modal-header">
               <h2>テンプレートプレビュー</h2>
-              <button className="close-button" onClick={handleClosePreview}>×</button>
+              <button 
+                onClick={handleClosePreview} 
+                className="close-button"
+                aria-label="閉じる"
+              >
+                ×
+              </button>
             </div>
-
             <div className="preview-container">
               {previewPdfUrl && (
                 <iframe
                   src={previewPdfUrl}
-                  title="PDF Preview"
                   className="pdf-preview"
+                  title="Invoice Preview"
                 />
               )}
-            </div>
-
-            <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" onClick={handleClosePreview}>
-                閉じる
-              </button>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
