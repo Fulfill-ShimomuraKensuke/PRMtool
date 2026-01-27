@@ -102,6 +102,11 @@ const invoiceTemplateService = {
     }
   },
 
+  setDefault: async (id) => {
+    const response = await api.patch(`/api/invoice-templates/${id}/set-default`);
+    return response.data;
+  },
+
   /**
    * テンプレートのプレビューPDFを取得
    * サンプルデータでレイアウトを確認

@@ -347,34 +347,42 @@
   }
 }
 
-/* プレビューモーダル - フルスクリーン版 */
-.preview-modal {
-  max-width: 100vw;
-  width: 100vw;
-  max-height: 100vh;
-  height: 100vh;
-  margin: 0;
-  border-radius: 0;
-  display: flex;
-  flex-direction: column;
+/* ========================================
+   プレビューモーダル - フルスクリーン版
+   重要: 特異性を高めて確実に適用
+   ======================================== */
+
+/* フルスクリーン設定 - 特異性を高める */
+.modal-content.preview-modal {
+  max-width: 100vw !important;
+  width: 100vw !important;
+  max-height: 100vh !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
 }
 
 /* モーダルヘッダー - コンパクト化 */
-.preview-modal .modal-header {
+.modal-content.preview-modal .modal-header {
   padding: 0.75rem 1.5rem;
   border-bottom: 1px solid #dee2e6;
   background-color: #2c3e50;
   flex-shrink: 0;
+  position: static;
 }
 
-.preview-modal .modal-header h2 {
+.modal-content.preview-modal .modal-header h2 {
   color: white;
   font-size: 1.25rem;
   margin: 0;
 }
 
 /* 閉じるボタン - 白色に変更 */
-.preview-modal .close-button {
+.modal-content.preview-modal .close-button {
   position: absolute;
   top: 0.75rem;
   right: 1.5rem;
@@ -393,7 +401,7 @@
   transition: opacity 0.2s;
 }
 
-.preview-modal .close-button:hover {
+.modal-content.preview-modal .close-button:hover {
   opacity: 0.7;
 }
 
@@ -417,22 +425,17 @@
   background-color: white;
 }
 
-/* 閉じるボタンエリア - 削除（ヘッダーに統合） */
-.preview-modal .modal-actions {
-  display: none;
-}
-
 /* レスポンシブ対応 */
 @media (max-width: 768px) {
-  .preview-modal .modal-header {
+  .modal-content.preview-modal .modal-header {
     padding: 0.5rem 1rem;
   }
 
-  .preview-modal .modal-header h2 {
+  .modal-content.preview-modal .modal-header h2 {
     font-size: 1rem;
   }
 
-  .preview-modal .close-button {
+  .modal-content.preview-modal .close-button {
     top: 0.5rem;
     right: 1rem;
     font-size: 1.5rem;
