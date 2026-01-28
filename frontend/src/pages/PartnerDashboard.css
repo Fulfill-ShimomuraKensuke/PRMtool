@@ -1,12 +1,11 @@
-/* パートナー別ダッシュボードのスタイル */
-
+/* パートナーダッシュボードのメインコンテナ */
 .partner-dashboard-container {
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
 }
 
-/* ヘッダー */
+/* パートナー情報を表示するヘッダーセクション */
 .dashboard-header {
   display: flex;
   justify-content: space-between;
@@ -22,7 +21,7 @@
   margin: 0 0 0.5rem 0;
 }
 
-.industry-tag {
+.industry-label {
   display: inline-block;
   padding: 0.25rem 0.75rem;
   background-color: #dbeafe;
@@ -33,15 +32,15 @@
   margin: 0;
 }
 
-/* 統計カードグリッド */
+/* 統計カードを横4項目×縦2項目で配置するグリッド */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
 
-/* 統計カード */
+/* 各統計情報を表示するカード */
 .stat-card {
   background: white;
   border-radius: 12px;
@@ -57,38 +56,7 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* アイコン */
-.stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-icon-projects {
-  background-color: #dbeafe;
-  color: #1e40af;
-}
-
-.stat-icon-commission {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-
-.stat-icon-invoice {
-  background-color: #fef3c7;
-  color: #92400e;
-}
-
-.stat-icon-amount {
-  background-color: #e0e7ff;
-  color: #4338ca;
-}
-
-/* 統計コンテンツ */
+/* カード内の統計情報を表示するコンテンツエリア */
 .stat-content {
   flex: 1;
 }
@@ -112,7 +80,53 @@
   margin: 0;
 }
 
-/* 詳細グリッド */
+/* 各カードの視覚的識別のためのアイコン（共通設定） */
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* 案件関連のアイコンスタイル */
+.stat-icon-project {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.stat-icon-new {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.stat-icon-active {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.stat-icon-completed {
+  background-color: #d9f99d;
+  color: #365314;
+}
+
+/* 手数料関連のアイコンスタイル */
+.stat-icon-commission,
+.stat-icon-rule {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+/* 請求書関連のアイコンスタイル */
+.stat-icon-invoice,
+.stat-icon-amount {
+  background-color: #e0e7ff;
+  color: #4338ca;
+}
+
+/* 詳細情報を表示するカードのグリッド */
 .details-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -120,7 +134,7 @@
   margin-bottom: 2rem;
 }
 
-/* 詳細カード */
+/* 詳細情報を表示するカード */
 .detail-card {
   background: white;
   border-radius: 12px;
@@ -136,7 +150,7 @@
   border-bottom: 2px solid #e5e7eb;
 }
 
-/* 詳細リスト */
+/* 詳細情報のリスト */
 .detail-list {
   display: flex;
   flex-direction: column;
@@ -164,7 +178,7 @@
   font-weight: 600;
 }
 
-/* アクションボタンエリア */
+/* 他画面への遷移ボタンを配置するエリア */
 .action-buttons {
   display: flex;
   gap: 1rem;
@@ -187,7 +201,7 @@
   background-color: #2563eb;
 }
 
-/* エラーコンテナ */
+/* エラー表示用のコンテナ */
 .error-container {
   display: flex;
   flex-direction: column;
@@ -197,7 +211,14 @@
   gap: 1rem;
 }
 
-/* レスポンシブ対応 */
+/* タブレット以下の画面サイズに対応 */
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* モバイル画面サイズに対応 */
 @media (max-width: 768px) {
   .partner-dashboard-container {
     padding: 1rem;

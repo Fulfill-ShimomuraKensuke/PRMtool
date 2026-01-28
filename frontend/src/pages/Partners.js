@@ -381,7 +381,7 @@ const Partners = () => {
             <button onClick={handleDownloadTemplate} className="btn-template">
               CSVテンプレート
             </button>
-            <button onClick={handleOpenImportModal} className="btn-secondary">
+            <button onClick={handleOpenImportModal} className="btn-import">
               CSVインポート
             </button>
             <button onClick={handleExportCsv} className="btn-export">

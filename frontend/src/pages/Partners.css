@@ -1,11 +1,15 @@
-/* パートナー管理ページのスタイル */
+/* ===================================
+   レイアウト基本構造
+   ================================== */
+
+/* ページ全体のコンテナ */
 .partners-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
 }
 
-/* ヘッダーセクション */
+/* ヘッダー部分の横並びレイアウト */
 .partners-header {
   display: flex;
   justify-content: space-between;
@@ -13,12 +17,129 @@
   margin-bottom: 2rem;
 }
 
-/* ヘッダータイトル */
+/* ページタイトルの色設定 */
 .partners-header h1 {
   color: #2c3e50;
 }
 
-/* 追加ボタン */
+/* ヘッダー内のボタン配置 */
+.header-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+
+/* ===================================
+   パートナーカード表示
+   ================================== */
+
+/* カードのグリッドレイアウト（レスポンシブ対応） */
+.partners-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* パートナー情報を表示するカード本体（クリック可能） */
+.partner-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* カードのホバー時の浮き上がり効果 */
+.partner-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* カード内のパートナー名表示 */
+.partner-card h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+/* パートナーの住所・電話番号表示 */
+.partner-address,
+.partner-phone {
+  color: #555;
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+/* パートナー情報の各項目表示 */
+.partner-info {
+  margin: 0.5rem 0;
+}
+
+.partner-info p {
+  margin: 0.25rem 0;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+/* カード内のアクションボタン配置 */
+.partner-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+
+/* ===================================
+   担当者情報表示
+   ================================== */
+
+/* カード内の担当者セクション（人数表示） */
+.partner-contacts {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.partner-contacts strong {
+  margin-right: 0.5rem;
+  color: #2c3e50;
+}
+
+.partner-contacts p {
+  margin: 0;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.partner-contacts ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.partner-contacts li {
+  padding: 0.25rem 0;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+/* 担当者リストの「...」表示 */
+.partner-contacts ul li.more-indicator {
+  color: #999;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+
+/* ===================================
+   ボタン共通スタイル
+   ================================== */
+
+/* プライマリーアクションボタン（パートナー追加など） */
 .btn-primary {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -30,60 +151,16 @@
   transition: transform 0.2s;
 }
 
-/* 追加ボタンホバー効果 */
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-/* パートナーグリッド */
-.partners-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-/* パートナーカード */
-.partner-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
-}
-
-/* パートナーカードホバー効果 */
-.partner-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-/* パートナーカード内容 */
-.partner-card h3 {
-  color: #2c3e50;
-  margin-bottom: 1rem;
-  font-size: 1.3rem;
-}
-
-/* パートナー情報 */
-.partner-address,
-.partner-phone {
-  color: #555;
-  margin: 0.5rem 0;
-  font-size: 0.95rem;
-}
-
-/* アクションボタン */
-.partner-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-/* 編集・削除ボタン */
-.btn-edit,
-.btn-delete {
+/* 編集操作ボタン */
+.btn-edit {
   flex: 1;
+  background-color: #3498db;
+  color: white;
   padding: 0.6rem;
   border: none;
   border-radius: 6px;
@@ -92,209 +169,62 @@
   transition: opacity 0.2s;
 }
 
-/* 編集ボタン */
-.btn-edit {
-  background-color: #3498db;
-  color: white;
-}
-
-/* 編集ボタンホバー効果 */
 .btn-edit:hover {
   opacity: 0.9;
 }
 
-/* 削除ボタン */
-.btn-delete {
-  background-color: #e74c3c;
+/* モーダル内の編集ボタン */
+.btn-edit-modal {
+  background-color: #3498db;
   color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: opacity 0.2s;
 }
 
-/* 削除ボタンホバー効果 */
+.btn-edit-modal:hover {
+  opacity: 0.9;
+}
+
+/* 削除操作ボタン */
+.btn-delete {
+  flex: 1;
+  background-color: #e74c3c;
+  color: white;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
 .btn-delete:hover {
   opacity: 0.9;
 }
 
-/* モーダルオーバーレイ */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-/* モーダルコンテンツ */
-.modal-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-}
-
-/* モーダルタイトル */
-.modal-content h2 {
-  color: #2c3e50;
-  margin-bottom: 1.5rem;
-}
-
-/* モーダルフォーム */
-.modal-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-/* キャンセル・送信ボタン */
-.btn-cancel,
-.btn-submit {
-  flex: 1;
-  padding: 0.75rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: opacity 0.2s;
-}
-
-/* キャンセルボタン */
-.btn-cancel {
-  background-color: #95a5a6;
-  color: white;
-}
-
-/* キャンセルボタンホバー効果 */
-.btn-cancel:hover {
-  opacity: 0.9;
-}
-
-/* 送信ボタン */
-.btn-submit {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-/* 送信ボタンホバー効果 */
-.btn-submit:hover {
-  opacity: 0.9;
-}
-
-/* 担当者リスト表示 */
-.partner-info {
-  margin: 0.5rem 0;
-}
-
-/* 担当者情報 */
-.partner-info p {
-  margin: 0.25rem 0;
-  color: #555;
-  font-size: 0.9rem;
-}
-
-/* 担当者表示セクション */
-.partner-contacts {
-  margin: 1rem 0;
-  padding: 0.75rem;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-}
-
-/* 担当者見出し */
-.partner-contacts strong {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #2c3e50;
-}
-
-/* 担当者リスト */
-.partner-contacts ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-/* 担当者リストアイテム */
-.partner-contacts li {
-  padding: 0.25rem 0;
-  color: #555;
-  font-size: 0.9rem;
-}
-
-/* 担当者入力フォーム */
-.contacts-list {
-  margin-bottom: 1rem;
-}
-
-/* 担当者入力アイテム */
-.contact-item {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-  align-items: center;
-}
-
-/* 担当者入力フィールド */
-.contact-name-input,
-.contact-info-input {
-  width: 100%;
-}
-
-/* 担当者削除ボタン */
-.btn-remove-contact {
+/* モーダル内の削除ボタン */
+.btn-delete-modal {
   background-color: #e74c3c;
   color: white;
+  padding: 0.75rem 1.5rem;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-/* 担当者削除ボタンホバー効果 */
-.btn-remove-contact:hover {
-  opacity: 0.9;
-}
-
-/* 担当者追加ボタン */
-.btn-add-contact {
-  background-color: #3498db;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 1rem;
   transition: opacity 0.2s;
 }
 
-/* 担当者追加ボタンホバー効果 */
-.btn-add-contact:hover {
+.btn-delete-modal:hover {
   opacity: 0.9;
 }
 
-/* パートナーカードのダブルクリック対応 */
-.partner-card {
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-/* パートナーカードホバー効果 */
-.partner-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-/* 詳細ボタン */
+/* 詳細表示ボタン */
 .btn-detail {
   width: 100%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -307,476 +237,62 @@
   transition: opacity 0.2s;
 }
 
-/* 詳細ボタンホバー効果 */
 .btn-detail:hover {
   opacity: 0.9;
 }
 
-/* 詳細モーダル */
-.modal-detail {
-  max-width: 700px;
-}
-
-/* 詳細セクション */
-.detail-section {
-  margin: 1.5rem 0;
-}
-
-/* 詳細セクション見出し */
-.detail-item {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-/* 最後の詳細セクションのボーダーを削除 */
-.detail-item:last-child {
-  border-bottom: none;
-}
-
-/* 詳細ラベルと内容 */
-.detail-item label {
-  display: block;
-  font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
-  font-size: 0.95rem;
-}
-
-/* 詳細内容 */
-.detail-item p {
-  margin: 0;
-  color: #555;
-  font-size: 1rem;
-}
-
-/* 詳細担当者リスト */
-.detail-contacts-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-/* 詳細担当者リストアイテム */
-.detail-contacts-list li {
-  padding: 0.5rem 0;
-  color: #555;
-  font-size: 0.95rem;
-}
-
-/* 詳細担当者リストの強調テキスト */
-.detail-contacts-list strong {
-  color: #2c3e50;
-}
-
-/* 詳細モーダルのボタン */
-.btn-edit-modal,
-.btn-delete-modal {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 1rem;
-  transition: opacity 0.2s;
-}
-
-/* 詳細モーダルの編集ボタン */
-.btn-edit-modal {
-  background-color: #3498db;
-  color: white;
-}
-
-/* 詳細モーダルの編集ボタンホバー効果 */
-.btn-edit-modal:hover {
-  opacity: 0.9;
-}
-
-/* 詳細モーダルの削除ボタン */
-.btn-delete-modal {
-  background-color: #e74c3c;
-  color: white;
-}
-
-/* 詳細モーダルの削除ボタンホバー効果 */
-.btn-delete-modal:hover {
-  opacity: 0.9;
-}
-
-/* 担当者表示の省略記号 */
-.partner-contacts ul li.more-indicator {
-  color: #999;
-  font-weight: bold;
-  font-size: 1.2rem;
-}
-
-/* パートナーカードの担当者人数表示 */
-.partner-contacts {
-  margin: 1rem 0;
-  padding: 0.75rem;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-}
-
-/* 担当者見出し */
-.partner-contacts strong {
-  margin-right: 0.5rem;
-  color: #2c3e50;
-}
-
-/* 担当者情報 */
-.partner-contacts p {
-  margin: 0;
-  color: #555;
-  font-size: 0.9rem;
-}
-
-/* 詳細モーダルの担当者グリッド表示 */
-.detail-contacts-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-/* 担当者グリッドアイテム */
-.contact-grid-item {
-  padding: 0.75rem;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  border-left: 3px solid #667eea;
-}
-
-/* 担当者フィールド */
-.contact-field {
-  display: flex;
-  margin-bottom: 0.25rem;
-}
-
-/* 最後の担当者フィールドのマージンを削除 */
-.contact-field:last-child {
-  margin-bottom: 0;
-}
-
-/* 担当者ラベルと値 */
-.contact-label {
-  font-weight: 600;
-  color: #2c3e50;
-  min-width: 100px;
-  flex-shrink: 0;
-}
-
-/* 担当者値 */
-.contact-value {
-  color: #555;
-  flex-grow: 1;
-}
-
-/* 検索バー */
-.search-bar {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  align-items: center;
-}
-
-/* 検索入力フィールド */
-.search-input {
+/* キャンセルボタン */
+.btn-cancel {
   flex: 1;
-  padding: 0.75rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
-}
-
-/* 検索入力フィールドフォーカス効果 */
-.search-input:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-/* クリアボタン */
-.btn-clear {
   background-color: #95a5a6;
   color: white;
+  padding: 0.75rem;
   border: none;
-  padding: 0.75rem 1.5rem;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
   transition: opacity 0.2s;
 }
 
-/* クリアボタンホバー効果 */
-.btn-clear:hover {
+.btn-cancel:hover {
   opacity: 0.9;
 }
 
-/* 検索結果情報 */
-.search-results-info {
-  margin-bottom: 1rem;
-  padding: 0.75rem;
-  background-color: #e8f4f8;
-  border-left: 4px solid #3498db;
-  border-radius: 4px;
-  color: #2c3e50;
-  font-weight: 500;
-}
-
-/* ヘッダーボタン */
-.header-buttons {
-  display: flex;
-  gap: 0.75rem;
-}
-
-/* セカンダリボタン */
-.btn-secondary {
-  background-color: #27ae60;
+/* フォーム送信ボタン */
+.btn-submit {
+  flex: 1;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  padding: 0.75rem;
   border: none;
-  padding: 0.75rem 1.5rem;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
   transition: opacity 0.2s;
 }
 
-/* セカンダリボタンホバー効果 */
+.btn-submit:hover {
+  opacity: 0.9;
+}
+
+/* CSVインポートボタン */
+.btn-import {
+  background-color: #27ae60;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.2s;
+  font-size: 0.95rem;
+}
+
 .btn-secondary:hover {
   opacity: 0.9;
 }
 
-/* CSVインポートモーダル */
-.import-instructions {
-  margin-bottom: 1.5rem;
-}
-
-/* インポート説明 */
-.import-instructions h3 {
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
-}
-
-/* インポート説明テキスト */
-.import-instructions p {
-  color: #666;
-  margin-bottom: 1rem;
-}
-
-/* CSVフォーマット例 */
-.csv-format {
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  padding: 1rem;
-  font-family: 'Courier New', monospace;
-  font-size: 0.85rem;
-  overflow-x: auto;
-  white-space: pre;
-}
-
-/* CSV注意事項リスト */
-.csv-notes {
-  margin-top: 1rem;
-  padding-left: 1.5rem;
-}
-
-/* CSV注意事項リストアイテム */
-.csv-notes li {
-  color: #666;
-  margin-bottom: 0.5rem;
-}
-
-/* ファイルアップロード */
-.file-upload {
-  margin: 1.5rem 0;
-}
-
-/* ファイルラベル */
-.file-label {
-  display: inline-block;
-  background-color: #3498db;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: opacity 0.2s;
-}
-
-/* ファイルラベルホバー効果 */
-.file-label:hover {
-  opacity: 0.9;
-}
-
-/* ファイル入力フィールド */
-.file-input {
-  display: none;
-}
-
-/* 選択されたファイル名 */
-.file-name {
-  margin-top: 0.75rem;
-  color: #2c3e50;
-  font-weight: 500;
-}
-
-/* インポート結果 */
-.import-result {
-  padding: 1rem 0;
-}
-
-/* インポート結果見出し */
-.import-result h3 {
-  color: #2c3e50;
-  margin-bottom: 1rem;
-}
-
-/* 結果サマリー */
-.result-summary {
-  display: flex;
-  gap: 2rem;
-  margin-bottom: 1.5rem;
-}
-
-/* 成功・エラーカウント */
-.success-count {
-  color: #27ae60;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-/* エラーカウント */
-.error-count {
-  color: #e74c3c;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-/* エラー詳細リスト */
-.error-details {
-  margin-top: 1rem;
-  padding: 1rem;
-  background-color: #fff5f5;
-  border-left: 4px solid #e74c3c;
-  border-radius: 4px;
-}
-
-/* エラー詳細見出し */
-.error-details h4 {
-  color: #c33;
-  margin-bottom: 0.75rem;
-}
-
-/* エラー詳細リストアイテム */
-.error-details ul {
-  margin: 0;
-  padding-left: 1.5rem;
-}
-
-/* エラー詳細リストアイテム */
-.error-details li {
-  color: #666;
-  margin-bottom: 0.5rem;
-}
-
-/* モーダルヘッダー */
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #e0e0e0;
-}
-
-/* モーダルタイトル */
-.modal-header h2 {
-  margin: 0;
-  color: #2c3e50;
-}
-
-/* 閉じるボタン */
-.btn-close {
-  background: none;
-  border: none;
-  font-size: 2rem;
-  color: #95a5a6;
-  cursor: pointer;
-  padding: 0;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: background-color 0.2s, color 0.2s;
-}
-
-/* 閉じるボタンホバー効果 */
-.btn-close:hover {
-  background-color: #f0f0f0;
-  color: #2c3e50;
-}
-
-/* 大きいモーダル */
-.modal-large {
-  max-width: 700px;
-}
-
-/* パートナー詳細コンテンツ */
-.partner-detail-content {
-  margin-bottom: 1.5rem;
-}
-
-/* パートナー詳細見出し */
-.partner-detail-content h3 {
-  color: #2c3e50;
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
-}
-
-/* 担当者テーブル */
-.contacts-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 0.5rem;
-}
-
-/* テーブルヘッダー */
-.contacts-table thead {
-  background-color: #f8f9fa;
-}
-
-/* テーブルセル */
-.contacts-table th {
-  padding: 0.75rem;
-  text-align: left;
-  font-weight: 600;
-  color: #2c3e50;
-  border-bottom: 2px solid #dee2e6;
-}
-
-/* テーブルデータセル */
-.contacts-table td {
-  padding: 0.75rem;
-  color: #555;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-/* 最後のテーブル行のボーダーを削除 */
-.contacts-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-/* テーブル行ホバー効果 */
-.contacts-table tbody tr:hover {
-  background-color: #f8f9fa;
-}
-
-/* CSVテンプレートボタン */
+/* CSVテンプレートダウンロードボタン */
 .btn-template {
   background-color: #9b59b6;
   color: white;
@@ -810,7 +326,7 @@
   opacity: 0.9;
 }
 
-/* ダッシュボードボタン */
+/* ダッシュボード遷移ボタン */
 .btn-dashboard {
   background: #2196f3;
   color: white;
@@ -824,4 +340,489 @@
 
 .btn-dashboard:hover {
   background: #1976d2;
+}
+
+/* 検索クリアボタン */
+.btn-clear {
+  background-color: #95a5a6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.btn-clear:hover {
+  opacity: 0.9;
+}
+
+/* 担当者追加ボタン */
+.btn-add-contact {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: opacity 0.2s;
+}
+
+.btn-add-contact:hover {
+  opacity: 0.9;
+}
+
+/* 担当者削除ボタン */
+.btn-remove-contact {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-remove-contact:hover {
+  opacity: 0.9;
+}
+
+
+/* ===================================
+   モーダルダイアログ
+   ================================== */
+
+/* モーダル背景のオーバーレイ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* モーダルの内容コンテナ */
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* 大きめのモーダル（詳細表示用） */
+.modal-large {
+  max-width: 700px;
+}
+
+.modal-detail {
+  max-width: 700px;
+}
+
+/* モーダルのヘッダー部分 */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+/* モーダルタイトル */
+.modal-content h2 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
+/* モーダル閉じるボタン */
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #95a5a6;
+  cursor: pointer;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-close:hover {
+  background-color: #f0f0f0;
+  color: #2c3e50;
+}
+
+/* モーダル内のボタン配置 */
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+
+/* ===================================
+   詳細モーダルの表示
+   ================================== */
+
+/* 詳細情報のコンテンツエリア */
+.partner-detail-content {
+  margin-bottom: 1.5rem;
+}
+
+.partner-detail-content h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+/* 詳細セクション全体 */
+.detail-section {
+  margin: 1.5rem 0;
+}
+
+/* 各詳細項目の区切り */
+.detail-item {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+/* 詳細項目のラベル */
+.detail-item label {
+  display: block;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+/* 詳細項目の内容テキスト */
+.detail-item p {
+  margin: 0;
+  color: #555;
+  font-size: 1rem;
+}
+
+/* 詳細モーダルの担当者リスト */
+.detail-contacts-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.detail-contacts-list li {
+  padding: 0.5rem 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.detail-contacts-list strong {
+  color: #2c3e50;
+}
+
+/* 詳細モーダルの担当者グリッド表示 */
+.detail-contacts-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* 各担当者情報のカード */
+.contact-grid-item {
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #667eea;
+}
+
+/* 担当者情報のフィールド行 */
+.contact-field {
+  display: flex;
+  margin-bottom: 0.25rem;
+}
+
+.contact-field:last-child {
+  margin-bottom: 0;
+}
+
+/* 担当者情報のラベル部分 */
+.contact-label {
+  font-weight: 600;
+  color: #2c3e50;
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+/* 担当者情報の値部分 */
+.contact-value {
+  color: #555;
+  flex-grow: 1;
+}
+
+
+/* ===================================
+   フォーム・入力関連
+   ================================== */
+
+/* 担当者入力フォームのリスト */
+.contacts-list {
+  margin-bottom: 1rem;
+}
+
+/* 各担当者入力行のレイアウト */
+.contact-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  align-items: center;
+}
+
+/* 担当者の氏名入力フィールド */
+.contact-name-input {
+  width: 100%;
+}
+
+/* 担当者の連絡先入力フィールド */
+.contact-info-input {
+  width: 100%;
+}
+
+
+/* ===================================
+   検索機能
+   ================================== */
+
+/* 検索バーの横並びレイアウト */
+.search-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+/* 検索キーワード入力フィールド */
+.search-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+/* 検索入力フォーカス時の強調表示 */
+.search-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* 検索結果の件数表示 */
+.search-results-info {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background-color: #e8f4f8;
+  border-left: 4px solid #3498db;
+  border-radius: 4px;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+
+/* ===================================
+   CSVインポート機能
+   ================================== */
+
+/* インポートの使い方説明セクション */
+.import-instructions {
+  margin-bottom: 1.5rem;
+}
+
+.import-instructions h3 {
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.import-instructions p {
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+/* CSVフォーマットの例示表示 */
+.csv-format {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 1rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* CSV使用時の注意事項リスト */
+.csv-notes {
+  margin-top: 1rem;
+  padding-left: 1.5rem;
+}
+
+.csv-notes li {
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+/* ファイルアップロード領域 */
+.file-upload {
+  margin: 1.5rem 0;
+}
+
+/* ファイル選択ボタンのラベル */
+.file-label {
+  display: inline-block;
+  background-color: #3498db;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.file-label:hover {
+  opacity: 0.9;
+}
+
+/* ファイル入力フィールド（非表示） */
+.file-input {
+  display: none;
+}
+
+/* 選択されたファイル名の表示 */
+.file-name {
+  margin-top: 0.75rem;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+/* インポート結果の表示領域 */
+.import-result {
+  padding: 1rem 0;
+}
+
+.import-result h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+/* インポート結果のサマリー表示 */
+.result-summary {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+/* 成功件数の表示 */
+.success-count {
+  color: #27ae60;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* エラー件数の表示 */
+.error-count {
+  color: #e74c3c;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* エラー詳細の表示領域 */
+.error-details {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #fff5f5;
+  border-left: 4px solid #e74c3c;
+  border-radius: 4px;
+}
+
+.error-details h4 {
+  color: #c33;
+  margin-bottom: 0.75rem;
+}
+
+.error-details ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.error-details li {
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+
+/* ===================================
+   テーブル表示
+   ================================== */
+
+/* 担当者情報テーブル */
+.contacts-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+/* テーブルヘッダー背景 */
+.contacts-table thead {
+  background-color: #f8f9fa;
+}
+
+/* テーブルヘッダーセル */
+.contacts-table th {
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: #2c3e50;
+  border-bottom: 2px solid #dee2e6;
+}
+
+/* テーブルデータセル */
+.contacts-table td {
+  padding: 0.75rem;
+  color: #555;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* 最終行のボーダー削除 */
+.contacts-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* テーブル行のホバー時の背景色変更 */
+.contacts-table tbody tr:hover {
+  background-color: #f8f9fa;
 }

@@ -480,8 +480,8 @@
 }
 
 /* セカンダリボタン（テンプレート管理用） */
-.btn-secondary {
-  background-color: #95a5a6;
+.btn-template1 {
+  background-color: #41cdd7;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -491,6 +491,6 @@
   transition: background-color 0.3s;
 }
 
-.btn-secondary:hover {
+.btn-template1:hover {
   background-color: #7f8c8d;
 }

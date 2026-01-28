@@ -85,11 +85,33 @@
   color: #999;
 }
 
-/* テンプレートアクション */
+/* テンプレートアクションボタン群のレイアウト */
 .template-actions {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+/* 各ボタンの基本サイズ設定 */
+.template-actions .btn {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 常に表示されるボタンは自動幅で配置 */
+.template-actions .btn-primary,
+.template-actions .btn-info {
+  flex: 0 1 auto;
+}
+
+/* 条件付きで表示されるボタンは利用可能なスペースを均等に使用 */
+.template-actions .btn-secondary,
+.template-actions .btn-danger {
+  flex: 1 1 auto;
 }
 
 /* 空の状態表示 */

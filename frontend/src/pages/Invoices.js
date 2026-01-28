@@ -302,7 +302,7 @@ const Invoices = () => {
         <div className="invoices-header">
           <h1>📄 請求書管理</h1>
           <div className="header-buttons">
-            <button className="btn-secondary" onClick={handleNavigateToTemplates}>
+            <button className="btn-template1" onClick={handleNavigateToTemplates}>
               📋 テンプレート管理
             </button>
             <button className="btn-primary" onClick={() => handleOpenModal()}>
@@ -577,9 +577,9 @@ const Invoices = () => {
                             type="number"
                             value={item.unitPrice}
                             onChange={(e) => handleItemChange(index, 'unitPrice', e.target.value)}
-                            placeholder="0.00"
-                            step="0.01"
-                            min="0"
+                            placeholder="0"
+                            step="1"
+                            min="1"
                             required
                           />
                         </div>
