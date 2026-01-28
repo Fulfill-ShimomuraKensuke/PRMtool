@@ -43,13 +43,35 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
+      # ddl-autoをnoneに変更（Flywayに任せる）
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
         format_sql: true
         use_sql_comments: true
         highlight_sql: true
+
+  # ==========================================
+  # Flyway設定（データベースマイグレーション）
+  # ==========================================
+  flyway:
+    # Flywayを有効化
+    enabled: true
+    # マイグレーションファイルの配置場所
+    locations: classpath:db/migration
+    # ファイルのエンコーディング
+    encoding: UTF-8
+    # 既存のデータベースに対してFlywayを初めて適用する場合
+    baseline-on-migrate: true
+    # ベースラインバージョン
+    baseline-version: 0
+    # マイグレーション実行前に検証
+    validate-on-migrate: true
+    # 順序が前後したマイグレーションを許可しない
+    out-of-order: false
+    # プレースホルダーの使用
+    placeholder-replacement: true
 
 ---
 # ==========================================
@@ -75,6 +97,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
+      # 本番環境ではvalidateのまま
       ddl-auto: validate
     show-sql: false
     properties:
@@ -84,6 +107,18 @@ spring:
           batch_size: 20
         order_inserts: true
         order_updates: true
+
+  # ==========================================
+  # Flyway設定（本番環境）
+  # ==========================================
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    encoding: UTF-8
+    baseline-on-migrate: true
+    baseline-version: 0
+    validate-on-migrate: true
+    out-of-order: false
 
 ---
 # ==========================================
@@ -108,8 +143,16 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
+      # テスト環境では毎回作り直し
       ddl-auto: create-drop
     show-sql: true
+
+  # ==========================================
+  # Flyway設定（テスト環境は無効化）
+  # ==========================================
+  flyway:
+    # テスト環境ではFlywayを無効化（create-dropを使用）
+    enabled: false
 
 ---
 # ==========================================
@@ -140,5 +183,7 @@ logging:
     org.springframework.security: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    # Flywayのログも表示
+    org.flywaydb: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
