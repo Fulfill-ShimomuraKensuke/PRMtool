@@ -33,7 +33,7 @@ public class InvoiceTemplateResponse {
   private String companyEmail; // メールアドレス
   private String companyWebsite; // ウェブサイト
 
-  // レイアウト・デザイン設定
+  // レイアウト・デザイン設定（旧形式、下位互換性のため保持）
   private String layoutSettings; // レイアウト設定JSON
   private String primaryColor; // プライマリカラー
   private String secondaryColor; // セカンダリカラー
@@ -44,6 +44,9 @@ public class InvoiceTemplateResponse {
   private String footerText; // フッターテキスト
   private String bankInfo; // 銀行情報
   private String paymentTerms; // 支払条件
+
+  // キャンバスレイアウト - エディタで作成したレイアウト情報
+  private String canvasLayout; // JSON形式でキャンバス上の全要素の配置情報
 
   // デフォルト設定
   private Boolean isDefault; // デフォルトフラグ
@@ -77,6 +80,7 @@ public class InvoiceTemplateResponse {
         .footerText(template.getFooterText())
         .bankInfo(template.getBankInfo())
         .paymentTerms(template.getPaymentTerms())
+        .canvasLayout(template.getCanvasLayout())
         .isDefault(template.getIsDefault())
         .createdById(template.getCreatedBy().getId())
         .createdByName(template.getCreatedBy().getName())

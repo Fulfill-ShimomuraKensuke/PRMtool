@@ -74,12 +74,16 @@ public class InvoiceTemplateService {
       throw new RuntimeException("同じ名前のテンプレートが既に存在します: " + request.getTemplateName());
     }
 
-    // 新規テンプレートをデフォルトとして設定する場合、既存のデフォルトを解除
+    // デフォルト設定の処理
     if (Boolean.TRUE.equals(request.getIsDefault())) {
-      clearDefaultTemplate();
+      // 既存のデフォルトテンプレートを解除
+      templateRepository.findByIsDefaultTrue().ifPresent(existingDefault -> {
+        existingDefault.setIsDefault(false);
+        templateRepository.save(existingDefault);
+      });
     }
 
-    // エンティティを構築
+    // テンプレートエンティティを作成
     InvoiceTemplate template = InvoiceTemplate.builder()
         .templateName(request.getTemplateName())
         .description(request.getDescription())
@@ -97,10 +101,12 @@ public class InvoiceTemplateService {
         .footerText(request.getFooterText())
         .bankInfo(request.getBankInfo())
         .paymentTerms(request.getPaymentTerms())
+        .canvasLayout(request.getCanvasLayout())
         .isDefault(request.getIsDefault() != null ? request.getIsDefault() : false)
         .createdBy(creator)
         .build();
 
+    // 保存
     InvoiceTemplate saved = templateRepository.save(template);
     return InvoiceTemplateResponse.from(saved);
   }
@@ -110,21 +116,27 @@ public class InvoiceTemplateService {
    * 既存テンプレートの内容を変更
    */
   public InvoiceTemplateResponse updateTemplate(UUID id, InvoiceTemplateRequest request, String loginId) {
-    // 既存テンプレートを取得
+    // テンプレートを取得
     InvoiceTemplate template = templateRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("テンプレートが見つかりません: " + id));
 
-    // テンプレート名が変更される場合、重複チェック
-    if (!template.getTemplateName().equals(request.getTemplateName())) {
-      templateRepository.findByTemplateName(request.getTemplateName())
-          .ifPresent(existing -> {
+    // テンプレート名の重複チェック（自分以外で同名が存在するか）
+    templateRepository.findByTemplateName(request.getTemplateName())
+        .ifPresent(existing -> {
+          if (!existing.getId().equals(id)) {
             throw new RuntimeException("同じ名前のテンプレートが既に存在します: " + request.getTemplateName());
-          });
-    }
+          }
+        });
 
-    // デフォルト設定が変更される場合、既存のデフォルトを解除
+    // デフォルト設定の処理
     if (Boolean.TRUE.equals(request.getIsDefault()) && !template.getIsDefault()) {
-      clearDefaultTemplate();
+      // 他のデフォルトテンプレートを解除
+      templateRepository.findByIsDefaultTrue().ifPresent(existingDefault -> {
+        if (!existingDefault.getId().equals(id)) {
+          existingDefault.setIsDefault(false);
+          templateRepository.save(existingDefault);
+        }
+      });
     }
 
     // テンプレート情報を更新
@@ -144,54 +156,49 @@ public class InvoiceTemplateService {
     template.setFooterText(request.getFooterText());
     template.setBankInfo(request.getBankInfo());
     template.setPaymentTerms(request.getPaymentTerms());
+    template.setCanvasLayout(request.getCanvasLayout());
     template.setIsDefault(request.getIsDefault() != null ? request.getIsDefault() : false);
 
+    // 保存
     InvoiceTemplate updated = templateRepository.save(template);
     return InvoiceTemplateResponse.from(updated);
   }
 
   /**
    * テンプレートを削除
-   * 指定されたIDのテンプレートを削除
+   * デフォルトテンプレートは削除不可
    */
   public void deleteTemplate(UUID id) {
     InvoiceTemplate template = templateRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("テンプレートが見つかりません: " + id));
 
-    // デフォルトテンプレートの削除は警告
+    // デフォルトテンプレートは削除不可
     if (template.getIsDefault()) {
-      throw new RuntimeException("デフォルトテンプレートは削除できません。先に別のテンプレートをデフォルトに設定してください。");
+      throw new RuntimeException("デフォルトテンプレートは削除できません");
     }
 
-    templateRepository.delete(template);
+    templateRepository.deleteById(id);
   }
 
   /**
-   * デフォルトテンプレートを設定
+   * デフォルトテンプレートに設定
    * 指定したテンプレートをデフォルトに変更
    */
   public InvoiceTemplateResponse setAsDefault(UUID id) {
     InvoiceTemplate template = templateRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("テンプレートが見つかりません: " + id));
 
-    // 既存のデフォルト設定を解除
-    clearDefaultTemplate();
+    // 既存のデフォルトテンプレートを解除
+    templateRepository.findByIsDefaultTrue().ifPresent(existingDefault -> {
+      if (!existingDefault.getId().equals(id)) {
+        existingDefault.setIsDefault(false);
+        templateRepository.save(existingDefault);
+      }
+    });
 
-    // 新しいデフォルトを設定
+    // 新しくデフォルトに設定
     template.setIsDefault(true);
     InvoiceTemplate updated = templateRepository.save(template);
-
     return InvoiceTemplateResponse.from(updated);
-  }
-
-  /**
-   * 既存のデフォルトテンプレート設定を解除
-   * 新しいデフォルトを設定する前に実行
-   */
-  private void clearDefaultTemplate() {
-    templateRepository.findByIsDefaultTrue().ifPresent(existingDefault -> {
-      existingDefault.setIsDefault(false);
-      templateRepository.save(existingDefault);
-    });
   }
 }
