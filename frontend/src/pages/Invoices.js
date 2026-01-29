@@ -3,11 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import invoiceService from '../services/invoiceService';
 import partnerService from '../services/partnerService';
 import commissionRuleService from '../services/commissionRuleService';
+import invoiceTemplateService from '../services/invoiceTemplateService';
 import './Invoices.css';
 
 /**
  * 請求書管理ページコンポーネント
  * 手数料ルールを選択して請求書を作成
+ * 
+ * 更新: テンプレート選択機能を追加
  */
 const Invoices = () => {
   const navigate = useNavigate();
@@ -15,6 +18,7 @@ const Invoices = () => {
   const [filteredInvoices, setFilteredInvoices] = useState([]);
   const [partners, setPartners] = useState([]);
   const [commissionRules, setCommissionRules] = useState([]);
+  const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -26,6 +30,7 @@ const Invoices = () => {
     taxCategory: 'TAX_INCLUDED',
     status: 'DRAFT',
     notes: '',
+    templateId: '',
     items: [{ commissionRuleId: '', description: '', quantity: 1, unitPrice: '' }],
   });
 
@@ -55,19 +60,24 @@ const Invoices = () => {
     setFilteredInvoices(filtered);
   }, [statusFilter, partnerFilter, invoices]);
 
-  // データ取得
+  /**
+   * データ取得
+   * 請求書、パートナー、手数料ルール、テンプレートを取得
+   */
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [invoicesData, partnersData, rulesData] = await Promise.all([
+      const [invoicesData, partnersData, rulesData, templatesData] = await Promise.all([
         invoiceService.getAll(),
         partnerService.getAll(),
         commissionRuleService.getAll(),
+        invoiceTemplateService.getAll(),
       ]);
       setInvoices(invoicesData);
       setFilteredInvoices(invoicesData);
       setPartners(partnersData);
       setCommissionRules(rulesData);
+      setTemplates(templatesData);
     } catch (err) {
       setError('データの取得に失敗しました');
       console.error(err);
@@ -81,23 +91,24 @@ const Invoices = () => {
     navigate('/invoice-templates');
   };
 
-  // 選択可能な手数料ルールをフィルタリング
-  // 請求書のパートナーに紐づく手数料ルールのみを表示
+  /**
+   * 選択可能な手数料ルールをフィルタリング
+   * 請求書のパートナーに紐づく手数料ルールのみを表示
+   */
   const getAvailableCommissionRules = () => {
     if (!formData.partnerId) {
-      // パートナー未選択時は空配列を返す（選択不可）
       return [];
     }
 
-    // 選択したパートナーに紐づく手数料ルールのみ表示
     return commissionRules.filter(rule => {
-      // 確定済みかつ、手数料ルールの案件のパートナーIDが請求書のパートナーIDと一致
       return rule.status === 'CONFIRMED' &&
         rule.projectPartnerId === formData.partnerId;
     });
   };
 
-  // モーダル開閉処理（新規作成または編集）
+  /**
+   * モーダル開閉処理（新規作成または編集）
+   */
   const handleOpenModal = (invoice = null) => {
     if (invoice) {
       setEditingInvoice(invoice);
@@ -108,6 +119,7 @@ const Invoices = () => {
         taxCategory: invoice.taxCategory || 'TAX_INCLUDED',
         status: invoice.status,
         notes: invoice.notes || '',
+        templateId: invoice.templateId || '',
         items: invoice.items.map(item => ({
           commissionRuleId: item.commissionRuleId || '',
           description: item.description,
@@ -117,11 +129,15 @@ const Invoices = () => {
       });
     } else {
       setEditingInvoice(null);
+
       // デフォルトの発行日と支払期限を設定
       const today = new Date().toISOString().split('T')[0];
       const dueDate = new Date();
       dueDate.setDate(dueDate.getDate() + 30);
       const dueDateStr = dueDate.toISOString().split('T')[0];
+
+      // デフォルトテンプレートを設定
+      const defaultTemplate = templates.find(t => t.isDefault);
 
       setFormData({
         partnerId: '',
@@ -130,6 +146,7 @@ const Invoices = () => {
         taxCategory: 'TAX_INCLUDED',
         status: 'DRAFT',
         notes: '',
+        templateId: defaultTemplate ? defaultTemplate.id : '',
         items: [{ commissionRuleId: '', description: '', quantity: 1, unitPrice: '' }],
       });
     }
@@ -154,7 +171,7 @@ const Invoices = () => {
         partnerId: value,
         items: formData.items.map(item => ({
           ...item,
-          commissionRuleId: ''  // 手数料ルールをクリア
+          commissionRuleId: ''
         }))
       });
     } else {
@@ -214,9 +231,10 @@ const Invoices = () => {
     }
   };
 
-  // 請求書を「支払済」に変更する処理
+  /**
+   * 請求書を「支払済」に変更する処理
+   */
   const handleMarkAsPaid = async (invoice) => {
-    // 確認ダイアログを表示
     const confirmed = window.confirm(
       `請求書番号: ${invoice.invoiceNumber}\n` +
       `パートナー: ${invoice.partnerName}\n` +
@@ -229,7 +247,7 @@ const Invoices = () => {
 
     try {
       await invoiceService.markAsPaid(invoice.id);
-      await fetchData(); // データを再取得
+      await fetchData();
     } catch (err) {
       setError(err.response?.data?.message || '支払済への変更に失敗しました');
       console.error(err);
@@ -527,6 +545,29 @@ const Invoices = () => {
                     </small>
                   )}
                 </div>
+
+                {/* テンプレート選択ドロップダウン */}
+                <div className="invoices-form">
+                  <label>
+                    請求書テンプレート <span className="required">*</span>
+                  </label>
+                  <select
+                    name="templateId"
+                    value={formData.templateId}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">選択してください</option>
+                    {templates.map((template) => (
+                      <option key={template.id} value={template.id}>
+                        {template.templateName} {template.isDefault && '（デフォルト）'}
+                      </option>
+                    ))}
+                  </select>
+                  <small className="invoices-form-hint">
+                    PDF生成時に使用するテンプレートを選択してください
+                  </small>
+                </div>
               </div>
 
               <div className="invoices-form" style={{ padding: '0 1.5rem' }}>
@@ -589,30 +630,26 @@ const Invoices = () => {
                         <select
                           value={item.commissionRuleId}
                           onChange={(e) => handleItemChange(index, 'commissionRuleId', e.target.value)}
-                          disabled={!formData.partnerId}  // パートナー未選択時は無効化
+                          disabled={!formData.partnerId}
                         >
                           <option value="">手数料ルールなし</option>
                           {formData.partnerId ? (
-                            // パートナー選択済み：フィルタリングされたルールのみ表示
                             getAvailableCommissionRules().map((rule) => (
                               <option key={rule.id} value={rule.id}>
                                 {rule.ruleName} - {rule.projectName} ({rule.projectPartnerName})
                               </option>
                             ))
                           ) : (
-                            // パートナー未選択：選択肢なし
                             <option value="" disabled>まずパートナーを選択してください</option>
                           )}
                         </select>
 
-                        {/* パートナー未選択時の注意メッセージ */}
                         {!formData.partnerId && (
                           <small style={{ display: 'block', color: '#999', marginTop: '0.25rem', fontSize: '0.875rem' }}>
                             ※手数料ルールを選択するには、まずパートナーを選択してください
                           </small>
                         )}
 
-                        {/* 選択可能なルールがない場合 */}
                         {formData.partnerId && getAvailableCommissionRules().length === 0 && (
                           <small style={{ display: 'block', color: '#e74c3c', marginTop: '0.25rem', fontSize: '0.875rem' }}>
                             ※このパートナー向けの確定済手数料ルールがありません
@@ -632,8 +669,6 @@ const Invoices = () => {
                           required
                         />
                       </div>
-
-
 
                       <button
                         type="button"

@@ -15,6 +15,8 @@ import java.util.UUID;
 
 /**
  * 請求書レスポンス
+ * 
+ * 更新: templateId, templateNameフィールド追加
  */
 @Data
 @NoArgsConstructor
@@ -37,6 +39,19 @@ public class InvoiceResponse {
   private BigDecimal totalAmount;
   private Invoice.InvoiceStatus status;
   private String notes;
+
+  /**
+   * 使用するテンプレートID
+   * PDF生成時に参照
+   */
+  private UUID templateId;
+
+  /**
+   * 使用するテンプレート名
+   * 画面表示用
+   */
+  private String templateName;
+
   private List<InvoiceItemResponse> items;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;

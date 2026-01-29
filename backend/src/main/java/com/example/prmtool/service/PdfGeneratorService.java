@@ -20,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
-import java.math.BigDecimal;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
