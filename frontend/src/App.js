@@ -13,6 +13,7 @@ import CommissionRules from './pages/CommissionRules';
 import Invoices from './pages/Invoices';
 import InvoiceTemplates from './pages/InvoiceTemplates';
 import PartnerDashboard from './pages/PartnerDashboard';
+import InvoiceTemplateEditor from './pages/InvoiceTemplateEditor';
 
 import './App.css';
 
@@ -115,6 +116,26 @@ function AppContent() {
           element={
             <PrivateRoute systemRestricted={true}>
               <InvoiceTemplates />
+            </PrivateRoute>
+          }
+        />
+
+        {/* 請求書テンプレート新規作成（SYSTEMロールは制限） */}
+        <Route
+          path="/invoice-templates/new"
+          element={
+            <PrivateRoute systemRestricted={true}>
+              <InvoiceTemplateEditor />
+            </PrivateRoute>
+          }
+        />
+
+        {/* 請求書テンプレート編集（SYSTEMロールは制限） */}
+        <Route
+          path="/invoice-templates/edit/:id"
+          element={
+            <PrivateRoute systemRestricted={true}>
+              <InvoiceTemplateEditor />
             </PrivateRoute>
           }
         />

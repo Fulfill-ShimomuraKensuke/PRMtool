@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';  // 追加
 import invoiceTemplateService from '../services/invoiceTemplateService';
 import { useAuth } from '../context/AuthContext';
 import './InvoiceTemplates.css';
@@ -8,6 +9,7 @@ import './InvoiceTemplates.css';
  * テンプレートの作成、編集、削除、プレビュー機能を提供
  */
 const InvoiceTemplates = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +43,16 @@ const InvoiceTemplates = () => {
     document.title = '請求書テンプレート管理 - PRM Tool';
     fetchTemplates();
   }, []);
+
+  // 新規作成ボタン - 新しいエディタに遷移
+  const handleCreateNew = () => {
+    navigate('/invoice-templates/new');
+  };
+
+  // 編集ボタン - 新しいエディタに遷移
+  const handleEdit = (templateId) => {
+    navigate(`/invoice-templates/edit/${templateId}`);
+  };
 
   // プレビューを閉じる（useCallbackでラップして最適化）
   const handleClosePreview = useCallback(() => {
@@ -78,56 +90,6 @@ const InvoiceTemplates = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  // モーダルを開く（新規作成または編集）
-  const handleOpenModal = (template = null) => {
-    if (template) {
-      setEditingTemplate(template);
-      setFormData({
-        templateName: template.templateName,
-        description: template.description || '',
-        companyName: template.companyName || '',
-        companyAddress: template.companyAddress || '',
-        companyPhone: template.companyPhone || '',
-        companyEmail: template.companyEmail || '',
-        companyWebsite: template.companyWebsite || '',
-        logoUrl: template.logoUrl || '',
-        primaryColor: template.primaryColor || '#2c3e50',
-        secondaryColor: template.secondaryColor || '#3498db',
-        fontFamily: template.fontFamily || 'Arial',
-        layoutSettings: template.layoutSettings || '{}',
-        headerText: template.headerText || '',
-        footerText: template.footerText || '',
-        bankInfo: template.bankInfo || '',
-        paymentTerms: template.paymentTerms || '',
-        notes: template.notes || '',
-        isDefault: template.isDefault || false,
-      });
-    } else {
-      setEditingTemplate(null);
-      setFormData({
-        templateName: '',
-        description: '',
-        companyName: '',
-        companyAddress: '',
-        companyPhone: '',
-        companyEmail: '',
-        companyWebsite: '',
-        logoUrl: '',
-        primaryColor: '#2c3e50',
-        secondaryColor: '#3498db',
-        fontFamily: 'Arial',
-        layoutSettings: '{}',
-        headerText: '',
-        footerText: '',
-        bankInfo: '',
-        paymentTerms: '',
-        notes: '',
-        isDefault: false,
-      });
-    }
-    setShowModal(true);
   };
 
   // モーダルを閉じる
@@ -209,7 +171,7 @@ const InvoiceTemplates = () => {
       <div className="invoice-templates-container">
         <div className="page-header">
           <h1>📋 請求書テンプレート管理</h1>
-          <button className="btn btn-primary" onClick={() => handleOpenModal()}>
+          <button className="btn btn-primary" onClick={handleCreateNew}>
             + 新規テンプレート作成
           </button>
         </div>
@@ -241,7 +203,7 @@ const InvoiceTemplates = () => {
                 </div>
                 <div className="template-actions">
                   <button
-                    onClick={() => handleOpenModal(template)}
+                    onClick={() => handleEdit(template.id)}
                     className="btn btn-primary btn-sm"
                   >
                     編集
