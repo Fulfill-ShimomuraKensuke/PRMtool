@@ -494,3 +494,136 @@
 .btn-template1:hover {
   background-color: #7f8c8d;
 }
+
+/* PDFアクション列のスタイル */
+.pdf-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+}
+
+/* PDFプレビューボタン */
+.btn-pdf-preview {
+  padding: 6px 12px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.3s;
+  white-space: nowrap;
+}
+
+.btn-pdf-preview:hover {
+  background: #2980b9;
+}
+
+/* PDFダウンロードボタン */
+.btn-pdf-download {
+  padding: 6px 12px;
+  background: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.3s;
+  white-space: nowrap;
+}
+
+.btn-pdf-download:hover:not(:disabled) {
+  background: #229954;
+}
+
+.btn-pdf-download:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}
+
+/* PDFプレビューモーダル */
+.pdf-preview-modal {
+  width: 90vw;
+  max-width: 1200px;
+  height: 90vh;
+  max-height: 900px;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* PDFプレビューモーダルのヘッダー */
+.pdf-preview-modal .modal-header {
+  padding: 20px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.pdf-preview-modal .modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #333;
+}
+
+/* 閉じるボタン */
+.close-button {
+  background: none;
+  border: none;
+  font-size: 32px;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s;
+  line-height: 1;
+}
+
+.close-button:hover {
+  color: #333;
+}
+
+/* PDFプレビューコンテナ */
+.pdf-preview-container {
+  flex: 1;
+  overflow: hidden;
+  background: #525659;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* PDF iframeのスタイル */
+.pdf-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: white;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .pdf-actions {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .btn-pdf-preview,
+  .btn-pdf-download {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+
+  .pdf-preview-modal {
+    width: 95vw;
+    height: 95vh;
+  }
+}

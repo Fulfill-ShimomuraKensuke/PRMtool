@@ -71,9 +71,10 @@ public class InvoiceController {
   /**
    * 請求書PDFを生成してダウンロード
    * 
-   * パラメータ:
-   * - id: 請求書ID
-   * - templateId: 使用するテンプレートID（オプション、指定しない場合はデフォルトテンプレート）
+   * 優先順位:
+   * 1. リクエストパラメータのtemplateId
+   * 2. 請求書に保存されたtemplate_id
+   * 3. デフォルトテンプレート
    * 
    * 権限: ADMIN, ACCOUNTING, REP
    */
@@ -82,19 +83,31 @@ public class InvoiceController {
   public ResponseEntity<byte[]> generateInvoicePdf(
       @PathVariable UUID id,
       @RequestParam(required = false) UUID templateId) {
+
     // 請求書を取得
     Invoice invoice = invoiceRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("請求書が見つかりません: " + id));
 
-    // テンプレートを取得
-    InvoiceTemplate template;
+    // テンプレートを取得（優先順位に従って）
+    InvoiceTemplate template = null;
+
+    // 1. リクエストパラメータのtemplateId
     if (templateId != null) {
       template = templateRepository.findById(templateId)
-          .orElseThrow(() -> new RuntimeException("テンプレートが見つかりません: " + templateId));
-    } else {
-      // デフォルトテンプレートを使用
+          .orElseThrow(() -> new RuntimeException("指定されたテンプレートが見つかりません: " + templateId));
+    }
+
+    // 2. 請求書に保存されたtemplate
+    if (template == null && invoice.getTemplate() != null) {
+      template = invoice.getTemplate();
+    }
+
+    // 3. デフォルトテンプレート
+    if (template == null) {
       template = templateRepository.findByIsDefaultTrue()
-          .orElseThrow(() -> new RuntimeException("デフォルトテンプレートが設定されていません"));
+          .orElseThrow(() -> new RuntimeException(
+              "請求書にテンプレートが設定されておらず、デフォルトテンプレートも存在しません。" +
+                  "テンプレート管理画面でテンプレートを作成し、デフォルトに設定してください。"));
     }
 
     // PDF生成

@@ -10,7 +10,10 @@ import './Invoices.css';
  * 請求書管理ページコンポーネント
  * 手数料ルールを選択して請求書を作成
  * 
- * 更新: テンプレート選択機能を追加
+ * 更新:
+ * - テンプレート選択機能
+ * - PDFダウンロード機能
+ * - PDFプレビュー機能
  */
 const Invoices = () => {
   const navigate = useNavigate();
@@ -23,6 +26,13 @@ const Invoices = () => {
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState(null);
+
+  // PDFプレビュー用のstate
+  const [showPdfPreview, setShowPdfPreview] = useState(false);
+  const [previewPdfUrl, setPreviewPdfUrl] = useState(null);
+  const [previewInvoiceNumber, setPreviewInvoiceNumber] = useState('');
+  const [downloadingPdf, setDownloadingPdf] = useState(null);
+
   const [formData, setFormData] = useState({
     partnerId: '',
     issueDate: '',
@@ -47,12 +57,10 @@ const Invoices = () => {
   useEffect(() => {
     let filtered = [...invoices];
 
-    // ステータスでフィルター
     if (statusFilter !== 'ALL') {
       filtered = filtered.filter(i => i.status === statusFilter);
     }
 
-    // パートナーでフィルター
     if (partnerFilter !== 'ALL') {
       filtered = filtered.filter(i => i.partnerId === partnerFilter);
     }
@@ -62,7 +70,6 @@ const Invoices = () => {
 
   /**
    * データ取得
-   * 請求書、パートナー、手数料ルール、テンプレートを取得
    */
   const fetchData = async () => {
     try {
@@ -92,8 +99,68 @@ const Invoices = () => {
   };
 
   /**
+   * PDFダウンロード処理
+   * 請求書のPDFファイルをダウンロード
+   */
+  const handleDownloadPdf = async (invoice) => {
+    try {
+      setDownloadingPdf(invoice.id);
+      setError('');
+
+      await invoiceService.downloadPdfFile(
+        invoice.id,
+        invoice.invoiceNumber,
+        invoice.templateId
+      );
+    } catch (err) {
+      console.error('PDFダウンロードエラー:', err);
+      setError('PDFのダウンロードに失敗しました: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setDownloadingPdf(null);
+    }
+  };
+
+  /**
+   * PDFプレビュー表示処理
+   * モーダルでPDFをプレビュー
+   */
+  const handlePreviewPdf = async (invoice) => {
+    try {
+      setError('');
+
+      // PDFをBlobとして取得
+      const blob = await invoiceService.downloadPdf(
+        invoice.id,
+        invoice.templateId
+      );
+
+      // BlobからURLを作成
+      const url = URL.createObjectURL(blob);
+
+      setPreviewPdfUrl(url);
+      setPreviewInvoiceNumber(invoice.invoiceNumber);
+      setShowPdfPreview(true);
+    } catch (err) {
+      console.error('PDFプレビューエラー:', err);
+      setError('PDFのプレビューに失敗しました: ' + (err.response?.data?.message || err.message));
+    }
+  };
+
+  /**
+   * PDFプレビューを閉じる
+   * URLオブジェクトをクリーンアップ
+   */
+  const handleClosePdfPreview = () => {
+    if (previewPdfUrl) {
+      URL.revokeObjectURL(previewPdfUrl);
+    }
+    setPreviewPdfUrl(null);
+    setPreviewInvoiceNumber('');
+    setShowPdfPreview(false);
+  };
+
+  /**
    * 選択可能な手数料ルールをフィルタリング
-   * 請求書のパートナーに紐づく手数料ルールのみを表示
    */
   const getAvailableCommissionRules = () => {
     if (!formData.partnerId) {
@@ -107,7 +174,7 @@ const Invoices = () => {
   };
 
   /**
-   * モーダル開閉処理（新規作成または編集）
+   * モーダル開閉処理
    */
   const handleOpenModal = (invoice = null) => {
     if (invoice) {
@@ -130,13 +197,11 @@ const Invoices = () => {
     } else {
       setEditingInvoice(null);
 
-      // デフォルトの発行日と支払期限を設定
       const today = new Date().toISOString().split('T')[0];
       const dueDate = new Date();
       dueDate.setDate(dueDate.getDate() + 30);
       const dueDateStr = dueDate.toISOString().split('T')[0];
 
-      // デフォルトテンプレートを設定
       const defaultTemplate = templates.find(t => t.isDefault);
 
       setFormData({
@@ -153,18 +218,15 @@ const Invoices = () => {
     setShowModal(true);
   };
 
-  // モーダルを閉じる処理
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingInvoice(null);
     setError('');
   };
 
-  // フォーム入力変更処理
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // パートナーが変更された場合、明細の手数料ルールをクリア
     if (name === 'partnerId') {
       setFormData({
         ...formData,
@@ -182,7 +244,6 @@ const Invoices = () => {
     }
   };
 
-  // 明細の変更処理
   const handleItemChange = (index, field, value) => {
     const newItems = [...formData.items];
     newItems[index][field] = value;
@@ -192,7 +253,6 @@ const Invoices = () => {
     });
   };
 
-  // 明細を追加
   const handleAddItem = () => {
     setFormData({
       ...formData,
@@ -200,7 +260,6 @@ const Invoices = () => {
     });
   };
 
-  // 明細を削除
   const handleRemoveItem = (index) => {
     if (formData.items.length === 1) {
       alert('最低1つの明細が必要です');
@@ -213,7 +272,6 @@ const Invoices = () => {
     });
   };
 
-  // フォーム送信処理（作成または更新）
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -231,9 +289,6 @@ const Invoices = () => {
     }
   };
 
-  /**
-   * 請求書を「支払済」に変更する処理
-   */
   const handleMarkAsPaid = async (invoice) => {
     const confirmed = window.confirm(
       `請求書番号: ${invoice.invoiceNumber}\n` +
@@ -254,7 +309,6 @@ const Invoices = () => {
     }
   };
 
-  // 請求書削除処理
   const handleDelete = async (id) => {
     if (!window.confirm('本当に削除しますか?')) return;
 
@@ -267,7 +321,6 @@ const Invoices = () => {
     }
   };
 
-  // ステータスを日本語表示に変換
   const getStatusLabel = (status) => {
     switch (status) {
       case 'DRAFT':
@@ -283,7 +336,6 @@ const Invoices = () => {
     }
   };
 
-  // 消費税区分を日本語表示に変換
   const getTaxCategoryLabel = (taxCategory) => {
     switch (taxCategory) {
       case 'TAX_INCLUDED':
@@ -297,7 +349,6 @@ const Invoices = () => {
     }
   };
 
-  // 金額をフォーマット
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('ja-JP', {
       style: 'currency',
@@ -305,13 +356,11 @@ const Invoices = () => {
     }).format(amount);
   };
 
-  // フィルタークリア
   const handleClearFilters = () => {
     setStatusFilter('ALL');
     setPartnerFilter('ALL');
   };
 
-  // フィルターが適用されているかチェック
   const hasActiveFilters = statusFilter !== 'ALL' || partnerFilter !== 'ALL';
 
   return (
@@ -392,6 +441,7 @@ const Invoices = () => {
                 <th>消費税区分</th>
                 <th>合計金額</th>
                 <th>ステータス</th>
+                <th>PDF</th>
                 <th>操作</th>
               </tr>
             </thead>
@@ -409,8 +459,27 @@ const Invoices = () => {
                       {getStatusLabel(invoice.status)}
                     </span>
                   </td>
+
+                  {/* PDFダウンロード&プレビューボタン */}
+                  <td className="pdf-actions">
+                    <button
+                      onClick={() => handlePreviewPdf(invoice)}
+                      className="btn-pdf-preview"
+                      title="PDFプレビュー"
+                    >
+                      👁️ プレビュー
+                    </button>
+                    <button
+                      onClick={() => handleDownloadPdf(invoice)}
+                      className="btn-pdf-download"
+                      disabled={downloadingPdf === invoice.id}
+                      title="PDFダウンロード"
+                    >
+                      {downloadingPdf === invoice.id ? '⏳' : '📥'} ダウンロード
+                    </button>
+                  </td>
+
                   <td className="table-actions">
-                    {/* 下書きの場合：編集・削除が可能 */}
                     {invoice.status === 'DRAFT' && (
                       <>
                         <button
@@ -428,7 +497,6 @@ const Invoices = () => {
                       </>
                     )}
 
-                    {/* 発行済の場合：支払済に変更ボタンのみ */}
                     {invoice.status === 'ISSUED' && (
                       <button
                         onClick={() => handleMarkAsPaid(invoice)}
@@ -438,7 +506,6 @@ const Invoices = () => {
                       </button>
                     )}
 
-                    {/* 支払済・キャンセルの場合：操作なし */}
                     {(invoice.status === 'PAID' || invoice.status === 'CANCELLED') && (
                       <span className="no-actions">-</span>
                     )}
@@ -450,7 +517,7 @@ const Invoices = () => {
         )}
       </div>
 
-      {/* モーダル */}
+      {/* 請求書作成・編集モーダル */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content modal-large">
@@ -546,7 +613,6 @@ const Invoices = () => {
                   )}
                 </div>
 
-                {/* テンプレート選択ドロップダウン */}
                 <div className="invoices-form">
                   <label>
                     請求書テンプレート <span className="required">*</span>
@@ -692,6 +758,36 @@ const Invoices = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* PDFプレビューモーダル */}
+      {showPdfPreview && (
+        <div className="modal-overlay" onClick={handleClosePdfPreview}>
+          <div
+            className="modal-content pdf-preview-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <h2>請求書プレビュー - {previewInvoiceNumber}</h2>
+              <button
+                onClick={handleClosePdfPreview}
+                className="close-button"
+                aria-label="閉じる"
+              >
+                ×
+              </button>
+            </div>
+            <div className="pdf-preview-container">
+              {previewPdfUrl && (
+                <iframe
+                  src={previewPdfUrl}
+                  className="pdf-iframe"
+                  title="Invoice PDF Preview"
+                />
+              )}
+            </div>
           </div>
         </div>
       )}
