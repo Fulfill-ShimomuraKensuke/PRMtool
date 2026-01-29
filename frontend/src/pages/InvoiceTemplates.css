@@ -177,7 +177,7 @@
   font-size: 1.5rem;
   cursor: pointer;
   color: #666;
-  padding: 0;
+  padding-right: 10px;
   width: 30px;
   height: 30px;
   display: flex;

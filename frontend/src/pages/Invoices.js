@@ -13,7 +13,8 @@ import './Invoices.css';
  * 更新:
  * - テンプレート選択機能
  * - PDFダウンロード機能
- * - PDFプレビュー機能
+ * - PDFプレビュー機能（フルスクリーン対応）
+ * - 編集・削除ボタン縦並び
  */
 const Invoices = () => {
   const navigate = useNavigate();
@@ -294,7 +295,7 @@ const Invoices = () => {
       `請求書番号: ${invoice.invoiceNumber}\n` +
       `パートナー: ${invoice.partnerName}\n` +
       `金額: ${formatCurrency(invoice.totalAmount)}\n\n` +
-      `この請求書を支払済に変更しますか？\n` +
+      `この請求書を支払済に変更しますか?\n` +
       `※この操作は取り消せません。`
     );
 
@@ -461,54 +462,59 @@ const Invoices = () => {
                   </td>
 
                   {/* PDFダウンロード&プレビューボタン */}
-                  <td className="pdf-actions">
-                    <button
-                      onClick={() => handlePreviewPdf(invoice)}
-                      className="btn-pdf-preview"
-                      title="PDFプレビュー"
-                    >
-                      👁️ プレビュー
-                    </button>
-                    <button
-                      onClick={() => handleDownloadPdf(invoice)}
-                      className="btn-pdf-download"
-                      disabled={downloadingPdf === invoice.id}
-                      title="PDFダウンロード"
-                    >
-                      {downloadingPdf === invoice.id ? '⏳' : '📥'} ダウンロード
-                    </button>
+                  <td>
+                    <p className="pdf-actions">
+                      <button
+                        onClick={() => handlePreviewPdf(invoice)}
+                        className="btn-pdf-preview"
+                        title="PDFプレビュー"
+                      >
+                        👁️ プレビュー
+                      </button>
+                      <button
+                        onClick={() => handleDownloadPdf(invoice)}
+                        className="btn-pdf-download"
+                        disabled={downloadingPdf === invoice.id}
+                        title="PDFダウンロード"
+                      >
+                        {downloadingPdf === invoice.id ? '⏳' : '📥'} ダウンロード
+                      </button>
+                    </p>
                   </td>
 
-                  <td className="table-actions">
-                    {invoice.status === 'DRAFT' && (
-                      <>
-                        <button
-                          onClick={() => handleOpenModal(invoice)}
-                          className="btn-edit"
-                        >
-                          編集
-                        </button>
-                        <button
-                          onClick={() => handleDelete(invoice.id)}
-                          className="btn-delete"
-                        >
-                          削除
-                        </button>
-                      </>
-                    )}
+                  {/* 操作ボタン */}
+                  <td>
+                    <p className="table-actions">
+                      {invoice.status === 'DRAFT' && (
+                        <>
+                          <button
+                            onClick={() => handleOpenModal(invoice)}
+                            className="btn-edit"
+                          >
+                            編集
+                          </button>
+                          <button
+                            onClick={() => handleDelete(invoice.id)}
+                            className="btn-delete"
+                          >
+                            削除
+                          </button>
+                        </>
+                      )}
 
-                    {invoice.status === 'ISSUED' && (
-                      <button
-                        onClick={() => handleMarkAsPaid(invoice)}
-                        className="btn-primary"
-                      >
-                        支払済に変更
-                      </button>
-                    )}
+                      {invoice.status === 'ISSUED' && (
+                        <button
+                          onClick={() => handleMarkAsPaid(invoice)}
+                          className="btn-primary"
+                        >
+                          支払済に変更
+                        </button>
+                      )}
 
-                    {(invoice.status === 'PAID' || invoice.status === 'CANCELLED') && (
-                      <span className="no-actions">-</span>
-                    )}
+                      {(invoice.status === 'PAID' || invoice.status === 'CANCELLED') && (
+                        <span className="no-actions">-</span>
+                      )}
+                    </p>
                   </td>
                 </tr>
               ))}
@@ -762,9 +768,9 @@ const Invoices = () => {
         </div>
       )}
 
-      {/* PDFプレビューモーダル */}
+      {/* PDFプレビューモーダル - フルスクリーン対応 */}
       {showPdfPreview && (
-        <div className="modal-overlay" onClick={handleClosePdfPreview}>
+        <div className="modal-overlay pdf-preview-overlay" onClick={handleClosePdfPreview}>
           <div
             className="modal-content pdf-preview-modal"
             onClick={(e) => e.stopPropagation()}

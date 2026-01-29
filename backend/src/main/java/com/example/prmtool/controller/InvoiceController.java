@@ -83,31 +83,32 @@ public class InvoiceController {
   public ResponseEntity<byte[]> generateInvoicePdf(
       @PathVariable UUID id,
       @RequestParam(required = false) UUID templateId) {
-
+    
     // 請求書を取得
     Invoice invoice = invoiceRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("請求書が見つかりません: " + id));
 
     // テンプレートを取得（優先順位に従って）
     InvoiceTemplate template = null;
-
+    
     // 1. リクエストパラメータのtemplateId
     if (templateId != null) {
       template = templateRepository.findById(templateId)
           .orElseThrow(() -> new RuntimeException("指定されたテンプレートが見つかりません: " + templateId));
     }
-
+    
     // 2. 請求書に保存されたtemplate
     if (template == null && invoice.getTemplate() != null) {
       template = invoice.getTemplate();
     }
-
+    
     // 3. デフォルトテンプレート
     if (template == null) {
       template = templateRepository.findByIsDefaultTrue()
           .orElseThrow(() -> new RuntimeException(
               "請求書にテンプレートが設定されておらず、デフォルトテンプレートも存在しません。" +
-                  "テンプレート管理画面でテンプレートを作成し、デフォルトに設定してください。"));
+              "テンプレート管理画面でテンプレートを作成し、デフォルトに設定してください。"
+          ));
     }
 
     // PDF生成

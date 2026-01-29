@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 /**
  * 請求書サービス
  * 「確定結果」を作成・管理。後で再計算はしない。
+ * 
+ * 更新: InvoiceTemplateRepository追加、template設定処理追加
  */
 @Service
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ public class InvoiceService {
   private final PartnerRepository partnerRepository;
   private final CommissionRuleRepository commissionRuleRepository;
   private final CommissionCalculationService commissionCalculationService;
+  private final InvoiceTemplateRepository templateRepository; // ★★★ 追加 ★★★
 
   // 現在の消費税率
   private static final BigDecimal DEFAULT_TAX_RATE = new BigDecimal("0.10");
@@ -65,6 +68,8 @@ public class InvoiceService {
   /**
    * 請求書を作成
    * 手数料ルールの内容をコピーして確定結果を保存
+   * 
+   * 更新: テンプレート設定処理追加
    */
   @Transactional
   public InvoiceResponse createInvoice(InvoiceRequest request) {
@@ -77,7 +82,14 @@ public class InvoiceService {
     Partner partner = partnerRepository.findById(request.getPartnerId())
         .orElseThrow(() -> new RuntimeException("パートナーが見つかりません: " + request.getPartnerId()));
 
-    // ★★★ 追加: パートナー整合性チェック ★★★
+    // ★★★ 追加: テンプレートを取得 ★★★
+    InvoiceTemplate template = null;
+    if (request.getTemplateId() != null) {
+      template = templateRepository.findById(request.getTemplateId())
+          .orElseThrow(() -> new RuntimeException("テンプレートが見つかりません: " + request.getTemplateId()));
+    }
+
+    // パートナー整合性チェック
     validatePartnerConsistency(request.getPartnerId(), request.getItems());
 
     // 請求書番号を生成
@@ -87,6 +99,7 @@ public class InvoiceService {
     Invoice invoice = Invoice.builder()
         .invoiceNumber(invoiceNumber)
         .partner(partner)
+        .template(template) // ★★★ 追加 ★★★
         .issueDate(request.getIssueDate())
         .dueDate(request.getDueDate())
         .taxCategory(request.getTaxCategory())
@@ -164,6 +177,8 @@ public class InvoiceService {
   /**
    * 請求書を更新
    * 注意: 発行済・支払済の請求書は更新できない
+   * 
+   * 更新: テンプレート設定処理追加
    */
   @Transactional
   public InvoiceResponse updateInvoice(UUID id, InvoiceRequest request) {
@@ -180,11 +195,19 @@ public class InvoiceService {
     Partner partner = partnerRepository.findById(request.getPartnerId())
         .orElseThrow(() -> new RuntimeException("パートナーが見つかりません: " + request.getPartnerId()));
 
-    // ★★★ 追加: パートナー整合性チェック ★★★
+    // ★★★ 追加: テンプレートを取得 ★★★
+    InvoiceTemplate template = null;
+    if (request.getTemplateId() != null) {
+      template = templateRepository.findById(request.getTemplateId())
+          .orElseThrow(() -> new RuntimeException("テンプレートが見つかりません: " + request.getTemplateId()));
+    }
+
+    // パートナー整合性チェック
     validatePartnerConsistency(request.getPartnerId(), request.getItems());
 
     // 基本情報を更新
     invoice.setPartner(partner);
+    invoice.setTemplate(template); // ★★★ 追加 ★★★
     invoice.setIssueDate(request.getIssueDate());
     invoice.setDueDate(request.getDueDate());
     invoice.setTaxCategory(request.getTaxCategory());
@@ -355,6 +378,8 @@ public class InvoiceService {
 
   /**
    * エンティティをレスポンスDTOに変換
+   * 
+   * 更新: templateId, templateName追加
    */
   private InvoiceResponse convertToResponse(Invoice invoice) {
     List<InvoiceResponse.InvoiceItemResponse> items = invoice.getItems().stream()
@@ -392,6 +417,8 @@ public class InvoiceService {
         .totalAmount(invoice.getTotalAmount())
         .status(invoice.getStatus())
         .notes(invoice.getNotes())
+        .templateId(invoice.getTemplate() != null ? invoice.getTemplate().getId() : null) // ★★★ 追加 ★★★
+        .templateName(invoice.getTemplate() != null ? invoice.getTemplate().getTemplateName() : null) // ★★★ 追加 ★★★
         .items(items)
         .createdAt(invoice.getCreatedAt())
         .updatedAt(invoice.getUpdatedAt())
@@ -401,11 +428,6 @@ public class InvoiceService {
   /**
    * 請求書を「支払済」に変更する専用メソッド
    * 発行済(ISSUED)状態の請求書のみ支払済(PAID)に変更可能
-   * 
-   * @param id 請求書ID
-   * @return 更新後の請求書レスポンス
-   * @throws RuntimeException      請求書が見つからない場合
-   * @throws IllegalStateException 発行済以外の状態の場合
    */
   @Transactional
   public InvoiceResponse markAsPaid(UUID id) {
@@ -426,35 +448,19 @@ public class InvoiceService {
   /**
    * パートナー整合性チェック
    * 請求書のパートナーと手数料ルールの案件のパートナーが一致するか検証
-   * 
-   * 目的: 請求書のパートナーと異なるパートナー向けの手数料ルールが使用されることを防ぐ
-   * 例: パートナーAの請求書に、パートナーB向けの手数料ルールが使用されるのを防ぐ
-   * 
-   * @param invoicePartnerId 請求書のパートナーID
-   * @param items            請求明細リスト
-   * @throws IllegalArgumentException パートナーが一致しない場合
    */
-  private void validatePartnerConsistency(UUID invoicePartnerId,
-      List<InvoiceRequest.InvoiceItemRequest> items) {
-    for (InvoiceRequest.InvoiceItemRequest itemRequest : items) {
-      // 手数料ルールが指定されている場合のみチェック
-      if (itemRequest.getCommissionRuleId() != null) {
-        CommissionRule rule = commissionRuleRepository.findById(itemRequest.getCommissionRuleId())
+  private void validatePartnerConsistency(UUID partnerId, List<InvoiceRequest.InvoiceItemRequest> items) {
+    for (InvoiceRequest.InvoiceItemRequest item : items) {
+      if (item.getCommissionRuleId() != null) {
+        CommissionRule rule = commissionRuleRepository.findById(item.getCommissionRuleId())
             .orElseThrow(() -> new RuntimeException(
-                "手数料ルールが見つかりません: " + itemRequest.getCommissionRuleId()));
+                "手数料ルールが見つかりません: " + item.getCommissionRuleId()));
 
-        // 手数料ルールの案件のパートナーIDを取得
         UUID rulePartnerId = rule.getProject().getPartner().getId();
-
-        // 請求書のパートナーIDと比較
-        if (!rulePartnerId.equals(invoicePartnerId)) {
-          Partner rulePartner = rule.getProject().getPartner();
+        if (!rulePartnerId.equals(partnerId)) {
           throw new IllegalArgumentException(
-              String.format(
-                  "手数料ルール「%s」は案件「%s」（パートナー：%s）向けです。選択したパートナーとは異なります。",
-                  rule.getRuleName(),
-                  rule.getProject().getName(),
-                  rulePartner.getName()));
+              "手数料ルール「" + rule.getRuleName() + "」は別のパートナー向けです。" +
+                  "請求書のパートナーと一致する手数料ルールを選択してください。");
         }
       }
     }
