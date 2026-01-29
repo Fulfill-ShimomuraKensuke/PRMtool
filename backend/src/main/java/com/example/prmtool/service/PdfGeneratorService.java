@@ -1,411 +1,353 @@
 package com.example.prmtool.service;
 
+import com.example.prmtool.dto.CanvasLayoutDto;
 import com.example.prmtool.entity.Invoice;
 import com.example.prmtool.entity.InvoiceTemplate;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.colors.Color;
 import com.itextpdf.kernel.colors.DeviceRgb;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
-import com.itextpdf.layout.properties.UnitValue;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
+import java.net.URL;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * PDF生成サービス
- * 請求書テンプレートに基づいてPDFファイルを生成
+ * canvasLayoutに基づいてPDFを生成
+ * 
+ * 処理フロー:
+ * 1. canvasLayoutをJSONからパース
+ * 2. 各要素を座標指定で描画
+ * 3. 動的フィールドに実データを埋め込み
+ * 4. PDFバイト配列を返却
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class PdfGeneratorService {
 
+  private final ObjectMapper objectMapper;
+
   /**
-   * 請求書PDFを生成
-   * テンプレートのレイアウトとデザイン設定を適用してPDFを作成
+   * 請求書PDFを生成（canvasLayout使用）
+   * 
+   * パラメータ:
+   * - invoice: 請求書データ
+   * - template: テンプレート（canvasLayoutを含む）
+   * 
+   * 戻り値:
+   * - PDFファイルのバイト配列
    */
   public byte[] generateInvoicePdf(Invoice invoice, InvoiceTemplate template) {
     try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+
       PdfWriter writer = new PdfWriter(baos);
       PdfDocument pdfDoc = new PdfDocument(writer);
+
+      // A4サイズ: 595x842ポイント (1ポイント = 1/72インチ)
       Document document = new Document(pdfDoc);
 
-      // カラー設定を取得
-      Color primaryColor = parseColor(template.getPrimaryColor());
-      Color secondaryColor = parseColor(template.getSecondaryColor());
+      // 日本語フォントを読み込み
+      PdfFont font = PdfFontFactory.createFont("HeiseiMin-W3", "UniJIS-UCS2-H");
 
-      // ヘッダー部分を追加
-      addHeader(document, template, primaryColor);
+      // canvasLayoutをパース
+      if (template.getCanvasLayout() != null && !template.getCanvasLayout().isEmpty()) {
+        CanvasLayoutDto layout = objectMapper.readValue(
+            template.getCanvasLayout(),
+            CanvasLayoutDto.class);
 
-      // 請求書情報を追加
-      addInvoiceInfo(document, invoice, secondaryColor);
+        // 動的フィールドの値マップを構築
+        Map<String, String> fieldValues = buildFieldValuesMap(invoice);
 
-      // 明細テーブルを追加
-      addItemsTable(document, invoice, primaryColor, secondaryColor);
-
-      // 合計金額を追加
-      addTotalSection(document, invoice, primaryColor);
-
-      // フッター情報を追加
-      addFooter(document, template, secondaryColor);
+        // 各要素を描画
+        for (CanvasLayoutDto.Element element : layout.getElements()) {
+          drawElement(document, element, fieldValues, font);
+        }
+      } else {
+        // canvasLayoutがない場合はエラーメッセージを表示
+        Paragraph errorMsg = new Paragraph("このテンプレートはcanvasLayoutを持っていません。")
+            .setFont(font)
+            .setFontSize(16)
+            .setTextAlignment(TextAlignment.CENTER);
+        document.add(errorMsg);
+      }
 
       document.close();
       return baos.toByteArray();
 
     } catch (Exception e) {
-      log.error("PDF生成中にエラーが発生しました", e);
+      log.error("PDF生成エラー", e);
       throw new RuntimeException("PDF生成に失敗しました: " + e.getMessage(), e);
     }
   }
 
   /**
-   * プレビュー用のサンプルPDFを生成
-   * テンプレートのデザインを確認するためのダミーデータを使用
+   * プレビュー用PDFを生成（サンプルデータ使用）
+   * 
+   * パラメータ:
+   * - template: テンプレート
+   * 
+   * 戻り値:
+   * - PDFファイルのバイト配列
    */
   public byte[] generatePreviewPdf(InvoiceTemplate template) {
     try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+
       PdfWriter writer = new PdfWriter(baos);
       PdfDocument pdfDoc = new PdfDocument(writer);
       Document document = new Document(pdfDoc);
 
-      Color primaryColor = parseColor(template.getPrimaryColor());
-      Color secondaryColor = parseColor(template.getSecondaryColor());
+      // 日本語フォントを読み込み
+      PdfFont font = PdfFontFactory.createFont("HeiseiMin-W3", "UniJIS-UCS2-H");
 
-      // ヘッダー
-      addHeader(document, template, primaryColor);
+      // canvasLayoutをパース
+      if (template.getCanvasLayout() != null && !template.getCanvasLayout().isEmpty()) {
+        CanvasLayoutDto layout = objectMapper.readValue(
+            template.getCanvasLayout(),
+            CanvasLayoutDto.class);
 
-      // サンプル請求書情報
-      addPreviewInvoiceInfo(document, secondaryColor);
+        // サンプルデータを生成
+        Map<String, String> fieldValues = buildSampleFieldValues();
 
-      // サンプル明細テーブル
-      addPreviewItemsTable(document, primaryColor, secondaryColor);
-
-      // サンプル合計金額
-      addPreviewTotalSection(document, primaryColor);
-
-      // フッター
-      addFooter(document, template, secondaryColor);
+        // 各要素を描画
+        for (CanvasLayoutDto.Element element : layout.getElements()) {
+          drawElement(document, element, fieldValues, font);
+        }
+      } else {
+        // canvasLayoutがない場合はエラーメッセージを表示
+        Paragraph errorMsg = new Paragraph("このテンプレートはcanvasLayoutを持っていません。")
+            .setFont(font)
+            .setFontSize(16)
+            .setTextAlignment(TextAlignment.CENTER);
+        document.add(errorMsg);
+      }
 
       document.close();
       return baos.toByteArray();
 
     } catch (Exception e) {
-      log.error("プレビューPDF生成中にエラーが発生しました", e);
+      log.error("プレビューPDF生成エラー", e);
       throw new RuntimeException("プレビューPDF生成に失敗しました: " + e.getMessage(), e);
     }
   }
 
   /**
-   * ヘッダー部分を追加
-   * 会社ロゴ、会社名、連絡先情報を表示
+   * 要素を描画
+   * 要素タイプに応じて適切な描画処理を実行
    */
-  private void addHeader(Document document, InvoiceTemplate template, Color primaryColor) {
-    // タイトル
-    Paragraph title = new Paragraph("請求書")
-        .setFontSize(24)
-        .setBold()
-        .setFontColor(primaryColor)
-        .setTextAlignment(TextAlignment.CENTER)
-        .setMarginBottom(20);
-    document.add(title);
+  private void drawElement(
+      Document document,
+      CanvasLayoutDto.Element element,
+      Map<String, String> fieldValues,
+      PdfFont font) throws Exception {
 
-    // 会社情報
-    if (template.getCompanyName() != null) {
-      Paragraph companyName = new Paragraph(template.getCompanyName())
-          .setFontSize(14)
-          .setBold()
-          .setMarginBottom(5);
-      document.add(companyName);
-    }
+    switch (element.getType()) {
+      case "text":
+        // 静的テキストを描画
+        drawText(document, element, element.getContent(), font);
+        break;
 
-    if (template.getCompanyAddress() != null) {
-      document.add(new Paragraph(template.getCompanyAddress()).setFontSize(10));
-    }
+      case "field":
+        // 動的フィールドを描画（実データに置き換え）
+        String fieldValue = fieldValues.getOrDefault(element.getFieldName(), "");
+        String displayValue = buildDisplayValue(element, fieldValue);
+        drawText(document, element, displayValue, font);
+        break;
 
-    if (template.getCompanyPhone() != null) {
-      document.add(new Paragraph("TEL: " + template.getCompanyPhone()).setFontSize(10));
-    }
+      case "image":
+        // 画像を描画
+        drawImage(document, element);
+        break;
 
-    if (template.getCompanyEmail() != null) {
-      document.add(new Paragraph("Email: " + template.getCompanyEmail()).setFontSize(10));
-    }
-
-    document.add(new Paragraph("\n"));
-  }
-
-  /**
-   * 請求書情報セクションを追加
-   * 請求先、請求番号、発行日、支払期限を表示
-   */
-  private void addInvoiceInfo(Document document, Invoice invoice, Color secondaryColor) {
-    Table infoTable = new Table(UnitValue.createPercentArray(new float[] { 1, 1 }));
-    infoTable.setWidth(UnitValue.createPercentValue(100));
-
-    // 請求先情報
-    Cell billToCell = new Cell()
-        .add(new Paragraph("請求先:").setBold())
-        .add(new Paragraph(invoice.getPartner().getName()))
-        .setBorder(null)
-        .setPadding(5);
-    infoTable.addCell(billToCell);
-
-    // 請求書詳細
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日");
-    Cell detailsCell = new Cell()
-        .add(new Paragraph("請求書番号: " + invoice.getInvoiceNumber()))
-        .add(new Paragraph("発行日: " + invoice.getIssueDate().format(formatter)))
-        .add(new Paragraph("支払期限: " + invoice.getDueDate().format(formatter)))
-        .setBorder(null)
-        .setPadding(5)
-        .setTextAlignment(TextAlignment.RIGHT);
-    infoTable.addCell(detailsCell);
-
-    document.add(infoTable);
-    document.add(new Paragraph("\n"));
-  }
-
-  /**
-   * 明細テーブルを追加
-   * 品目、数量、単価、金額を表形式で表示
-   */
-  private void addItemsTable(Document document, Invoice invoice, Color primaryColor, Color secondaryColor) {
-    Table table = new Table(UnitValue.createPercentArray(new float[] { 3, 1, 2, 2 }));
-    table.setWidth(UnitValue.createPercentValue(100));
-
-    // ヘッダー行
-    String[] headers = { "品目", "数量", "単価", "金額" };
-    for (String header : headers) {
-      Cell cell = new Cell()
-          .add(new Paragraph(header).setBold())
-          .setBackgroundColor(primaryColor)
-          .setFontColor(new DeviceRgb(255, 255, 255))
-          .setTextAlignment(TextAlignment.CENTER)
-          .setPadding(8);
-      table.addHeaderCell(cell);
-    }
-
-    // 明細行
-    invoice.getItems().forEach(item -> {
-      table.addCell(createCell(item.getDescription()));
-      table.addCell(createCell(String.valueOf(item.getQuantity()), TextAlignment.CENTER));
-      table.addCell(createCell(String.format("¥%,.0f", item.getUnitPrice()), TextAlignment.RIGHT));
-      table.addCell(createCell(String.format("¥%,.0f", item.getItemTotal()), TextAlignment.RIGHT));
-    });
-
-    document.add(table);
-    document.add(new Paragraph("\n"));
-  }
-
-  /**
-   * 合計金額セクションを追加
-   * 小計、消費税、合計金額を表示
-   */
-  private void addTotalSection(Document document, Invoice invoice, Color primaryColor) {
-    Table totalTable = new Table(UnitValue.createPercentArray(new float[] { 3, 1 }));
-    totalTable.setWidth(UnitValue.createPercentValue(50));
-    totalTable.setHorizontalAlignment(com.itextpdf.layout.properties.HorizontalAlignment.RIGHT);
-
-    // 小計
-    totalTable.addCell(createCell("小計:").setBold().setTextAlignment(TextAlignment.RIGHT));
-    totalTable
-        .addCell(createCell(String.format("¥%,.0f", invoice.getSubtotal())).setTextAlignment(TextAlignment.RIGHT));
-
-    // 消費税
-    totalTable.addCell(createCell("消費税:").setBold().setTextAlignment(TextAlignment.RIGHT));
-    totalTable
-        .addCell(createCell(String.format("¥%,.0f", invoice.getTaxAmount())).setTextAlignment(TextAlignment.RIGHT));
-
-    // 合計
-    Cell totalLabelCell = createCell("合計金額:")
-        .setBold()
-        .setBackgroundColor(primaryColor)
-        .setFontColor(new DeviceRgb(255, 255, 255))
-        .setTextAlignment(TextAlignment.RIGHT);
-    totalTable.addCell(totalLabelCell);
-
-    Cell totalValueCell = createCell(String.format("¥%,.0f", invoice.getTotalAmount()))
-        .setBold()
-        .setBackgroundColor(primaryColor)
-        .setFontColor(new DeviceRgb(255, 255, 255))
-        .setTextAlignment(TextAlignment.RIGHT);
-    totalTable.addCell(totalValueCell);
-
-    document.add(totalTable);
-    document.add(new Paragraph("\n"));
-  }
-
-  /**
-   * フッター情報を追加
-   * 振込先情報、支払条件、備考を表示
-   */
-  private void addFooter(Document document, InvoiceTemplate template, Color secondaryColor) {
-    if (template.getBankInfo() != null && !template.getBankInfo().isEmpty()) {
-      Paragraph bankTitle = new Paragraph("振込先情報")
-          .setBold()
-          .setFontColor(secondaryColor)
-          .setMarginTop(10);
-      document.add(bankTitle);
-      document.add(new Paragraph(template.getBankInfo()).setFontSize(10));
-    }
-
-    if (template.getPaymentTerms() != null && !template.getPaymentTerms().isEmpty()) {
-      Paragraph termsTitle = new Paragraph("支払条件")
-          .setBold()
-          .setFontColor(secondaryColor)
-          .setMarginTop(10);
-      document.add(termsTitle);
-      document.add(new Paragraph(template.getPaymentTerms()).setFontSize(10));
-    }
-
-    if (template.getFooterText() != null && !template.getFooterText().isEmpty()) {
-      Paragraph footer = new Paragraph(template.getFooterText())
-          .setFontSize(9)
-          .setFontColor(secondaryColor)
-          .setMarginTop(20)
-          .setTextAlignment(TextAlignment.CENTER);
-      document.add(footer);
+      default:
+        log.warn("未対応の要素タイプ: {}", element.getType());
     }
   }
 
   /**
-   * プレビュー用の請求書情報を追加
-   * サンプルデータを使用してレイアウトを確認
+   * テキストを描画
+   * 座標とスタイルに基づいて配置
    */
-  private void addPreviewInvoiceInfo(Document document, Color secondaryColor) {
-    Table infoTable = new Table(UnitValue.createPercentArray(new float[] { 1, 1 }));
-    infoTable.setWidth(UnitValue.createPercentValue(100));
+  private void drawText(
+      Document document,
+      CanvasLayoutDto.Element element,
+      String text,
+      PdfFont font) {
+    // ピクセルをポイントに変換
+    // A4サイズ: キャンバス794px = PDF 595pt, キャンバス1123px = PDF 842pt
+    float x = element.getPosition().getX() * 595f / 794f;
+    float y = 842f - (element.getPosition().getY() * 842f / 1123f); // Y座標は上下反転
 
-    Cell billToCell = new Cell()
-        .add(new Paragraph("請求先:").setBold())
-        .add(new Paragraph("サンプル株式会社"))
-        .setBorder(null)
-        .setPadding(5);
-    infoTable.addCell(billToCell);
+    CanvasLayoutDto.Style style = element.getStyle();
 
-    Cell detailsCell = new Cell()
-        .add(new Paragraph("請求書番号: INV-2026-001"))
-        .add(new Paragraph("発行日: 2026年01月26日"))
-        .add(new Paragraph("支払期限: 2026年02月25日"))
-        .setBorder(null)
-        .setPadding(5)
-        .setTextAlignment(TextAlignment.RIGHT);
-    infoTable.addCell(detailsCell);
+    // スタイル設定
+    Paragraph paragraph = new Paragraph(text)
+        .setFont(font)
+        .setFontSize(style.getFontSize() != null ? style.getFontSize() : 12f)
+        .setFontColor(parseColor(style.getColor()))
+        .setFixedPosition(x, y, element.getSize().getWidth() * 595f / 794f);
 
-    document.add(infoTable);
-    document.add(new Paragraph("\n"));
-  }
-
-  /**
-   * プレビュー用の明細テーブルを追加
-   * サンプルデータを使用
-   */
-  private void addPreviewItemsTable(Document document, Color primaryColor, Color secondaryColor) {
-    Table table = new Table(UnitValue.createPercentArray(new float[] { 3, 1, 2, 2 }));
-    table.setWidth(UnitValue.createPercentValue(100));
-
-    // ヘッダー
-    String[] headers = { "品目", "数量", "単価", "金額" };
-    for (String header : headers) {
-      Cell cell = new Cell()
-          .add(new Paragraph(header).setBold())
-          .setBackgroundColor(primaryColor)
-          .setFontColor(new DeviceRgb(255, 255, 255))
-          .setTextAlignment(TextAlignment.CENTER)
-          .setPadding(8);
-      table.addHeaderCell(cell);
+    // テキスト配置
+    if ("center".equals(style.getAlign())) {
+      paragraph.setTextAlignment(TextAlignment.CENTER);
+    } else if ("right".equals(style.getAlign())) {
+      paragraph.setTextAlignment(TextAlignment.RIGHT);
+    } else {
+      paragraph.setTextAlignment(TextAlignment.LEFT);
     }
 
-    // サンプル明細
-    table.addCell(createCell("コンサルティング業務"));
-    table.addCell(createCell("1", TextAlignment.CENTER));
-    table.addCell(createCell("¥500,000", TextAlignment.RIGHT));
-    table.addCell(createCell("¥500,000", TextAlignment.RIGHT));
+    // 太字設定
+    if ("bold".equals(style.getFontWeight())) {
+      paragraph.setBold();
+    }
 
-    table.addCell(createCell("システム開発支援"));
-    table.addCell(createCell("2", TextAlignment.CENTER));
-    table.addCell(createCell("¥300,000", TextAlignment.RIGHT));
-    table.addCell(createCell("¥600,000", TextAlignment.RIGHT));
-
-    document.add(table);
-    document.add(new Paragraph("\n"));
+    document.add(paragraph);
   }
 
   /**
-   * プレビュー用の合計金額セクションを追加
-   * サンプルデータを使用
+   * 画像を描画
    */
-  private void addPreviewTotalSection(Document document, Color primaryColor) {
-    Table totalTable = new Table(UnitValue.createPercentArray(new float[] { 3, 1 }));
-    totalTable.setWidth(UnitValue.createPercentValue(50));
-    totalTable.setHorizontalAlignment(com.itextpdf.layout.properties.HorizontalAlignment.RIGHT);
+  private void drawImage(Document document, CanvasLayoutDto.Element element) throws Exception {
+    try {
+      // 画像URLから画像データを取得
+      // Data URLの場合とHTTP URLの場合を処理
+      String imageUrl = element.getUrl();
 
-    totalTable.addCell(createCell("小計:").setBold().setTextAlignment(TextAlignment.RIGHT));
-    totalTable.addCell(createCell("¥1,100,000").setTextAlignment(TextAlignment.RIGHT));
+      if (imageUrl.startsWith("data:image")) {
+        // Data URLの場合（base64エンコード）
+        String base64Data = imageUrl.split(",")[1];
+        byte[] imageBytes = java.util.Base64.getDecoder().decode(base64Data);
+        Image image = new Image(ImageDataFactory.create(imageBytes));
 
-    totalTable.addCell(createCell("消費税:").setBold().setTextAlignment(TextAlignment.RIGHT));
-    totalTable.addCell(createCell("¥110,000").setTextAlignment(TextAlignment.RIGHT));
+        // 座標変換
+        float x = element.getPosition().getX() * 595f / 794f;
+        float y = 842f - ((element.getPosition().getY() + element.getSize().getHeight()) * 842f / 1123f);
 
-    Cell totalLabelCell = createCell("合計金額:")
-        .setBold()
-        .setBackgroundColor(primaryColor)
-        .setFontColor(new DeviceRgb(255, 255, 255))
-        .setTextAlignment(TextAlignment.RIGHT);
-    totalTable.addCell(totalLabelCell);
+        // サイズ設定
+        image.setFixedPosition(x, y);
+        image.scaleToFit(
+            element.getSize().getWidth() * 595f / 794f,
+            element.getSize().getHeight() * 842f / 1123f);
 
-    Cell totalValueCell = createCell("¥1,210,000")
-        .setBold()
-        .setBackgroundColor(primaryColor)
-        .setFontColor(new DeviceRgb(255, 255, 255))
-        .setTextAlignment(TextAlignment.RIGHT);
-    totalTable.addCell(totalValueCell);
+        document.add(image);
+      } else {
+        // HTTP URLの場合
+        Image image = new Image(ImageDataFactory.create(new URL(imageUrl)));
 
-    document.add(totalTable);
+        // 座標変換
+        float x = element.getPosition().getX() * 595f / 794f;
+        float y = 842f - ((element.getPosition().getY() + element.getSize().getHeight()) * 842f / 1123f);
+
+        // サイズ設定
+        image.setFixedPosition(x, y);
+        image.scaleToFit(
+            element.getSize().getWidth() * 595f / 794f,
+            element.getSize().getHeight() * 842f / 1123f);
+
+        document.add(image);
+      }
+    } catch (Exception e) {
+      log.error("画像の描画に失敗しました: {}", element.getUrl(), e);
+      // 画像描画失敗時はスキップ（エラーで全体を止めない）
+    }
   }
 
   /**
-   * テーブルセルを生成
-   * 標準的なパディングとボーダーを適用
+   * 動的フィールドの値マップを構築
+   * 請求書データから各フィールドの値を抽出
    */
-  private Cell createCell(String content) {
-    return new Cell()
-        .add(new Paragraph(content))
-        .setPadding(5);
+  private Map<String, String> buildFieldValuesMap(Invoice invoice) {
+    Map<String, String> values = new HashMap<>();
+
+    values.put("companyName", invoice.getPartner().getName());
+    values.put("industry", invoice.getPartner().getIndustry() != null ? invoice.getPartner().getIndustry() : "");
+    values.put("address", invoice.getPartner().getAddress() != null ? invoice.getPartner().getAddress() : "");
+    values.put("phone", invoice.getPartner().getPhone() != null ? invoice.getPartner().getPhone() : "");
+    values.put("representativeName", invoice.getPartner().getName()); // パートナー名を代表者名として使用
+
+    // 日付フォーマット
+    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日");
+    values.put("issueDate", invoice.getIssueDate().format(dateFormatter));
+    values.put("dueDate", invoice.getDueDate().format(dateFormatter));
+
+    // 金額フォーマット（カンマ区切り）
+    values.put("totalAmount", String.format("%,d", invoice.getTotalAmount().longValue()));
+
+    return values;
   }
 
   /**
-   * テーブルセルを生成（配置指定）
-   * 標準的なパディングとボーダー、指定された配置を適用
+   * サンプルフィールド値を構築
+   * プレビュー表示用のダミーデータ
    */
-  private Cell createCell(String content, TextAlignment alignment) {
-    return new Cell()
-        .add(new Paragraph(content))
-        .setPadding(5)
-        .setTextAlignment(alignment);
+  private Map<String, String> buildSampleFieldValues() {
+    Map<String, String> values = new HashMap<>();
+
+    values.put("companyName", "株式会社サンプル");
+    values.put("industry", "情報通信業");
+    values.put("address", "東京都渋谷区〇〇1-2-3");
+    values.put("phone", "03-1234-5678");
+    values.put("representativeName", "山田太郎");
+    values.put("issueDate", "2026年01月29日");
+    values.put("dueDate", "2026年02月28日");
+    values.put("totalAmount", "1,234,567");
+
+    return values;
   }
 
   /**
-   * カラーコードを解析
-   * 16進数カラーコードをiTextのColorオブジェクトに変換
+   * 表示値を構築
+   * prefix + 値 + suffix の形式で組み立て
+   */
+  private String buildDisplayValue(CanvasLayoutDto.Element element, String value) {
+    StringBuilder sb = new StringBuilder();
+
+    if (element.getPrefix() != null && !element.getPrefix().isEmpty()) {
+      sb.append(element.getPrefix());
+    }
+
+    sb.append(value);
+
+    if (element.getSuffix() != null && !element.getSuffix().isEmpty()) {
+      sb.append(element.getSuffix());
+    }
+
+    return sb.toString();
+  }
+
+  /**
+   * カラーコードをiText Colorに変換
    */
   private Color parseColor(String colorCode) {
-    if (colorCode == null || !colorCode.startsWith("#")) {
+    if (colorCode == null || colorCode.isEmpty()) {
       return new DeviceRgb(0, 0, 0); // デフォルトは黒
     }
 
+    // #RRGGBBの形式をパース
+    colorCode = colorCode.replace("#", "");
+
     try {
-      String hex = colorCode.substring(1);
-      int r = Integer.parseInt(hex.substring(0, 2), 16);
-      int g = Integer.parseInt(hex.substring(2, 4), 16);
-      int b = Integer.parseInt(hex.substring(4, 6), 16);
+      int r = Integer.parseInt(colorCode.substring(0, 2), 16);
+      int g = Integer.parseInt(colorCode.substring(2, 4), 16);
+      int b = Integer.parseInt(colorCode.substring(4, 6), 16);
       return new DeviceRgb(r, g, b);
     } catch (Exception e) {
-      log.warn("無効なカラーコード: {}, デフォルトの黒を使用します", colorCode);
+      log.warn("カラーコードのパースに失敗: {}", colorCode);
       return new DeviceRgb(0, 0, 0);
     }
   }

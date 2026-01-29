@@ -119,6 +119,8 @@ public class InvoiceTemplateController {
   /**
    * テンプレートのプレビューPDFを生成
    * サンプルデータを使用してテンプレートのデザインを確認
+   * 
+   * 更新: canvasLayoutに対応
    */
   @GetMapping("/{id}/preview")
   @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
@@ -126,8 +128,10 @@ public class InvoiceTemplateController {
     InvoiceTemplate template = templateRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("テンプレートが見つかりません: " + id));
 
+    // PDF生成（サンプルデータ使用）
     byte[] pdfBytes = pdfGeneratorService.generatePreviewPdf(template);
 
+    // レスポンスヘッダー設定
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_PDF);
     headers.setContentDispositionFormData("inline", "preview_" + template.getTemplateName() + ".pdf");
