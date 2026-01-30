@@ -274,10 +274,17 @@ public class PdfGeneratorService {
     Map<String, String> values = new HashMap<>();
 
     values.put("companyName", invoice.getPartner().getName());
-    values.put("industry", invoice.getPartner().getIndustry() != null ? invoice.getPartner().getIndustry() : "");
-    values.put("address", invoice.getPartner().getAddress() != null ? invoice.getPartner().getAddress() : "");
-    values.put("phone", invoice.getPartner().getPhone() != null ? invoice.getPartner().getPhone() : "");
-    values.put("representativeName", invoice.getPartner().getName()); // パートナー名を代表者名として使用
+    values.put("industry", invoice.getPartner().getIndustry() != null
+        ? invoice.getPartner().getIndustry() : "");
+    values.put("address", invoice.getPartner().getAddress() != null
+        ? invoice.getPartner().getAddress() : "");
+    values.put("phone", invoice.getPartner().getPhone() != null
+        ? invoice.getPartner().getPhone() : "");
+
+    // 担当者名: 1人目の担当者を取得
+    values.put("representativeName",
+    invoice.getPartner().getContacts() != null && !invoice.getPartner().getContacts().isEmpty()
+        ? invoice.getPartner().getContacts().get(0).getContactName() : "");
 
     // 日付フォーマット
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日");
