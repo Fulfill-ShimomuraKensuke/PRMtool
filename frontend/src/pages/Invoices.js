@@ -463,7 +463,7 @@ const Invoices = () => {
 
                   {/* PDFダウンロード&プレビューボタン */}
                   <td>
-                    <p className="pdf-actions">
+                    <div className="pdf-actions">
                       <button
                         onClick={() => handlePreviewPdf(invoice)}
                         className="btn-pdf-preview"
@@ -479,12 +479,12 @@ const Invoices = () => {
                       >
                         {downloadingPdf === invoice.id ? '⏳' : '📥'} ダウンロード
                       </button>
-                    </p>
+                    </div>
                   </td>
 
                   {/* 操作ボタン */}
                   <td>
-                    <p className="table-actions">
+                    <div className="table-actions">
                       {invoice.status === 'DRAFT' && (
                         <>
                           <button
@@ -514,7 +514,7 @@ const Invoices = () => {
                       {(invoice.status === 'PAID' || invoice.status === 'CANCELLED') && (
                         <span className="no-actions">-</span>
                       )}
-                    </p>
+                    </div>
                   </td>
                 </tr>
               ))}
