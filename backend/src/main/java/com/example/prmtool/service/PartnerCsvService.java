@@ -3,6 +3,8 @@ package com.example.prmtool.service;
 import com.example.prmtool.entity.Partner;
 import com.example.prmtool.entity.PartnerContact;
 import com.example.prmtool.repository.PartnerRepository;
+import com.example.prmtool.validator.ContactInfoValidator;
+import com.example.prmtool.validator.DuplicatePartnerNameValidator;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -15,12 +17,21 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+/**
+ * パートナーCSVインポート/エクスポートサービス
+ * 新スキーマ対応（郵便番号、メールアドレス、phone/email分離）
+ */
 @Service
 public class PartnerCsvService {
 
   private final PartnerRepository partnerRepository;
+  private final DuplicatePartnerNameValidator nameValidator;
+  private final ContactInfoValidator contactValidator;
 
-  // ヘッダーマッピング定義
+  /**
+   * ヘッダーマッピング定義
+   * CSV列名を内部フィールド名にマッピング
+   */
   private static final Map<String, String> HEADER_MAPPING = new HashMap<>();
 
   static {
@@ -38,8 +49,15 @@ public class PartnerCsvService {
     HEADER_MAPPING.put("電話番号", "phone");
     HEADER_MAPPING.put("電話", "phone");
 
+    // 郵便番号（新規追加）
+    HEADER_MAPPING.put("郵便番号", "postalCode");
+
     // 住所
     HEADER_MAPPING.put("住所", "address");
+
+    // メールアドレス（新規追加）
+    HEADER_MAPPING.put("メールアドレス", "email");
+    HEADER_MAPPING.put("メール", "email");
 
     // 担当者名（1セルに複数値）
     HEADER_MAPPING.put("担当者名", "contactNames");
@@ -52,16 +70,26 @@ public class PartnerCsvService {
     HEADER_MAPPING.put("company_name", "name");
     HEADER_MAPPING.put("industry", "industry");
     HEADER_MAPPING.put("phone", "phone");
+    HEADER_MAPPING.put("postal_code", "postalCode");
     HEADER_MAPPING.put("address", "address");
+    HEADER_MAPPING.put("email", "email");
     HEADER_MAPPING.put("contact_names", "contactNames");
     HEADER_MAPPING.put("contact_infos", "contactInfos");
   }
 
-  public PartnerCsvService(PartnerRepository partnerRepository) {
+  public PartnerCsvService(
+      PartnerRepository partnerRepository,
+      DuplicatePartnerNameValidator nameValidator,
+      ContactInfoValidator contactValidator) {
     this.partnerRepository = partnerRepository;
+    this.nameValidator = nameValidator;
+    this.contactValidator = contactValidator;
   }
 
-  // CSVファイルからパートナーをインポート
+  /**
+   * CSVファイルからパートナーをインポート
+   * 新スキーマ対応（郵便番号、メールアドレス、phone/email分離）
+   */
   @Transactional
   public Map<String, Object> importPartnersFromCsv(MultipartFile file) throws Exception {
     List<String> errors = new ArrayList<>();
@@ -94,17 +122,38 @@ public class PartnerCsvService {
           try {
             Partner partner = parsePartnerFromRecord(record, normalizedHeaders, rowNumber);
 
-            // バリデーション
+            // 企業名の必須チェック
             if (partner.getName() == null || partner.getName().trim().isEmpty()) {
               errors.add("行" + rowNumber + ": パートナー名は必須です");
               errorCount++;
               continue;
             }
 
+            // 企業名の重複チェック
+            try {
+              nameValidator.validate(partner.getName());
+            } catch (IllegalArgumentException e) {
+              errors.add("行" + rowNumber + ": " + e.getMessage());
+              errorCount++;
+              continue;
+            }
+
+            // 担当者の必須チェック
             if (partner.getContacts() == null || partner.getContacts().isEmpty()) {
               errors.add("行" + rowNumber + ": 最低1人の担当者が必要です");
               errorCount++;
               continue;
+            }
+
+            // 担当者の連絡先バリデーション
+            for (PartnerContact contact : partner.getContacts()) {
+              try {
+                contactValidator.validate(contact);
+              } catch (IllegalArgumentException e) {
+                errors.add("行" + rowNumber + ": " + e.getMessage());
+                errorCount++;
+                continue;
+              }
             }
 
             // 保存
@@ -126,7 +175,10 @@ public class PartnerCsvService {
     return result;
   }
 
-  // ヘッダーを正規化
+  /**
+   * ヘッダーを正規化
+   * CSV列名を内部フィールド名にマッピング
+   */
   private Map<String, Integer> normalizeHeaders(Map<String, Integer> originalHeaders) {
     Map<String, Integer> normalized = new HashMap<>();
 
@@ -139,7 +191,10 @@ public class PartnerCsvService {
     return normalized;
   }
 
-  // CSVレコードからPartnerエンティティを生成
+  /**
+   * CSVレコードからPartnerエンティティを生成
+   * 新スキーマ対応（郵便番号、メールアドレス追加）
+   */
   private Partner parsePartnerFromRecord(CSVRecord record, Map<String, Integer> headers, int rowNumber)
       throws Exception {
 
@@ -147,7 +202,9 @@ public class PartnerCsvService {
         .name(getValueByKey(record, headers, "name"))
         .industry(getValueByKey(record, headers, "industry"))
         .phone(getValueByKey(record, headers, "phone"))
+        .postalCode(getValueByKey(record, headers, "postalCode"))
         .address(getValueByKey(record, headers, "address"))
+        .email(getValueByKey(record, headers, "email"))
         .contacts(new ArrayList<>())
         .build();
 
@@ -160,7 +217,10 @@ public class PartnerCsvService {
     return partner;
   }
 
-  // 担当者情報をパース（1セルにカンマ区切りで複数値）
+  /**
+   * 担当者情報をパース（1セルにカンマ区切りで複数値）
+   * 新スキーマ対応（phone/email分離）
+   */
   private List<PartnerContact> parseContacts(CSVRecord record, Map<String, Integer> headers, int rowNumber)
       throws Exception {
 
@@ -195,21 +255,39 @@ public class PartnerCsvService {
         throw new Exception("担当者名と担当者連絡先は空にできません");
       }
 
-      PartnerContact contact = PartnerContact.builder()
-          .contactName(name)
-          .contactInfo(info)
-          .build();
+      // 連絡先がメールアドレス形式か電話番号形式かを判定
+      PartnerContact.PartnerContactBuilder builder = PartnerContact.builder()
+          .contactName(name);
+
+      if (info.contains("@")) {
+        // @が含まれていればメールアドレス
+        builder.email(info);
+      } else {
+        // それ以外は電話番号
+        builder.phone(info);
+      }
+
+      PartnerContact contact = builder.build();
+
+      // バリデーション: 電話番号またはメールアドレスのどちらかは必須
+      if (!contact.hasValidContactInfo()) {
+        throw new Exception("担当者「" + name + "」の連絡先は電話番号またはメールアドレスが必須です");
+      }
+
       contacts.add(contact);
     }
 
     return contacts;
   }
 
-  // ヘッダーマップからキーで値を取得
+  /**
+   * ヘッダーマップからキーで値を取得
+   */
   private String getValueByKey(CSVRecord record, Map<String, Integer> headers, String key) {
     Integer index = headers.get(key);
     if (index != null && index < record.size()) {
-      return record.get(index);
+      String value = record.get(index);
+      return (value != null && !value.trim().isEmpty()) ? value.trim() : null;
     }
     return null;
   }

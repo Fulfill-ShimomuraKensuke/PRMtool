@@ -9,6 +9,42 @@
   padding: 2rem;
 }
 
+
+/* ===================================
+   共通メッセージ・ステータス表示
+   ================================== */
+
+/* エラーメッセージ表示 */
+.error-message {
+  background-color: #fff5f5;
+  border-left: 4px solid #e74c3c;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  color: #c33;
+  font-weight: 500;
+}
+
+/* ローディング表示 */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+  color: #667eea;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* データ無し表示 */
+.no-data {
+  text-align: center;
+  padding: 3rem;
+  color: #95a5a6;
+  font-size: 1.1rem;
+}
+
+
 /* ヘッダー部分の横並びレイアウト */
 .partners-header {
   display: flex;
@@ -288,7 +324,7 @@
   font-size: 0.95rem;
 }
 
-.btn-secondary:hover {
+.btn-import:hover {
   opacity: 0.9;
 }
 
@@ -418,6 +454,8 @@
   border-radius: 12px;
   width: 90%;
   max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 
@@ -451,6 +489,11 @@
   margin-bottom: 1.5rem;
 }
 
+.modal-content h3 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
 /* モーダル閉じるボタン */
 .btn-close {
   background: none;
@@ -480,6 +523,15 @@
   margin-top: 1.5rem;
 }
 
+/* モーダルフッター */
+.modal-footer {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
 
 /* ===================================
    詳細モーダルの表示
@@ -499,6 +551,18 @@
 /* 詳細セクション全体 */
 .detail-section {
   margin: 1.5rem 0;
+}
+
+.detail-section h4 {
+  color: #2c3e50;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+
+.detail-section p {
+  margin: 0.5rem 0;
+  color: #555;
+  font-size: 0.95rem;
 }
 
 /* 各詳細項目の区切り */
@@ -560,6 +624,21 @@
   border-left: 3px solid #667eea;
 }
 
+/* 担当者詳細 */
+.contact-detail {
+  margin-bottom: 1rem;
+}
+
+.contact-detail:last-child {
+  margin-bottom: 0;
+}
+
+.contact-detail p {
+  margin: 0.25rem 0;
+  color: #555;
+  font-size: 0.9rem;
+}
+
 /* 担当者情報のフィールド行 */
 .contact-field {
   display: flex;
@@ -589,18 +668,138 @@
    フォーム・入力関連
    ================================== */
 
+/* フォームセクション */
+.form-section {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.form-section:last-of-type {
+  border-bottom: none;
+}
+
+.form-section h4 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+/* フォームグループ */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.9rem;
+}
+
+/* 必須マーク */
+.form-group label.required::after {
+  content: ' *';
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+/* 入力フィールド */
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* エラー状態の入力フィールド */
+.form-group input.error,
+.form-group select.error,
+.form-group textarea.error {
+  border-color: #e74c3c;
+}
+
+.form-group input.error:focus,
+.form-group select.error:focus,
+.form-group textarea.error:focus {
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+/* エラーメッセージテキスト */
+.error-text {
+  display: block;
+  margin-top: 0.5rem;
+  color: #e74c3c;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* 情報メッセージテキスト */
+.info-text {
+  display: block;
+  margin-top: 0.5rem;
+  color: #3498db;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+/* フォーム横並びレイアウト */
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.form-row .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
 /* 担当者入力フォームのリスト */
 .contacts-list {
   margin-bottom: 1rem;
 }
 
-/* 各担当者入力行のレイアウト */
+/* 各担当者入力項目 */
 .contact-item {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.contact-item:last-child {
+  margin-bottom: 0;
+}
+
+/* 担当者のヘッダー部分 */
+.contact-header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.contact-header span {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.95rem;
 }
 
 /* 担当者の氏名入力フィールド */
@@ -825,4 +1024,58 @@
 /* テーブル行のホバー時の背景色変更 */
 .contacts-table tbody tr:hover {
   background-color: #f8f9fa;
+}
+
+
+/* ===================================
+   レスポンシブ対応
+   ================================== */
+
+@media (max-width: 768px) {
+  .partners-container {
+    padding: 1rem;
+  }
+
+  .partners-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .header-buttons {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .header-buttons button {
+    width: 100%;
+  }
+
+  .partners-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .modal-content {
+    width: 95%;
+    padding: 1.5rem;
+  }
+
+  .modal-actions,
+  .modal-footer {
+    flex-direction: column;
+  }
+
+  .modal-actions button,
+  .modal-footer button {
+    width: 100%;
+  }
+
+  .result-summary {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }
