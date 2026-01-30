@@ -204,7 +204,7 @@ const Projects = () => {
     <>
       <div className="projects-container">
         <div className="projects-header">
-          <h1>案件管理</h1>
+          <h1>📘案件管理</h1>
           <div className="header-buttons">
             <button onClick={() => handleOpenModal()} className="btn-primary">
               + 新規案件作成

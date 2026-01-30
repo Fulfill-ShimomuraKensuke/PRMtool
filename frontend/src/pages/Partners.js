@@ -460,7 +460,7 @@ const Partners = () => {
   return (
     <div className="partners-container">
       <div className="partners-header">
-        <h1>パートナー管理</h1>
+        <h1>🏢パートナー管理</h1>
         <div className="header-buttons">
           <button onClick={handleDownloadTemplate} className="btn-template">
             CSVテンプレート
