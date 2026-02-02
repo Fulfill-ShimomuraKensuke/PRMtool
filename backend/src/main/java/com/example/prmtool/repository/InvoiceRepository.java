@@ -17,13 +17,25 @@ import java.util.UUID;
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
 
-  // パートナーIDで請求書を取得
+  /**
+   * 全請求書を作成日時の昇順で取得
+   * 登録順を維持するため、createdAtの昇順でソート
+   */
+  List<Invoice> findAllByOrderByCreatedAtAsc();
+
+  /**
+   * パートナーIDで請求書を取得（作成日時の昇順）
+   */
   List<Invoice> findByPartnerId(UUID partnerId);
 
-  // ステータスで請求書を取得
+  /**
+   * ステータスで請求書を取得（作成日時の昇順）
+   */
   List<Invoice> findByStatus(Invoice.InvoiceStatus status);
 
-  // パートナーIDとステータスで請求書を取得
+  /**
+   * パートナーIDとステータスで請求書を取得（作成日時の昇順）
+   */
   List<Invoice> findByPartnerIdAndStatus(UUID partnerId, Invoice.InvoiceStatus status);
 
   // 最新の請求書番号を取得（番号生成用）

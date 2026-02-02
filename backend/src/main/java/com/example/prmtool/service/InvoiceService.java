@@ -30,7 +30,7 @@ public class InvoiceService {
   private final PartnerRepository partnerRepository;
   private final CommissionRuleRepository commissionRuleRepository;
   private final CommissionCalculationService commissionCalculationService;
-  private final InvoiceTemplateRepository templateRepository; // ★★★ 追加 ★★★
+  private final InvoiceTemplateRepository templateRepository;
 
   // 現在の消費税率
   private static final BigDecimal DEFAULT_TAX_RATE = new BigDecimal("0.10");
@@ -40,7 +40,7 @@ public class InvoiceService {
    */
   @Transactional(readOnly = true)
   public List<InvoiceResponse> getAllInvoices() {
-    return invoiceRepository.findAll().stream()
+    return invoiceRepository.findAllByOrderByCreatedAtAsc().stream()
         .map(this::convertToResponse)
         .collect(Collectors.toList());
   }
@@ -82,7 +82,7 @@ public class InvoiceService {
     Partner partner = partnerRepository.findById(request.getPartnerId())
         .orElseThrow(() -> new RuntimeException("パートナーが見つかりません: " + request.getPartnerId()));
 
-    // ★★★ 追加: テンプレートを取得 ★★★
+    //テンプレートを取得
     InvoiceTemplate template = null;
     if (request.getTemplateId() != null) {
       template = templateRepository.findById(request.getTemplateId())
@@ -99,7 +99,7 @@ public class InvoiceService {
     Invoice invoice = Invoice.builder()
         .invoiceNumber(invoiceNumber)
         .partner(partner)
-        .template(template) // ★★★ 追加 ★★★
+        .template(template)
         .issueDate(request.getIssueDate())
         .dueDate(request.getDueDate())
         .taxCategory(request.getTaxCategory())
@@ -195,7 +195,7 @@ public class InvoiceService {
     Partner partner = partnerRepository.findById(request.getPartnerId())
         .orElseThrow(() -> new RuntimeException("パートナーが見つかりません: " + request.getPartnerId()));
 
-    // ★★★ 追加: テンプレートを取得 ★★★
+    //テンプレートを取得
     InvoiceTemplate template = null;
     if (request.getTemplateId() != null) {
       template = templateRepository.findById(request.getTemplateId())
@@ -207,7 +207,7 @@ public class InvoiceService {
 
     // 基本情報を更新
     invoice.setPartner(partner);
-    invoice.setTemplate(template); // ★★★ 追加 ★★★
+    invoice.setTemplate(template);
     invoice.setIssueDate(request.getIssueDate());
     invoice.setDueDate(request.getDueDate());
     invoice.setTaxCategory(request.getTaxCategory());
@@ -417,8 +417,8 @@ public class InvoiceService {
         .totalAmount(invoice.getTotalAmount())
         .status(invoice.getStatus())
         .notes(invoice.getNotes())
-        .templateId(invoice.getTemplate() != null ? invoice.getTemplate().getId() : null) // ★★★ 追加 ★★★
-        .templateName(invoice.getTemplate() != null ? invoice.getTemplate().getTemplateName() : null) // ★★★ 追加 ★★★
+        .templateId(invoice.getTemplate() != null ? invoice.getTemplate().getId() : null)
+        .templateName(invoice.getTemplate() != null ? invoice.getTemplate().getTemplateName() : null)
         .items(items)
         .createdAt(invoice.getCreatedAt())
         .updatedAt(invoice.getUpdatedAt())

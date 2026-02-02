@@ -84,15 +84,20 @@ public class ProjectService {
     return ProjectResponse.from(finalProject);
   }
 
-  // 全案件取得
+  /**
+   * 全案件を取得
+   * 作成日時の昇順（登録順）で返却
+   */
   @Transactional(readOnly = true)
   public List<ProjectResponse> getAllProjects() {
-    return projectRepository.findAll().stream()
+    return projectRepository.findAllByOrderByCreatedAtAsc().stream()
         .map(ProjectResponse::from)
         .collect(Collectors.toList());
   }
 
-  // オーナーで絞り込んで案件取得
+  /**
+   * パートナーIDで案件を取得
+   */
   @Transactional(readOnly = true)
   public List<ProjectResponse> getProjectsByOwner(UUID ownerId) {
     return projectRepository.findByOwnerId(Objects.requireNonNull(ownerId)).stream()

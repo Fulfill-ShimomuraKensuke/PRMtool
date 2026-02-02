@@ -17,6 +17,12 @@ import java.util.UUID;
 public interface CommissionRuleRepository extends JpaRepository<CommissionRule, UUID> {
 
   /**
+   * 全手数料ルールを作成日時の昇順で取得
+   * 登録順を維持するため、createdAtの昇順でソート
+   */
+  List<CommissionRule> findAllByOrderByCreatedAtAsc();
+
+  /**
    * 案件IDで手数料ルールを取得
    * 
    * @param projectId 案件ID
@@ -30,7 +36,7 @@ public interface CommissionRuleRepository extends JpaRepository<CommissionRule, 
    * @param projectId 案件ID
    * @return 確定状態の手数料ルールのリスト
    */
-  @Query("SELECT cr FROM CommissionRule cr WHERE cr.project.id = :projectId AND cr.status = 'CONFIRMED'")
+  @Query("SELECT cr FROM CommissionRule cr WHERE cr.project.id = :projectId AND cr.status = 'CONFIRMED' ORDER BY cr.createdAt ASC")
   List<CommissionRule> findUsableRulesByProjectId(@Param("projectId") UUID projectId);
 
   /**

@@ -30,7 +30,7 @@ public class CommissionRuleService {
    */
   @Transactional(readOnly = true)
   public List<CommissionRuleResponse> getAllRules() {
-    return commissionRuleRepository.findAll().stream()
+    return commissionRuleRepository.findAllByOrderByCreatedAtAsc().stream()
         .map(this::convertToResponse)
         .collect(Collectors.toList());
   }

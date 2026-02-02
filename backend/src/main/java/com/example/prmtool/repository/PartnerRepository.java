@@ -4,6 +4,7 @@ import com.example.prmtool.entity.Partner;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,7 +14,6 @@ import java.util.UUID;
  */
 @Repository
 public interface PartnerRepository extends JpaRepository<Partner, UUID> {
-
   /**
    * 企業名で検索
    * 企業名の重複チェックに使用
@@ -22,4 +22,12 @@ public interface PartnerRepository extends JpaRepository<Partner, UUID> {
    * @return 該当するパートナー（存在しない場合はEmpty）
    */
   Optional<Partner> findByName(String name);
+
+  /**
+   * 全パートナーを作成日時の昇順で取得
+   * 登録順を維持するため、createdAtの昇順でソート
+   * 
+   * @return 作成日時順のパートナー一覧
+   */
+  List<Partner> findAllByOrderByCreatedAtAsc();
 }

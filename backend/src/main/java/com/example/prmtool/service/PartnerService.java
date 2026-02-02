@@ -30,10 +30,11 @@ public class PartnerService {
 
   /**
    * 全パートナーを取得
+   * 作成日時の昇順（登録順）で返却
    */
   @Transactional(readOnly = true)
   public List<PartnerResponse> getAllPartners() {
-    return partnerRepository.findAll().stream()
+    return partnerRepository.findAllByOrderByCreatedAtAsc().stream()
         .map(PartnerResponse::from)
         .collect(Collectors.toList());
   }
