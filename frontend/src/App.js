@@ -14,6 +14,9 @@ import Invoices from './pages/Invoices';
 import InvoiceTemplates from './pages/InvoiceTemplates';
 import PartnerDashboard from './pages/PartnerDashboard';
 import InvoiceTemplateEditor from './pages/InvoiceTemplateEditor';
+import MailSettings from './pages/MailSettings'; // 新規追加
+import Contents from './pages/Contents'; // 新規追加
+import ContentShares from './pages/ContentShares'; // 新規追加
 
 import './App.css';
 
@@ -140,7 +143,46 @@ function AppContent() {
           }
         />
 
-        {/* アカウント管理（SYSTEMとADMINのみアクセス可能、REPは制限） */}
+        {/* ========================================
+            新規追加: メール設定
+            SYSTEMとADMINのみアクセス可能
+            ======================================== */}
+        <Route
+          path="/mail-settings"
+          element={
+            <PrivateRoute requiredRole="ADMIN">
+              <MailSettings />
+            </PrivateRoute>
+          }
+        />
+
+        {/* ========================================
+            新規追加: コンテンツ管理（ファイル倉庫）
+            ADMIN、ACCOUNTING、REPがアクセス可能（SYSTEMは制限）
+            ======================================== */}
+        <Route
+          path="/contents"
+          element={
+            <PrivateRoute systemRestricted={true}>
+              <Contents />
+            </PrivateRoute>
+          }
+        />
+
+        {/* ========================================
+            新規追加: コンテンツ共有管理
+            ADMIN、ACCOUNTING、REPがアクセス可能（SYSTEMは制限）
+            ======================================== */}
+        <Route
+          path="/content-shares"
+          element={
+            <PrivateRoute systemRestricted={true}>
+              <ContentShares />
+            </PrivateRoute>
+          }
+        />
+
+        {/* アカウント管理（SYSTEMとADMINのみアクセス可能） */}
         <Route
           path="/accounts"
           element={
