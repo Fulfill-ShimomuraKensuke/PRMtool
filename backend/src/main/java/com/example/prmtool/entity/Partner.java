@@ -72,10 +72,11 @@ public class Partner {
   private String address;
 
   /**
-   * 企業代表メールアドレス（任意）
+   * 企業代表メールアドレス（必須）
    * 形式: 標準的なメールアドレス形式
    */
-  @Column(length = 255)
+  @Column(nullable = false, length = 255)
+  @NotBlank(message = "企業代表メールアドレスは必須です")
   @Email(message = "正しいメールアドレス形式で入力してください")
   private String email;
 

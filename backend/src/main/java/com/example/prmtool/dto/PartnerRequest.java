@@ -53,8 +53,9 @@ public class PartnerRequest {
   private String address;
 
   /**
-   * 企業代表メールアドレス（任意）
+   * 企業代表メールアドレス（必須）
    */
+  @NotBlank(message = "企業代表メールアドレスは必須です")
   @Email(message = "正しいメールアドレス形式で入力してください")
   private String email;
 

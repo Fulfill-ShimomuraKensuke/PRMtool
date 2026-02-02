@@ -18,10 +18,17 @@ export const validatePhone = (phone) => {
 
 /**
  * メールアドレスのバリデーション
+ * 企業代表メールは必須
  */
-export const validateEmail = (email) => {
+export const validateEmail = (email, isRequired = false) => {
+  // 必須チェック
+  if (isRequired && (!email || email.trim() === '')) {
+    return false;
+  }
+
+  // 空欄の場合は任意項目として許可
   if (!email || email.trim() === '') {
-    return true; // 空欄は許可（任意項目）
+    return true;
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -73,8 +80,10 @@ export const validatePartnerForm = (formData) => {
     errors.postalCode = '郵便番号は7桁の数字で入力してください';
   }
 
-  // メールアドレスのフォーマットチェック
-  if (formData.email && !validateEmail(formData.email)) {
+  // メールアドレスの必須チェックとフォーマットチェック
+  if (!formData.email || formData.email.trim() === '') {
+    errors.email = '企業代表メールアドレスは必須です';
+  } else if (!validateEmail(formData.email)) {
     errors.email = '正しいメールアドレス形式で入力してください';
   }
 
