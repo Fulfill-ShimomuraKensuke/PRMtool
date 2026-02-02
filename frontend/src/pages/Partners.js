@@ -294,16 +294,22 @@ const Partners = () => {
     }
   };
 
-  // 削除処理
+  // 削除処理（削除後は詳細モーダルを閉じて一覧画面に戻る）
   const handleDelete = async (id) => {
-    if (!window.confirm('本当に削除しますか？')) {
+    if (!window.confirm('本当に削除しますか?')) {
       return;
     }
 
     try {
       await partnerService.delete(id);
       alert('パートナーを削除しました');
-      fetchPartners();
+
+      // 詳細モーダルを閉じる
+      setShowDetailModal(false);
+      setSelectedPartner(null);
+
+      // パートナー一覧を再取得
+      await fetchPartners();
     } catch (err) {
       alert('削除に失敗しました');
       console.error('Delete partner error:', err);
@@ -734,7 +740,7 @@ const Partners = () => {
               </div>
 
               <div className="form-group">
-                <label>メールアドレス</label>
+                <label className="required">メールアドレス</label>
                 <input
                   type="email"
                   name="email"
