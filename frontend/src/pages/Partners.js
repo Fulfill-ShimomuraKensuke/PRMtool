@@ -107,8 +107,9 @@ const Partners = () => {
     setShowEditModal(true);
   };
 
-  // 編集モーダルを開く
+  // 編集モーダルを開く（詳細モーダルを閉じてから開く）
   const handleOpenEditModal = (partner) => {
+    setShowDetailModal(false);
     setEditingPartner(partner);
     setFormData({
       name: partner.name,
@@ -129,11 +130,17 @@ const Partners = () => {
     setShowEditModal(true);
   };
 
-  // モーダルを閉じる
+  // モーダルを閉じる（編集中の場合は詳細モーダルを再表示）
   const handleCloseEditModal = () => {
+    const partnerToShow = editingPartner;
     setShowEditModal(false);
     setEditingPartner(null);
     setErrors({});
+    // 編集中のパートナーがあった場合は詳細モーダルを再表示
+    if (partnerToShow) {
+      setSelectedPartner(partnerToShow);
+      setShowDetailModal(true);
+    }
   };
 
   // 詳細モーダルを開く
@@ -237,7 +244,7 @@ const Partners = () => {
     setFormData(prev => ({ ...prev, contacts: newContacts }));
   };
 
-  // 保存処理
+  // 保存処理（保存後に詳細モーダルを再表示）
   const handleSave = async () => {
     // バリデーション
     const validationErrors = validatePartnerForm(formData);
@@ -248,16 +255,35 @@ const Partners = () => {
     }
 
     try {
+      let savedPartnerId;
+
       if (editingPartner) {
         await partnerService.update(editingPartner.id, formData);
+        savedPartnerId = editingPartner.id;
         alert('パートナー情報を更新しました');
       } else {
-        await partnerService.create(formData);
+        const result = await partnerService.create(formData);
+        savedPartnerId = result.id;
         alert('パートナーを登録しました');
       }
 
-      handleCloseEditModal();
-      fetchPartners();
+      // 編集モーダルを閉じる
+      setShowEditModal(false);
+      setEditingPartner(null);
+      setErrors({});
+
+      // パートナー一覧を再取得
+      await fetchPartners();
+
+      // 保存したパートナーの最新情報を取得して詳細モーダルを表示
+      try {
+        const updatedPartner = await partnerService.getById(savedPartnerId);
+        setSelectedPartner(updatedPartner);
+        setShowDetailModal(true);
+      } catch (err) {
+        console.error('Failed to fetch updated partner:', err);
+        // 詳細表示に失敗しても処理は続行
+      }
     } catch (err) {
       if (err.response?.data?.message) {
         alert(err.response.data.message);
