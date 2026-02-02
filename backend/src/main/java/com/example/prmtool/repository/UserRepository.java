@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import jakarta.persistence.LockModeType;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,4 +32,12 @@ public interface UserRepository extends JpaRepository<User, UUID> {
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("select count(u) from User u where u.role = :role")
   long countByRoleForUpdate(@Param("role") User.UserRole role);
+
+  /**
+   * 全ユーザーを作成日時の昇順で取得
+   * 登録順を維持するため、createdAtの昇順でソート
+   * 
+   * @return 作成日時順のユーザー一覧
+   */
+  List<User> findAllByOrderByCreatedAtAsc();
 }

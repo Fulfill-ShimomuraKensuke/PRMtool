@@ -15,23 +15,29 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
-  private final UserRepository userRepository; // UserRepository追加
-  private final PasswordEncoder passwordEncoder; // PasswordEncoder追加
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
 
   public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
   }
 
-  // 全ユーザーを取得
+  /**
+   * 全ユーザーを取得
+   * 作成日時の昇順（登録順）で返却
+   */
   @Transactional(readOnly = true)
   public List<UserResponse> getAllUsers() {
-    return userRepository.findAll().stream()
+    return userRepository.findAllByOrderByCreatedAtAsc().stream()
         .map(UserResponse::from)
         .collect(Collectors.toList());
   }
 
-  // IDでユーザーを取得
+  /**
+   * IDでユーザーを取得
+   * 特定のユーザー1件を返却
+   */
   @Transactional(readOnly = true)
   public UserResponse getUserById(UUID id) {
     User user = userRepository.findById(id)
@@ -39,16 +45,21 @@ public class UserService {
     return UserResponse.from(user);
   }
 
-  // 案件担当者として割り当て可能なユーザーを取得（SYSTEMロールを除外）
+  /**
+   * 案件担当者として割り当て可能なユーザーを取得（SYSTEMロールを除外）
+   * 作成日時の昇順（登録順）で返却
+   */
   @Transactional(readOnly = true)
   public List<UserResponse> getAssignableUsers() {
-    return userRepository.findAll().stream()
-        .filter(user -> user.getRole() != User.UserRole.SYSTEM) // SYSTEMロールは案件担当者になれない
+    return userRepository.findAllByOrderByCreatedAtAsc().stream()
+        .filter(user -> user.getRole() != User.UserRole.SYSTEM)
         .map(UserResponse::from)
         .collect(Collectors.toList());
   }
 
-  // ユーザーを作成
+  /**
+   * ユーザーを作成
+   */
   @Transactional
   public UserResponse createUser(UserRequest request, String createdBy) {
     // ログインIDの重複チェック
@@ -76,7 +87,9 @@ public class UserService {
     return UserResponse.from(savedUser);
   }
 
-  // ユーザーを更新
+  /**
+   * ユーザーを更新
+   */
   @Transactional
   public UserResponse updateUser(UUID id, UserRequest request) {
     User user = userRepository.findById(id)
@@ -108,7 +121,9 @@ public class UserService {
     return UserResponse.from(updatedUser);
   }
 
-  // ユーザーを削除
+  /**
+   * ユーザーを削除
+   */
   @Transactional
   public void deleteUser(UUID id) {
     User user = userRepository.findById(id)
