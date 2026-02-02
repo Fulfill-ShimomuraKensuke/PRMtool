@@ -1,0 +1,538 @@
+@startuml PRM_Tool_Complete_Class_Diagram
+
+' スタイル設定
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #FFFFFF
+skinparam class {
+    BackgroundColor<<Entity>> #E3F2FD
+    BackgroundColor<<Enum>> #FFF9C4
+    BorderColor #1976D2
+    ArrowColor #1976D2
+}
+
+title PRM Tool システム 完全クラス図
+
+' ========================================
+' ユーザー管理エンティティ
+' システムにログインするユーザーの情報を管理
+' ========================================
+package "ユーザー管理" {
+    class User <<Entity>> {
+        ' 一意識別子
+        +id : UUID
+        ' ユーザー名
+        +name : String
+        ' ログインID（一意）
+        +loginId : String
+        ' ハッシュ化されたパスワード
+        +passwordHash : String
+        ' メールアドレス
+        +email : String
+        ' 電話番号
+        +phone : String
+        ' 住所
+        +address : String
+        ' 役職
+        +position : String
+        ' ユーザーロール（権限）
+        +role : UserRole
+        ' システム保護フラグ（削除不可）
+        +isSystemProtected : Boolean
+        ' 作成日時
+        +createdAt : LocalDateTime
+        ' 作成者
+        +createdBy : String
+        ' 更新日時
+        +updatedAt : LocalDateTime
+    }
+
+    enum UserRole <<Enum>> {
+        ' システム管理者（アカウント管理のみ可能）
+        SYSTEM
+        ' 管理者（全ての機能にアクセス可能、削除権限あり）
+        ADMIN
+        ' 会計担当（手数料ルール・請求書の作成・編集・確定が可能、削除は不可）
+        ACCOUNTING
+        ' 担当者（限定的な機能にアクセス可能）
+        REP
+    }
+}
+
+' ========================================
+' パートナー管理エンティティ
+' パートナー企業とその担当者の情報を管理
+' ========================================
+package "パートナー管理" {
+    class Partner <<Entity>> {
+        ' パートナーの一意識別子
+        +id : UUID
+        ' 企業名（必須、一意）
+        +name : String
+        ' 業界
+        +industry : String
+        ' 代表電話（数字とハイフンのみ、例：03-1234-5678）
+        +phone : String
+        ' 郵便番号（7桁の数字、ハイフンなし、例：1234567）
+        +postalCode : String
+        ' 住所
+        +address : String
+        ' 企業代表メールアドレス
+        +email : String
+        ' 複数の担当者
+        +contacts : List<PartnerContact>
+        ' 作成日時（自動設定）
+        +createdAt : LocalDateTime
+        ' 更新日時（自動設定）
+        +updatedAt : LocalDateTime
+        ..
+        ' 担当者を追加するヘルパーメソッド（双方向関連を正しく設定）
+        +addContact(contact : PartnerContact) : void
+        ' 担当者を削除するヘルパーメソッド（双方向関連を正しく解除）
+        +removeContact(contact : PartnerContact) : void
+    }
+
+    class PartnerContact <<Entity>> {
+        ' 連絡先の一意識別子
+        +id : UUID
+        ' 所属するパートナー企業（必須の関連）
+        +partner : Partner
+        ' 担当者名（必須）
+        +contactName : String
+        ' 担当者電話番号（任意、メールアドレスとどちらかは必須）
+        +phone : String
+        ' 担当者メールアドレス（任意、電話番号とどちらかは必須）
+        +email : String
+        ' 作成日時（自動設定）
+        +createdAt : LocalDateTime
+        ' 更新日時（自動設定）
+        +updatedAt : LocalDateTime
+        ..
+        ' 電話番号またはメールアドレスのバリデーション（どちらかは必須）
+        +hasValidContactInfo() : Boolean
+    }
+}
+
+' ========================================
+' 案件管理エンティティ
+' プロジェクト情報と担当者の割り当てを管理
+' ========================================
+package "案件管理" {
+    class Project <<Entity>> {
+        ' 案件の一意識別子
+        +id : UUID
+        ' 案件名
+        +name : String
+        ' 案件ステータス
+        +status : ProjectStatus
+        ' 関連するパートナー企業
+        +partner : Partner
+        ' メイン担当者（作成者）
+        +owner : User
+        ' 複数の担当者
+        +assignments : List<ProjectAssignment>
+        ' テーブルデータ
+        +tableData : ProjectTableData
+        ' 作成日時
+        +createdAt : LocalDateTime
+        ' 更新日時
+        +updatedAt : LocalDateTime
+        ..
+        ' 担当者を追加するヘルパーメソッド
+        +addAssignment(assignment : ProjectAssignment) : void
+        ' 担当者を削除するヘルパーメソッド
+        +removeAssignment(assignment : ProjectAssignment) : void
+    }
+
+    enum ProjectStatus <<Enum>> {
+        ' 新規
+        NEW
+        ' 進行中
+        IN_PROGRESS
+        ' 完了
+        DONE
+    }
+
+    class ProjectAssignment <<Entity>> {
+        ' 一意識別子
+        +id : UUID
+        ' プロジェクト
+        +project : Project
+        ' ユーザー
+        +user : User
+        ' 割り当て日時
+        +assignedAt : LocalDateTime
+    }
+
+    class ProjectTableData <<Entity>> {
+        ' テーブルデータの一意識別子
+        +id : UUID
+        ' 関連するプロジェクト
+        +project : Project
+        ' JSON形式でテーブルデータを保存
+        +tableDataJson : String
+        ' 作成日時
+        +createdAt : LocalDateTime
+        ' 更新日時
+        +updatedAt : LocalDateTime
+    }
+}
+
+' ========================================
+' 手数料管理エンティティ
+' 案件ごとの手数料契約ルールを管理
+' ========================================
+package "手数料管理" {
+    class CommissionRule <<Entity>> {
+        ' 手数料ルールの一意識別子
+        +id : UUID
+        ' 案件への参照（どの案件の手数料ルールか）
+        +project : Project
+        ' ルール名（例：「初期契約」「追加契約」など）
+        +ruleName : String
+        ' 手数料タイプ（RATE: %指定、FIXED: 固定金額）
+        +commissionType : CommissionType
+        ' 手数料率（%）- commissionType が RATE の場合に使用（例: 3.5% なら 3.5 を格納）
+        +ratePercent : BigDecimal
+        ' 1件あたり固定金額 - commissionType が FIXED の場合に使用
+        +fixedAmount : BigDecimal
+        ' ステータス（請求書で使用できるのは「確定」のみ）
+        +status : CommissionStatus
+        ' 備考
+        +notes : String
+        ' 作成日時
+        +createdAt : LocalDateTime
+        ' 更新日時
+        +updatedAt : LocalDateTime
+        ..
+        ' このルールが請求書で使用可能かチェック
+        +isUsableForInvoice() : Boolean
+        ' バリデーション: 手数料タイプに応じて必要なフィールドが設定されているかチェック
+        -validate() : void
+    }
+
+    enum CommissionType <<Enum>> {
+        ' %指定（例: 3.5%）
+        RATE
+        ' 1件あたり固定金額（例: 5,000円）
+        FIXED
+    }
+
+    enum CommissionStatus <<Enum>> {
+        ' 未承認
+        UNAPPROVED
+        ' 確認中
+        REVIEWING
+        ' 確定（請求書で使用可能）
+        CONFIRMED
+        ' 支払済
+        PAID
+        ' 使用不可
+        DISABLED
+    }
+}
+
+' ========================================
+' 請求書管理エンティティ
+' 請求書本体と明細、テンプレートを管理
+' ========================================
+package "請求書管理" {
+    class Invoice <<Entity>> {
+        ' 請求書の一意識別子
+        +id : UUID
+        ' 請求書番号（例: INV-2026-0001）
+        +invoiceNumber : String
+        ' パートナーへの参照
+        +partner : Partner
+        ' 使用するテンプレートへの参照（PDF生成時に使用）
+        +template : InvoiceTemplate
+        ' 発行日
+        +issueDate : LocalDate
+        ' 支払期限
+        +dueDate : LocalDate
+        ' 消費税区分
+        +taxCategory : TaxCategory
+        ' 消費税率（請求書作成時点の税率を保持）
+        +taxRate : BigDecimal
+        ' 商品小計（税抜）
+        +subtotal : BigDecimal
+        ' 手数料小計
+        +commissionSubtotal : BigDecimal
+        ' 課税対象額（消費税区分によって異なる）
+        +taxableAmount : BigDecimal
+        ' 消費税額
+        +taxAmount : BigDecimal
+        ' 合計金額（税込）
+        +totalAmount : BigDecimal
+        ' ステータス
+        +status : InvoiceStatus
+        ' 備考
+        +notes : String
+        ' 請求書明細（1つの請求書に複数の明細、最低1件）
+        +items : List<InvoiceItem>
+        ' 作成日時（この時点で金額が確定し、後から変わらない）
+        +createdAt : LocalDateTime
+        ' 更新日時
+        +updatedAt : LocalDateTime
+        ..
+        ' 明細を追加するヘルパーメソッド
+        +addItem(item : InvoiceItem) : void
+        ' 明細を削除するヘルパーメソッド
+        +removeItem(item : InvoiceItem) : void
+    }
+
+    enum TaxCategory <<Enum>> {
+        ' あり（商品＋手数料に課税）
+        TAX_INCLUDED
+        ' 手数料抜き（商品部分のみ課税）
+        TAX_ON_PRODUCT_ONLY
+        ' なし（非課税）
+        TAX_EXEMPT
+    }
+
+    enum InvoiceStatus <<Enum>> {
+        ' 下書き
+        DRAFT
+        ' 発行済
+        ISSUED
+        ' 支払済
+        PAID
+        ' キャンセル
+        CANCELLED
+    }
+
+    class InvoiceItem <<Entity>> {
+        ' 明細の一意識別子
+        +id : UUID
+        ' 請求書への参照
+        +invoice : Invoice
+        ' どの手数料ルールを適用したか（参照のみ、計算には使用しない）
+        +appliedCommissionRule : CommissionRule
+        ' 明細の説明
+        +description : String
+        ' 数量
+        +quantity : Integer
+        ' 単価
+        +unitPrice : BigDecimal
+        ' 商品金額（quantity × unitPrice）
+        +productAmount : BigDecimal
+        ' 適用した手数料タイプ（請求書作成時点のルールをコピー）
+        +appliedCommissionType : CommissionType
+        ' 適用した手数料率（%）- タイプが RATE の場合
+        +appliedRatePercent : BigDecimal
+        ' 適用した固定金額 - タイプが FIXED の場合
+        +appliedFixedAmount : BigDecimal
+        ' 手数料額（計算結果を保存）
+        +commissionAmount : BigDecimal
+        ' 明細合計（productAmount + commissionAmount）
+        +itemTotal : BigDecimal
+        ' 作成日時
+        +createdAt : LocalDateTime
+    }
+
+    class InvoiceTemplate <<Entity>> {
+        ' テンプレートの一意識別子
+        +id : UUID
+        ' テンプレート識別用の名前
+        +templateName : String
+        ' テンプレートの用途や説明
+        +description : String
+        ' 会社ロゴ画像のストレージURL
+        +logoUrl : String
+        ' 請求元の会社名
+        +companyName : String
+        ' 会社の住所
+        +companyAddress : String
+        ' 連絡先電話番号
+        +companyPhone : String
+        ' 連絡先メールアドレス
+        +companyEmail : String
+        ' 会社のウェブサイトURL
+        +companyWebsite : String
+        ' JSON形式で項目の表示位置や順序を保存（旧形式、下位互換性のため保持）
+        +layoutSettings : String
+        ' メインカラー（ヘッダー背景など）
+        +primaryColor : String
+        ' サブカラー（罫線や強調表示）
+        +secondaryColor : String
+        ' 使用するフォント名
+        +fontFamily : String
+        ' JSON形式で表示項目のON/OFFを保存（旧形式、下位互換性のため保持）
+        +displaySettings : String
+        ' 備考や追加メッセージ
+        +footerText : String
+        ' 振込先の銀行口座情報
+        +bankInfo : String
+        ' 支払期日や支払条件
+        +paymentTerms : String
+        ' JSON形式で要素の座標・サイズ・スタイル情報を保存
+        +canvasLayout : String
+        ' このテンプレートをデフォルトとして使用するか
+        +isDefault : Boolean
+        ' テンプレートを作成したユーザー
+        +createdBy : User
+        ' テンプレート作成日時
+        +createdAt : LocalDateTime
+        ' テンプレート最終更新日時
+        +updatedAt : LocalDateTime
+    }
+}
+
+' ========================================
+' エンティティ間のリレーションシップ
+' ========================================
+
+' ユーザーとロールの関連
+User --> UserRole : "has role\nロールを持つ"
+
+' パートナーと担当者の関連（1対多、カスケード削除）
+Partner "1" *-- "0..*" PartnerContact : "has contacts\n担当者を持つ"
+
+' 案件とパートナーの関連（多対1）
+Project "*" --> "1" Partner : "belongs to\n所属する"
+
+' 案件とオーナーの関連（多対1）
+Project "*" --> "1" User : "owned by\nオーナー"
+
+' 案件と担当者割り当ての関連（1対多、カスケード削除）
+Project "1" *-- "0..*" ProjectAssignment : "has assignments\n担当者割り当て"
+
+' 担当者割り当てとユーザーの関連（多対1）
+ProjectAssignment "*" --> "1" User : "assigned to\n割り当て先"
+
+' 案件とテーブルデータの関連（1対1、カスケード削除）
+Project "1" *-- "0..1" ProjectTableData : "has table data\nテーブルデータ"
+
+' 案件とステータスの関連
+Project --> ProjectStatus : "has status\nステータスを持つ"
+
+' 手数料ルールと案件の関連（多対1）
+CommissionRule "*" --> "1" Project : "belongs to\n所属する案件"
+
+' 手数料ルールとタイプの関連
+CommissionRule --> CommissionType : "has type\nタイプを持つ"
+
+' 手数料ルールとステータスの関連
+CommissionRule --> CommissionStatus : "has status\nステータスを持つ"
+
+' 請求書とパートナーの関連（多対1）
+Invoice "*" --> "1" Partner : "bills to\n請求先"
+
+' 請求書とテンプレートの関連（多対1、オプショナル）
+Invoice "*" --> "0..1" InvoiceTemplate : "uses template\nテンプレート使用"
+
+' 請求書とステータスの関連
+Invoice --> InvoiceStatus : "has status\nステータスを持つ"
+
+' 請求書と税区分の関連
+Invoice --> TaxCategory : "has tax category\n税区分を持つ"
+
+' 請求書と明細の関連（1対多、カスケード削除、最低1件）
+Invoice "1" *-- "1..*" InvoiceItem : "contains items\n明細を含む"
+
+' 請求書明細と手数料ルールの関連（多対1、オプショナル、参照のみ）
+InvoiceItem "*" --> "0..1" CommissionRule : "references rule\nルール参照"
+
+' 請求書明細と適用手数料タイプの関連
+InvoiceItem --> CommissionType : "applied type\n適用タイプ"
+
+' テンプレートと作成者の関連（多対1）
+InvoiceTemplate "*" --> "1" User : "created by\n作成者"
+
+' ========================================
+' 重要な注釈
+' ========================================
+note right of User
+  【ユーザー管理】
+  システムにログインするユーザー情報
+  
+  4つのロール:
+  - SYSTEM: アカウント管理のみ可能
+  - ADMIN: 全ての機能にアクセス可能
+  - ACCOUNTING: 手数料・請求書の作成・編集・確定
+  - REP: 限定的な機能にアクセス可能
+end note
+
+note right of Partner
+  【パートナー管理】
+  取引先企業の基本情報
+  
+  - 企業名は一意
+  - 複数の担当者を登録可能
+  - 電話番号は「03-1234-5678」形式
+  - 郵便番号は7桁の数字のみ
+  - パートナー削除時、担当者も自動削除
+end note
+
+note right of Project
+  【案件管理】
+  パートナー企業との案件を管理
+  
+  - オーナー（メイン担当者）必須
+  - 複数の担当者を割り当て可能
+  - テーブルデータをJSON形式で保存
+  - ステータス: NEW → IN_PROGRESS → DONE
+end note
+
+note right of CommissionRule
+  【手数料管理】
+  案件ごとの手数料契約ルール
+  
+  - RATE: 割合指定（例: 3.5%）
+  - FIXED: 固定金額（例: 5,000円）
+  - CONFIRMEDステータスのみ請求書で使用可能
+  - 「ルール」であり「確定結果」ではない
+end note
+
+note right of Invoice
+  【請求書管理】
+  確定結果を保持、過去の状態を変更しない
+  
+  - 明細ごとに手数料ルールの内容をコピー保持
+  - テンプレートを指定してPDF生成可能
+  - 発行済・支払済は更新・削除不可
+  - 消費税区分により課税対象額が変動
+  - 請求書番号は自動生成（INV-2026-0001形式）
+end note
+
+note right of InvoiceTemplate
+  【請求書テンプレート】
+  請求書のレイアウトとデザイン設定
+  
+  - 複数のテンプレートを作成可能
+  - デフォルトテンプレートを1つ設定可能
+  - キャンバスレイアウト（JSON）で
+    要素の座標・サイズ・スタイルを保存
+  - 旧形式（layoutSettings、displaySettings）も
+    下位互換性のため保持
+end note
+
+' ========================================
+' データ型とアノテーション情報
+' ========================================
+note bottom of Invoice
+  【データベースアノテーション】
+  @Entity
+  @Table(name = "invoices")
+  
+  主要な制約:
+  - invoiceNumber: unique = true
+  - partner: nullable = false
+  - taxRate: precision = 5, scale = 4
+  - 金額フィールド: precision = 15, scale = 2
+  
+  カスケード:
+  - items: CascadeType.ALL, orphanRemoval = true
+end note
+
+note bottom of Partner
+  【バリデーション】
+  - 企業名: @NotBlank, unique
+  - 電話番号: @Pattern(regexp = "^$|^\\d{2,4}-\\d{2,4}-\\d{4}$")
+  - 郵便番号: @Pattern(regexp = "^$|^\\d{7}$")
+  - メール: @Email
+  
+  カスケード:
+  - contacts: CascadeType.ALL, orphanRemoval = true
+end note
+
+@enduml

@@ -24,6 +24,7 @@ PRMtool
 │  │  │  │           │  ├─ CommissionRuleController.java
 │  │  │  │           │  ├─ HealthController.java
 │  │  │  │           │  ├─ InvoiceController.java
+│  │  │  │           │  ├─ InvoiceTemplateController.java
 │  │  │  │           │  ├─ PartnerController.java
 │  │  │  │           │  ├─ PartnerDashboardController.java
 │  │  │  │           │  ├─ ProjectController.java
@@ -32,10 +33,13 @@ PRMtool
 │  │  │  │           ├─ dto
 │  │  │  │           │  ├─ AuthResponse.java
 │  │  │  │           │  ├─ BootstrapRequest.java
+│  │  │  │           │  ├─ CanvasLayoutDto.java
 │  │  │  │           │  ├─ CommissionRuleRequest.java
 │  │  │  │           │  ├─ CommissionRuleResponse.java
 │  │  │  │           │  ├─ InvoiceRequest.java
 │  │  │  │           │  ├─ InvoiceResponse.java
+│  │  │  │           │  ├─ InvoiceTemplateRequest.java
+│  │  │  │           │  ├─ InvoiceTemplateResponse.java
 │  │  │  │           │  ├─ LoginRequest.java
 │  │  │  │           │  ├─ PartnerContactDTO.java
 │  │  │  │           │  ├─ PartnerDashboardResponse.java
@@ -51,6 +55,7 @@ PRMtool
 │  │  │  │           │  ├─ CommissionRule.java
 │  │  │  │           │  ├─ Invoice.java
 │  │  │  │           │  ├─ InvoiceItem.java
+│  │  │  │           │  ├─ InvoiceTemplate.java
 │  │  │  │           │  ├─ Partner.java
 │  │  │  │           │  ├─ PartnerContact.java
 │  │  │  │           │  ├─ Project.java
@@ -61,6 +66,7 @@ PRMtool
 │  │  │  │           │  ├─ CommissionRuleRepository.java
 │  │  │  │           │  ├─ InvoiceItemRepository.java
 │  │  │  │           │  ├─ InvoiceRepository.java
+│  │  │  │           │  ├─ InvoiceTemplateRepository.java
 │  │  │  │           │  ├─ PartnerContactRepository.java
 │  │  │  │           │  ├─ PartnerRepository.java
 │  │  │  │           │  ├─ ProjectAssignmentRepository.java
@@ -73,14 +79,25 @@ PRMtool
 │  │  │  │           │  ├─ CommissionCalculationService.java
 │  │  │  │           │  ├─ CommissionRuleService.java
 │  │  │  │           │  ├─ InvoiceService.java
+│  │  │  │           │  ├─ InvoiceTemplateService.java
 │  │  │  │           │  ├─ PartnerCsvService.java
 │  │  │  │           │  ├─ PartnerDashboardService.java
 │  │  │  │           │  ├─ PartnerService.java
+│  │  │  │           │  ├─ PdfGeneratorService.java
 │  │  │  │           │  ├─ ProjectCsvService.java
 │  │  │  │           │  ├─ ProjectService.java
 │  │  │  │           │  └─ UserService.java
+│  │  │  │           ├─ validator
+│  │  │  │           │  ├─ ContactInfoValidator.java
+│  │  │  │           │  └─ DuplicatePartnerNameValidator.java
 │  │  │  │           └─ PrmtoolApplication.java
 │  │  │  └─ resources
+│  │  │     ├─ db
+│  │  │     │  └─ migration
+│  │  │     │     ├─ V1__Create_initial_schema.sql
+│  │  │     │     ├─ V2__Add_canvas_layout_to_invoice_templates.sql
+│  │  │     │     ├─ V3__Add_template_id_to_invoices.sql
+│  │  │     │     └─ V4__Update_partner_schema.sql
 │  │  │     ├─ static
 │  │  │     ├─ templates
 │  │  │     └─ application.yml
@@ -111,6 +128,7 @@ PRMtool
 │  │  │  │        │  ├─ CommissionRuleController.class
 │  │  │  │        │  ├─ HealthController.class
 │  │  │  │        │  ├─ InvoiceController.class
+│  │  │  │        │  ├─ InvoiceTemplateController.class
 │  │  │  │        │  ├─ PartnerController.class
 │  │  │  │        │  ├─ PartnerDashboardController.class
 │  │  │  │        │  ├─ ProjectController.class
@@ -121,6 +139,12 @@ PRMtool
 │  │  │  │        │  ├─ AuthResponse$AuthResponseBuilder.class
 │  │  │  │        │  ├─ BootstrapRequest.class
 │  │  │  │        │  ├─ BootstrapRequest$BootstrapRequestBuilder.class
+│  │  │  │        │  ├─ CanvasLayoutDto.class
+│  │  │  │        │  ├─ CanvasLayoutDto$Canvas.class
+│  │  │  │        │  ├─ CanvasLayoutDto$Element.class
+│  │  │  │        │  ├─ CanvasLayoutDto$Position.class
+│  │  │  │        │  ├─ CanvasLayoutDto$Size.class
+│  │  │  │        │  ├─ CanvasLayoutDto$Style.class
 │  │  │  │        │  ├─ CommissionRuleRequest.class
 │  │  │  │        │  ├─ CommissionRuleRequest$CommissionRuleRequestBuilder.class
 │  │  │  │        │  ├─ CommissionRuleResponse.class
@@ -133,6 +157,10 @@ PRMtool
 │  │  │  │        │  ├─ InvoiceResponse$InvoiceItemResponse.class
 │  │  │  │        │  ├─ InvoiceResponse$InvoiceItemResponse$InvoiceItemResponseBuilder.class
 │  │  │  │        │  ├─ InvoiceResponse$InvoiceResponseBuilder.class
+│  │  │  │        │  ├─ InvoiceTemplateRequest.class
+│  │  │  │        │  ├─ InvoiceTemplateRequest$InvoiceTemplateRequestBuilder.class
+│  │  │  │        │  ├─ InvoiceTemplateResponse.class
+│  │  │  │        │  ├─ InvoiceTemplateResponse$InvoiceTemplateResponseBuilder.class
 │  │  │  │        │  ├─ LoginRequest.class
 │  │  │  │        │  ├─ LoginRequest$LoginRequestBuilder.class
 │  │  │  │        │  ├─ PartnerContactDTO.class
@@ -166,6 +194,8 @@ PRMtool
 │  │  │  │        │  ├─ Invoice$TaxCategory.class
 │  │  │  │        │  ├─ InvoiceItem.class
 │  │  │  │        │  ├─ InvoiceItem$InvoiceItemBuilder.class
+│  │  │  │        │  ├─ InvoiceTemplate.class
+│  │  │  │        │  ├─ InvoiceTemplate$InvoiceTemplateBuilder.class
 │  │  │  │        │  ├─ Partner.class
 │  │  │  │        │  ├─ Partner$PartnerBuilder.class
 │  │  │  │        │  ├─ PartnerContact.class
@@ -184,6 +214,7 @@ PRMtool
 │  │  │  │        │  ├─ CommissionRuleRepository.class
 │  │  │  │        │  ├─ InvoiceItemRepository.class
 │  │  │  │        │  ├─ InvoiceRepository.class
+│  │  │  │        │  ├─ InvoiceTemplateRepository.class
 │  │  │  │        │  ├─ PartnerContactRepository.class
 │  │  │  │        │  ├─ PartnerRepository.class
 │  │  │  │        │  ├─ ProjectAssignmentRepository.class
@@ -198,14 +229,25 @@ PRMtool
 │  │  │  │        │  ├─ CommissionRuleService.class
 │  │  │  │        │  ├─ InvoiceService.class
 │  │  │  │        │  ├─ InvoiceService$1.class
+│  │  │  │        │  ├─ InvoiceTemplateService.class
 │  │  │  │        │  ├─ PartnerCsvService.class
 │  │  │  │        │  ├─ PartnerDashboardService.class
 │  │  │  │        │  ├─ PartnerService.class
+│  │  │  │        │  ├─ PdfGeneratorService.class
 │  │  │  │        │  ├─ ProjectCsvService.class
 │  │  │  │        │  ├─ ProjectCsvService$ProjectImportData.class
 │  │  │  │        │  ├─ ProjectService.class
 │  │  │  │        │  └─ UserService.class
+│  │  │  │        ├─ validator
+│  │  │  │        │  ├─ ContactInfoValidator.class
+│  │  │  │        │  └─ DuplicatePartnerNameValidator.class
 │  │  │  │        └─ PrmtoolApplication.class
+│  │  │  ├─ db
+│  │  │  │  └─ migration
+│  │  │  │     ├─ V1__Create_initial_schema.sql
+│  │  │  │     ├─ V2__Add_canvas_layout_to_invoice_templates.sql
+│  │  │  │     ├─ V3__Add_template_id_to_invoices.sql
+│  │  │  │     └─ V4__Update_partner_schema.sql
 │  │  │  └─ application.yml
 │  │  ├─ generated-sources
 │  │  │  └─ annotations
@@ -230,7 +272,6 @@ PRMtool
 │  │  │  └─ com
 │  │  │     └─ example
 │  │  │        └─ prmtool
-│  │  │           ├─ application-test.yml
 │  │  │           └─ PrmtoolApplicationTests.class
 │  │  ├─ prmtool-0.0.1-SNAPSHOT.jar
 │  │  └─ prmtool-0.0.1-SNAPSHOT.jar.original
@@ -248,24 +289,35 @@ PRMtool
 │  │  └─ robots.txt
 │  ├─ src
 │  │  ├─ components
+│  │  │  ├─ ElementEditor.js
+│  │  │  ├─ ElementList.js
+│  │  │  ├─ ElementToolbar.js
+│  │  │  ├─ FieldElement.js
+│  │  │  ├─ ImageElement.js
 │  │  │  ├─ Navbar.css
 │  │  │  ├─ Navbar.js
 │  │  │  ├─ PrivateRoute.js
 │  │  │  ├─ Spreadsheet.css
-│  │  │  └─ Spreadsheet.js
+│  │  │  ├─ Spreadsheet.js
+│  │  │  ├─ TemplateCanvas.js
+│  │  │  └─ TextElement.js
 │  │  ├─ context
 │  │  │  └─ AuthContext.js
+│  │  ├─ hooks
+│  │  │  └─ useTemplateEditor.js
 │  │  ├─ pages
 │  │  │  ├─ Accounts.css
 │  │  │  ├─ Accounts.js
 │  │  │  ├─ Auth.css
+│  │  │  ├─ CommissionRules.css
 │  │  │  ├─ CommissionRules.js
-│  │  │  ├─ Commissions.css
-│  │  │  ├─ Commissions.js
 │  │  │  ├─ Dashboard.css
 │  │  │  ├─ Dashboard.js
 │  │  │  ├─ Invoices.css
 │  │  │  ├─ Invoices.js
+│  │  │  ├─ InvoiceTemplateEditor.js
+│  │  │  ├─ InvoiceTemplates.css
+│  │  │  ├─ InvoiceTemplates.js
 │  │  │  ├─ Login.css
 │  │  │  ├─ Login.js
 │  │  │  ├─ PartnerDashboard.css
@@ -281,11 +333,14 @@ PRMtool
 │  │  │  ├─ api.js
 │  │  │  ├─ authService.js
 │  │  │  ├─ commissionRuleService.js
-│  │  │  ├─ commissionService.js
 │  │  │  ├─ invoiceService.js
+│  │  │  ├─ invoiceTemplateService.js
 │  │  │  ├─ partnerService.js
 │  │  │  ├─ projectService.js
 │  │  │  └─ userService.js
+│  │  ├─ utils
+│  │  │  ├─ partnerValidation.js
+│  │  │  └─ postalCodeUtil.js
 │  │  ├─ App.css
 │  │  ├─ App.js
 │  │  ├─ index.css
@@ -295,7 +350,13 @@ PRMtool
 │  ├─ package-lock.json
 │  └─ package.json
 ├─ Materials
+│  ├─ class_diagram.pu
+│  ├─ CODE_REVIEW_RESULTS.md
+│  ├─ COPASS_COMPARISON_AND_PROPOSALS.md
+│  ├─ PHASE1_CONFIRMED_PLAN.md
+│  ├─ ユーザー用手引き_tmp.html
 │  ├─ ユーザー用手引き.md
+│  ├─ ユーザー用手引き.pdf
 │  ├─ 開発者向けセットアップガイド.md
 │  └─ 要件定義書.md
 ├─ scripts
