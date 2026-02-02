@@ -32,15 +32,11 @@
 /* ナビゲーションメニューのスタイル */
 .navbar-menu {
   display: flex;
+  align-items: center;
   list-style: none;
   margin: 0;
   padding: 0;
-  gap: 0rem;
-}
-
-/* ナビゲーションメニューのアイテム */
-.navbar-item {
-  margin: 0;
+  gap: 0.5rem;
 }
 
 /* ナビゲーションリンクのスタイル */
@@ -48,9 +44,10 @@
   color: white;
   text-decoration: none;
   font-size: 1rem;
-  transition: color 0.3s;
-  padding: 0.1rem 1rem;
+  transition: all 0.3s;
+  padding: 0.5rem 1rem;
   border-radius: 4px;
+  display: inline-block;
 }
 
 /* ナビゲーションリンクのホバー効果 */
@@ -58,6 +55,87 @@
   color: #3498db;
   background-color: rgba(255, 255, 255, 0.1);
 }
+
+/* アクティブなリンク */
+.navbar-link.active {
+  color: #3498db;
+  background-color: rgba(52, 152, 219, 0.2);
+  font-weight: bold;
+}
+
+/* ========================================
+   ドロップダウンメニュー
+   ======================================== */
+
+/* ドロップダウンコンテナ */
+.navbar-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* ドロップダウントグルボタン（navbar-linkと同じスタイル） */
+.dropdown-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: all 0.3s;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* ドロップダウントグルのホバー効果 */
+.dropdown-toggle:hover {
+  color: #3498db;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ドロップダウンがアクティブな時（サブページを開いている時） */
+.dropdown-toggle.active {
+  color: #3498db;
+  background-color: rgba(52, 152, 219, 0.2);
+  font-weight: bold;
+}
+
+/* ドロップダウンメニュー本体 */
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  min-width: 180px;
+  z-index: 1000;
+  margin-top: 8px;
+  padding: 8px 0;
+}
+
+/* ドロップダウンメニュー項目 */
+.dropdown-item {
+  display: block;
+  padding: 10px 20px;
+  color: #333;
+  text-decoration: none;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+/* ドロップダウンメニュー項目のホバー効果 */
+.dropdown-item:hover {
+  background-color: #f5f5f5;
+  color: #3498db;
+}
+
+/* ========================================
+   ユーザー情報エリア
+   ======================================== */
 
 /* ユーザー情報のスタイル */
 .navbar-user {
@@ -67,15 +145,10 @@
   color: white;
 }
 
-/* ユーザー情報のメールアドレス */
-.navbar-user-email {
+/* ユーザー情報テキスト */
+.user-info {
   font-size: 0.9rem;
-}
-
-/* ユーザー情報のロール */
-.navbar-user-role {
-  font-size: 0.85rem;
-  color: #95a5a6;
+  color: white;
 }
 
 /* ログアウトボタンのスタイル */
@@ -93,4 +166,20 @@
 /* ログアウトボタンのホバー効果 */
 .navbar-logout-btn:hover {
   background-color: #c0392b;
+}
+
+/* ========================================
+   レスポンシブ対応（オプション）
+   ======================================== */
+
+@media (max-width: 768px) {
+  .navbar-container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .navbar-menu {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 }
