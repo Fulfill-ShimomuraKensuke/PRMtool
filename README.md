@@ -1019,6 +1019,106 @@ mvn spring-boot:run
 
 ---
 
+## 🚀 S3ストレージへの移行手順
+
+現在、ファイルストレージは**ローカルディスク**を使用していますが、本番環境では**AWS S3**への移行を推奨します。
+
+### **移行手順**
+
+#### **1. AWS S3バケットの作成**
+
+1. AWSコンソールにログイン
+2. S3サービスを開く
+3. 「バケットを作成」をクリック
+4. バケット名を入力（例: `prmtool-files-prod`）
+5. リージョンを選択（推奨: `ap-northeast-1` 東京）
+6. パブリックアクセスをブロック（セキュリティ設定）
+7. バケットを作成
+
+#### **2. IAMユーザーの作成とアクセスキー取得**
+
+1. IAMサービスを開く
+2. 新しいIAMユーザーを作成（例: `prmtool-s3-user`）
+3. S3へのアクセス権限を付与（`AmazonS3FullAccess` ポリシー）
+4. アクセスキーとシークレットキーを生成・保存
+
+#### **3. pom.xml に依存関係を追加**
+```xml
+<!-- AWS SDK for Java v2 - S3 -->
+<dependency>
+    <groupId>software.amazon.awssdk</groupId>
+    <artifactId>s3</artifactId>
+    <version>2.20.26</version>
+</dependency>
+```
+
+#### **4. S3FileStorageService.java を実装**
+
+`backend/src/main/java/com/example/prmtool/service/impl/S3FileStorageService.java` を作成：
+```java
+@Service
+@Slf4j
+@ConditionalOnProperty(name = "file.storage.type", havingValue = "s3")
+public class S3FileStorageService implements FileStorageService {
+    // S3Clientを使用した実装
+    // LocalFileStorageServiceを参考に実装
+}
+```
+
+#### **5. application.yml の設定を変更**
+
+`application-prod.yml` または `application-dev.yml` で以下を設定：
+```yaml
+file:
+  storage:
+    type: s3
+    s3:
+      bucket-name: prmtool-files-prod
+      region: ap-northeast-1
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+```
+
+#### **6. 環境変数の設定**
+
+本番環境で以下の環境変数を設定：
+```bash
+export AWS_ACCESS_KEY=your-access-key
+export AWS_SECRET_KEY=your-secret-key
+```
+
+#### **7. 既存ファイルの移行**
+
+ローカルストレージ（`./uploads/`）のファイルをS3にアップロード：
+```bash
+aws s3 sync ./uploads/ s3://prmtool-files-prod/
+```
+
+#### **8. 動作確認**
+
+1. アプリケーションを再起動
+2. ファイルのアップロード・ダウンロードをテスト
+3. ログでS3への接続を確認
+
+---
+
+### **ローカルとS3の切り替え**
+
+`application.yml` の `file.storage.type` を変更するだけで切り替え可能：
+
+- `type: local` → ローカルストレージ
+- `type: s3` → AWS S3
+
+---
+
+### **コスト見積もり**
+
+- S3ストレージ: 約$0.025/GB/月（東京リージョン）
+- データ転送: 最初の10TBまで $0.114/GB
+- リクエスト: PUT/POST $0.0047/1,000リクエスト
+
+**例**: 月間100GBストレージ + 10,000リクエスト = 約$3-5/月
+
 ## ライセンス
 
 このプロジェクトはプロプライエタリライセンスです。無断での複製、配布、変更は禁止されています。

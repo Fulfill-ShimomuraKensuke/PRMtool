@@ -188,7 +188,9 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
-# ファイルストレージ設定
+# ========================================
+# ファイルストレージ設定（現在: ローカル）
+# ========================================
 file:
   storage:
     type: local  # local または s3
@@ -204,3 +206,17 @@ spring:
       enabled: true
       max-file-size: 10MB
       max-request-size: 10MB
+
+# ========================================
+# S3移行時の設定例（現在はコメントアウト）
+# ========================================
+# file:
+#   storage:
+#     type: s3  # localからs3に変更
+#     s3:
+#       bucket-name: your-bucket-name  # S3バケット名
+#       region: ap-northeast-1  # AWSリージョン（東京）
+#       access-key: ${AWS_ACCESS_KEY}  # 環境変数から取得
+#       secret-key: ${AWS_SECRET_KEY}  # 環境変数から取得
+#     max-file-size: 10MB
+#     allowed-extensions: pdf,doc,docx,xls,xlsx,ppt,pptx,txt,png,jpg,jpeg,gif
