@@ -73,6 +73,32 @@ spring:
     # プレースホルダーの使用
     placeholder-replacement: true
 
+  # ==========================================
+  # メール送信設定（開発環境: Gmail）
+  # ==========================================
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: shimomura-kensuke@fulfill-group.co.jp  # Gmailアドレス
+    password: qxmdykpyynuwlvyq      # Googleアプリパスワード
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+  # ファイルアップロード設定
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
 ---
 # ==========================================
 # 本番環境設定（PostgreSQL使用）
@@ -120,6 +146,25 @@ spring:
     validate-on-migrate: true
     out-of-order: false
 
+  # ==========================================
+  # メール送信設定（本番環境: AWS SES）
+  # ==========================================
+  mail:
+    host: email-smtp.ap-northeast-1.amazonaws.com  # AWS SESのSMTPエンドポイント（東京リージョン）
+    port: 587
+    username: ${AWS_SES_SMTP_USERNAME}  # AWS SES SMTPユーザー名
+    password: ${AWS_SES_SMTP_PASSWORD}  # AWS SES SMTPパスワード
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
 ---
 # ==========================================
 # ローカルテスト環境設定（H2使用）
@@ -153,6 +198,15 @@ spring:
   flyway:
     # テスト環境ではFlywayを無効化（create-dropを使用）
     enabled: false
+
+  # ==========================================
+  # メール送信設定（テスト環境: 無効化）
+  # ==========================================
+  mail:
+    host: localhost
+    port: 1025
+    username: test
+    password: test
 
 ---
 # ==========================================
@@ -189,6 +243,14 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
 # ========================================
+# メール送信設定（共通）
+# ========================================
+mail:
+  from:
+    email: ${MAIL_FROM_EMAIL:noreply@prmtool.com}  # デフォルト送信元
+    name: ${MAIL_FROM_NAME:PRM Tool}                # デフォルト送信元名
+
+# ========================================
 # ファイルストレージ設定（現在: ローカル）
 # ========================================
 file:
@@ -198,14 +260,6 @@ file:
       upload-dir: ./uploads  # ローカルストレージのディレクトリ
     max-file-size: 10MB  # 最大ファイルサイズ
     allowed-extensions: pdf,doc,docx,xls,xlsx,ppt,pptx,txt,png,jpg,jpeg,gif  # 許可する拡張子
-
-# Spring Bootのファイルアップロード設定
-spring:
-  servlet:
-    multipart:
-      enabled: true
-      max-file-size: 10MB
-      max-request-size: 10MB
 
 # ========================================
 # S3移行時の設定例（現在はコメントアウト）

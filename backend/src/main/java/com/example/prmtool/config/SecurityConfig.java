@@ -149,6 +149,16 @@ public class SecurityConfig {
             .hasAnyRole("SYSTEM", "ADMIN")
 
             // ========================================
+            // 請求書送付管理
+            // - 送信: ADMIN, ACCOUNTING
+            // - 履歴閲覧: ADMIN, ACCOUNTING, REP
+            // ========================================
+            .requestMatchers(HttpMethod.POST, "/api/invoice-deliveries/send")
+            .hasAnyRole("ADMIN", "ACCOUNTING")
+            .requestMatchers(HttpMethod.GET, "/api/invoice-deliveries/**")
+            .hasAnyRole("ADMIN", "ACCOUNTING", "REP")
+
+            // ========================================
             // コンテンツ管理（ファイル倉庫）
             // - 閲覧: ADMIN, ACCOUNTING, REP（SYSTEM は制限）
             // - フォルダ作成・編集: ADMIN, ACCOUNTING
