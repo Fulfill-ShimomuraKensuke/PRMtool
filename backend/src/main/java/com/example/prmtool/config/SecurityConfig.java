@@ -19,6 +19,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 /**
  * Spring Security設定
  * 役割ベースのアクセス制御を実装
+ * SYSTEM: システム管理（メール設定、アカウント管理のみ）
  * ADMIN: 全権限
  * ACCOUNTING: 手数料ルール・請求書の作成・編集・確定（削除不可）
  * REP: 限定的なアクセス
@@ -130,6 +131,59 @@ public class SecurityConfig {
             .hasAnyRole("ADMIN", "ACCOUNTING")
             .requestMatchers(HttpMethod.DELETE, "/api/invoices/*")
             .hasRole("ADMIN")
+
+            // ========================================
+            // 送信元メールアドレス管理
+            // - 閲覧・作成・編集・削除: SYSTEM, ADMIN
+            // - 有効な送信元メールアドレス取得: SYSTEM, ADMIN, ACCOUNTING（送信時に使用）
+            // ========================================
+            .requestMatchers(HttpMethod.GET, "/api/sender-emails/active", "/api/sender-emails/default")
+            .hasAnyRole("SYSTEM", "ADMIN", "ACCOUNTING")
+            .requestMatchers(HttpMethod.GET, "/api/sender-emails", "/api/sender-emails/*")
+            .hasAnyRole("SYSTEM", "ADMIN")
+            .requestMatchers(HttpMethod.POST, "/api/sender-emails")
+            .hasAnyRole("SYSTEM", "ADMIN")
+            .requestMatchers(HttpMethod.PUT, "/api/sender-emails/*")
+            .hasAnyRole("SYSTEM", "ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/api/sender-emails/*")
+            .hasAnyRole("SYSTEM", "ADMIN")
+
+            // ========================================
+            // コンテンツ管理（ファイル倉庫）
+            // - 閲覧: ADMIN, ACCOUNTING, REP（SYSTEM は制限）
+            // - フォルダ作成・編集: ADMIN, ACCOUNTING
+            // - フォルダ削除: ADMIN のみ
+            // - ファイルアップロード・編集: ADMIN, ACCOUNTING
+            // - ファイル削除: ADMIN のみ
+            // ========================================
+            .requestMatchers(HttpMethod.GET, "/api/contents/**")
+            .hasAnyRole("ADMIN", "ACCOUNTING", "REP")
+            .requestMatchers(HttpMethod.POST, "/api/contents/folders", "/api/contents/files")
+            .hasAnyRole("ADMIN", "ACCOUNTING")
+            .requestMatchers(HttpMethod.PUT, "/api/contents/folders/*", "/api/contents/files/*")
+            .hasAnyRole("ADMIN", "ACCOUNTING")
+            .requestMatchers(HttpMethod.DELETE, "/api/contents/folders/*", "/api/contents/files/*")
+            .hasRole("ADMIN")
+            .requestMatchers(HttpMethod.POST, "/api/contents/files/*/download")
+            .hasAnyRole("ADMIN", "ACCOUNTING", "REP")
+
+            // ========================================
+            // コンテンツ共有管理
+            // - 閲覧: ADMIN, ACCOUNTING, REP（SYSTEM は制限）
+            // - 共有作成・更新: ADMIN, ACCOUNTING
+            // - 共有無効化: ADMIN, ACCOUNTING
+            // - アクセス記録: ADMIN, ACCOUNTING, REP
+            // ========================================
+            .requestMatchers(HttpMethod.GET, "/api/content-shares", "/api/content-shares/**")
+            .hasAnyRole("ADMIN", "ACCOUNTING", "REP")
+            .requestMatchers(HttpMethod.POST, "/api/content-shares")
+            .hasAnyRole("ADMIN", "ACCOUNTING")
+            .requestMatchers(HttpMethod.PUT, "/api/content-shares/*")
+            .hasAnyRole("ADMIN", "ACCOUNTING")
+            .requestMatchers(HttpMethod.PATCH, "/api/content-shares/*/revoke")
+            .hasAnyRole("ADMIN", "ACCOUNTING")
+            .requestMatchers(HttpMethod.POST, "/api/content-shares/*/access")
+            .hasAnyRole("ADMIN", "ACCOUNTING", "REP")
 
             // ========================================
             // パートナー別ダッシュボード
