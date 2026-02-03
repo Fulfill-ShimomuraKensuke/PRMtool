@@ -2,6 +2,7 @@ package com.example.prmtool.controller;
 
 import com.example.prmtool.dto.*;
 import com.example.prmtool.service.ContentManagementService;
+import com.example.prmtool.service.FileStorageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,9 +26,10 @@ import java.util.UUID;
 public class ContentManagementController {
 
   private final ContentManagementService service;
+  private final FileStorageService fileStorageService;
 
   // ========================================
-  // フォルダ管理
+  // フォルダ管理（既存のコードはそのまま）
   // ========================================
 
   /**
@@ -82,7 +85,7 @@ public class ContentManagementController {
   public ResponseEntity<ContentFolderResponse> createFolder(
       @Valid @RequestBody ContentFolderRequest request,
       Authentication authentication) {
-    // 認証情報からユーザーIDを取得（実際の実装に合わせて調整）
+    // TODO: 認証情報からユーザーIDを正しく取得
     UUID userId = UUID.fromString(authentication.getName());
     ContentFolderResponse created = service.createFolder(request, userId);
     return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -150,15 +153,35 @@ public class ContentManagementController {
   }
 
   /**
-   * ファイルをアップロード
+   * ファイルをアップロード（マルチパート対応）
    * 権限: ADMIN, ACCOUNTING
    */
-  @PostMapping("/files")
+  @PostMapping(value = "/files/upload", consumes = "multipart/form-data")
   @PreAuthorize("hasAnyRole('ADMIN', 'ACCOUNTING')")
   public ResponseEntity<ContentFileResponse> uploadFile(
-      @Valid @RequestBody ContentFileRequest request,
+      @RequestParam("file") MultipartFile file,
+      @RequestParam("folderId") UUID folderId,
+      @RequestParam(value = "title", required = false) String title,
+      @RequestParam(value = "description", required = false) String description,
+      @RequestParam(value = "tags", required = false) String tags,
       Authentication authentication) {
-    // 認証情報からユーザーIDを取得（実際の実装に合わせて調整）
+
+    // ファイルをストレージに保存
+    String fileUrl = fileStorageService.storeFile(file);
+
+    // ファイル情報をデータベースに保存
+    ContentFileRequest request = ContentFileRequest.builder()
+        .folderId(folderId)
+        .fileName(file.getOriginalFilename())
+        .title(title != null ? title : file.getOriginalFilename())
+        .description(description)
+        .fileUrl(fileUrl)
+        .fileType(file.getContentType())
+        .fileSize(file.getSize())
+        .tags(tags)
+        .build();
+
+    // TODO: 認証情報からユーザーIDを正しく取得
     UUID userId = UUID.fromString(authentication.getName());
     ContentFileResponse created = service.uploadFile(request, userId);
     return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -184,6 +207,14 @@ public class ContentManagementController {
   @DeleteMapping("/files/{id}")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Void> deleteFile(@PathVariable UUID id) {
+    // ファイル情報を取得
+    ContentFileResponse file = service.getFileById(id);
+
+    // ストレージからファイルを削除
+    String fileName = file.getFileUrl().substring(file.getFileUrl().lastIndexOf("/") + 1);
+    fileStorageService.deleteFile(fileName);
+
+    // データベースから削除
     service.deleteFile(id);
     return ResponseEntity.noContent().build();
   }
@@ -198,7 +229,7 @@ public class ContentManagementController {
       @PathVariable UUID id,
       Authentication authentication,
       @RequestParam(required = false) String ipAddress) {
-    // 認証情報からユーザーIDを取得
+    // TODO: 認証情報からユーザーIDを正しく取得
     UUID userId = UUID.fromString(authentication.getName());
     service.recordDownload(id, userId, ipAddress);
     return ResponseEntity.ok().build();
