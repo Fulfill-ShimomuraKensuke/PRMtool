@@ -15,6 +15,7 @@ PRMtool
 │  │  │  │           │  ├─ CorsConfig.java
 │  │  │  │           │  ├─ CustomUserDetailsService.java
 │  │  │  │           │  ├─ DataInitializer.java
+│  │  │  │           │  ├─ FileStorageProperties.java
 │  │  │  │           │  ├─ JwtRequestFilter.java
 │  │  │  │           │  ├─ JwtUtil.java
 │  │  │  │           │  └─ SecurityConfig.java
@@ -22,6 +23,9 @@ PRMtool
 │  │  │  │           │  ├─ AdminBootstrapController.java
 │  │  │  │           │  ├─ AuthController.java
 │  │  │  │           │  ├─ CommissionRuleController.java
+│  │  │  │           │  ├─ ContentManagementController.java
+│  │  │  │           │  ├─ ContentShareController.java
+│  │  │  │           │  ├─ FileController.java
 │  │  │  │           │  ├─ HealthController.java
 │  │  │  │           │  ├─ InvoiceController.java
 │  │  │  │           │  ├─ InvoiceTemplateController.java
@@ -29,6 +33,7 @@ PRMtool
 │  │  │  │           │  ├─ PartnerDashboardController.java
 │  │  │  │           │  ├─ ProjectController.java
 │  │  │  │           │  ├─ RootController.java
+│  │  │  │           │  ├─ SenderEmailAddressController.java
 │  │  │  │           │  └─ UserController.java
 │  │  │  │           ├─ dto
 │  │  │  │           │  ├─ AuthResponse.java
@@ -36,6 +41,12 @@ PRMtool
 │  │  │  │           │  ├─ CanvasLayoutDto.java
 │  │  │  │           │  ├─ CommissionRuleRequest.java
 │  │  │  │           │  ├─ CommissionRuleResponse.java
+│  │  │  │           │  ├─ ContentFileRequest.java
+│  │  │  │           │  ├─ ContentFileResponse.java
+│  │  │  │           │  ├─ ContentFolderRequest.java
+│  │  │  │           │  ├─ ContentFolderResponse.java
+│  │  │  │           │  ├─ ContentShareRequest.java
+│  │  │  │           │  ├─ ContentShareResponse.java
 │  │  │  │           │  ├─ InvoiceRequest.java
 │  │  │  │           │  ├─ InvoiceResponse.java
 │  │  │  │           │  ├─ InvoiceTemplateRequest.java
@@ -49,10 +60,17 @@ PRMtool
 │  │  │  │           │  ├─ ProjectRequest.java
 │  │  │  │           │  ├─ ProjectResponse.java
 │  │  │  │           │  ├─ ProjectTableDataDTO.java
+│  │  │  │           │  ├─ SenderEmailRequest.java
+│  │  │  │           │  ├─ SenderEmailResponse.java
 │  │  │  │           │  ├─ UserRequest.java
 │  │  │  │           │  └─ UserResponse.java
 │  │  │  │           ├─ entity
 │  │  │  │           │  ├─ CommissionRule.java
+│  │  │  │           │  ├─ ContentDownloadHistory.java
+│  │  │  │           │  ├─ ContentFile.java
+│  │  │  │           │  ├─ ContentFolder.java
+│  │  │  │           │  ├─ ContentShare.java
+│  │  │  │           │  ├─ ContentShareAccessHistory.java
 │  │  │  │           │  ├─ Invoice.java
 │  │  │  │           │  ├─ InvoiceItem.java
 │  │  │  │           │  ├─ InvoiceTemplate.java
@@ -61,9 +79,17 @@ PRMtool
 │  │  │  │           │  ├─ Project.java
 │  │  │  │           │  ├─ ProjectAssignment.java
 │  │  │  │           │  ├─ ProjectTableData.java
+│  │  │  │           │  ├─ SenderEmailAddress.java
 │  │  │  │           │  └─ User.java
+│  │  │  │           ├─ exception
+│  │  │  │           │  └─ FileStorageException.java
 │  │  │  │           ├─ repository
 │  │  │  │           │  ├─ CommissionRuleRepository.java
+│  │  │  │           │  ├─ ContentDownloadHistoryRepository.java
+│  │  │  │           │  ├─ ContentFileRepository.java
+│  │  │  │           │  ├─ ContentFolderRepository.java
+│  │  │  │           │  ├─ ContentShareAccessHistoryRepository.java
+│  │  │  │           │  ├─ ContentShareRepository.java
 │  │  │  │           │  ├─ InvoiceItemRepository.java
 │  │  │  │           │  ├─ InvoiceRepository.java
 │  │  │  │           │  ├─ InvoiceTemplateRepository.java
@@ -72,12 +98,18 @@ PRMtool
 │  │  │  │           │  ├─ ProjectAssignmentRepository.java
 │  │  │  │           │  ├─ ProjectRepository.java
 │  │  │  │           │  ├─ ProjectTableDataRepository.java
+│  │  │  │           │  ├─ SenderEmailAddressRepository.java
 │  │  │  │           │  └─ UserRepository.java
 │  │  │  │           ├─ service
+│  │  │  │           │  ├─ impl
+│  │  │  │           │  │  └─ LocalFileStorageService.java
 │  │  │  │           │  ├─ AdminBootstrapService.java
 │  │  │  │           │  ├─ AuthService.java
 │  │  │  │           │  ├─ CommissionCalculationService.java
 │  │  │  │           │  ├─ CommissionRuleService.java
+│  │  │  │           │  ├─ ContentManagementService.java
+│  │  │  │           │  ├─ ContentShareService.java
+│  │  │  │           │  ├─ FileStorageService.java
 │  │  │  │           │  ├─ InvoiceService.java
 │  │  │  │           │  ├─ InvoiceTemplateService.java
 │  │  │  │           │  ├─ PartnerCsvService.java
@@ -86,6 +118,7 @@ PRMtool
 │  │  │  │           │  ├─ PdfGeneratorService.java
 │  │  │  │           │  ├─ ProjectCsvService.java
 │  │  │  │           │  ├─ ProjectService.java
+│  │  │  │           │  ├─ SenderEmailAddressService.java
 │  │  │  │           │  └─ UserService.java
 │  │  │  │           ├─ validator
 │  │  │  │           │  ├─ ContactInfoValidator.java
@@ -97,7 +130,11 @@ PRMtool
 │  │  │     │     ├─ V1__Create_initial_schema.sql
 │  │  │     │     ├─ V2__Add_canvas_layout_to_invoice_templates.sql
 │  │  │     │     ├─ V3__Add_template_id_to_invoices.sql
-│  │  │     │     └─ V4__Update_partner_schema.sql
+│  │  │     │     ├─ V4__Update_partner_schema.sql
+│  │  │     │     ├─ V5__make_partner_email_required.sql
+│  │  │     │     ├─ V6__Add_invoice_delivery_tables.sql
+│  │  │     │     ├─ V7__Add_sender_email_addresses.sql
+│  │  │     │     └─ V8__Add_content_management_tables.sql
 │  │  │     ├─ static
 │  │  │     ├─ templates
 │  │  │     └─ application.yml
@@ -117,6 +154,8 @@ PRMtool
 │  │  │  │        │  ├─ CorsConfig.class
 │  │  │  │        │  ├─ CustomUserDetailsService.class
 │  │  │  │        │  ├─ DataInitializer.class
+│  │  │  │        │  ├─ FileStorageProperties.class
+│  │  │  │        │  ├─ FileStorageProperties$Local.class
 │  │  │  │        │  ├─ JwtRequestFilter.class
 │  │  │  │        │  ├─ JwtUtil.class
 │  │  │  │        │  └─ SecurityConfig.class
@@ -126,6 +165,9 @@ PRMtool
 │  │  │  │        │  ├─ AuthController.class
 │  │  │  │        │  ├─ AuthController$ErrorResponse.class
 │  │  │  │        │  ├─ CommissionRuleController.class
+│  │  │  │        │  ├─ ContentManagementController.class
+│  │  │  │        │  ├─ ContentShareController.class
+│  │  │  │        │  ├─ FileController.class
 │  │  │  │        │  ├─ HealthController.class
 │  │  │  │        │  ├─ InvoiceController.class
 │  │  │  │        │  ├─ InvoiceTemplateController.class
@@ -133,6 +175,7 @@ PRMtool
 │  │  │  │        │  ├─ PartnerDashboardController.class
 │  │  │  │        │  ├─ ProjectController.class
 │  │  │  │        │  ├─ RootController.class
+│  │  │  │        │  ├─ SenderEmailAddressController.class
 │  │  │  │        │  └─ UserController.class
 │  │  │  │        ├─ dto
 │  │  │  │        │  ├─ AuthResponse.class
@@ -149,6 +192,18 @@ PRMtool
 │  │  │  │        │  ├─ CommissionRuleRequest$CommissionRuleRequestBuilder.class
 │  │  │  │        │  ├─ CommissionRuleResponse.class
 │  │  │  │        │  ├─ CommissionRuleResponse$CommissionRuleResponseBuilder.class
+│  │  │  │        │  ├─ ContentFileRequest.class
+│  │  │  │        │  ├─ ContentFileRequest$ContentFileRequestBuilder.class
+│  │  │  │        │  ├─ ContentFileResponse.class
+│  │  │  │        │  ├─ ContentFileResponse$ContentFileResponseBuilder.class
+│  │  │  │        │  ├─ ContentFolderRequest.class
+│  │  │  │        │  ├─ ContentFolderRequest$ContentFolderRequestBuilder.class
+│  │  │  │        │  ├─ ContentFolderResponse.class
+│  │  │  │        │  ├─ ContentFolderResponse$ContentFolderResponseBuilder.class
+│  │  │  │        │  ├─ ContentShareRequest.class
+│  │  │  │        │  ├─ ContentShareRequest$ContentShareRequestBuilder.class
+│  │  │  │        │  ├─ ContentShareResponse.class
+│  │  │  │        │  ├─ ContentShareResponse$ContentShareResponseBuilder.class
 │  │  │  │        │  ├─ InvoiceRequest.class
 │  │  │  │        │  ├─ InvoiceRequest$InvoiceItemRequest.class
 │  │  │  │        │  ├─ InvoiceRequest$InvoiceItemRequest$InvoiceItemRequestBuilder.class
@@ -179,6 +234,10 @@ PRMtool
 │  │  │  │        │  ├─ ProjectResponse$ProjectResponseBuilder.class
 │  │  │  │        │  ├─ ProjectTableDataDTO.class
 │  │  │  │        │  ├─ ProjectTableDataDTO$ProjectTableDataDTOBuilder.class
+│  │  │  │        │  ├─ SenderEmailRequest.class
+│  │  │  │        │  ├─ SenderEmailRequest$SenderEmailRequestBuilder.class
+│  │  │  │        │  ├─ SenderEmailResponse.class
+│  │  │  │        │  ├─ SenderEmailResponse$SenderEmailResponseBuilder.class
 │  │  │  │        │  ├─ UserRequest.class
 │  │  │  │        │  ├─ UserRequest$UserRequestBuilder.class
 │  │  │  │        │  ├─ UserResponse.class
@@ -188,6 +247,21 @@ PRMtool
 │  │  │  │        │  ├─ CommissionRule$CommissionRuleBuilder.class
 │  │  │  │        │  ├─ CommissionRule$CommissionStatus.class
 │  │  │  │        │  ├─ CommissionRule$CommissionType.class
+│  │  │  │        │  ├─ ContentDownloadHistory.class
+│  │  │  │        │  ├─ ContentDownloadHistory$ContentDownloadHistoryBuilder.class
+│  │  │  │        │  ├─ ContentFile.class
+│  │  │  │        │  ├─ ContentFile$AccessLevel.class
+│  │  │  │        │  ├─ ContentFile$ContentFileBuilder.class
+│  │  │  │        │  ├─ ContentFolder.class
+│  │  │  │        │  ├─ ContentFolder$ContentFolderBuilder.class
+│  │  │  │        │  ├─ ContentShare.class
+│  │  │  │        │  ├─ ContentShare$ContentShareBuilder.class
+│  │  │  │        │  ├─ ContentShare$ShareMethod.class
+│  │  │  │        │  ├─ ContentShare$ShareStatus.class
+│  │  │  │        │  ├─ ContentShare$ShareTarget.class
+│  │  │  │        │  ├─ ContentShareAccessHistory.class
+│  │  │  │        │  ├─ ContentShareAccessHistory$AccessType.class
+│  │  │  │        │  ├─ ContentShareAccessHistory$ContentShareAccessHistoryBuilder.class
 │  │  │  │        │  ├─ Invoice.class
 │  │  │  │        │  ├─ Invoice$InvoiceBuilder.class
 │  │  │  │        │  ├─ Invoice$InvoiceStatus.class
@@ -207,11 +281,20 @@ PRMtool
 │  │  │  │        │  ├─ ProjectAssignment$ProjectAssignmentBuilder.class
 │  │  │  │        │  ├─ ProjectTableData.class
 │  │  │  │        │  ├─ ProjectTableData$ProjectTableDataBuilder.class
+│  │  │  │        │  ├─ SenderEmailAddress.class
+│  │  │  │        │  ├─ SenderEmailAddress$SenderEmailAddressBuilder.class
 │  │  │  │        │  ├─ User.class
 │  │  │  │        │  ├─ User$UserBuilder.class
 │  │  │  │        │  └─ User$UserRole.class
+│  │  │  │        ├─ exception
+│  │  │  │        │  └─ FileStorageException.class
 │  │  │  │        ├─ repository
 │  │  │  │        │  ├─ CommissionRuleRepository.class
+│  │  │  │        │  ├─ ContentDownloadHistoryRepository.class
+│  │  │  │        │  ├─ ContentFileRepository.class
+│  │  │  │        │  ├─ ContentFolderRepository.class
+│  │  │  │        │  ├─ ContentShareAccessHistoryRepository.class
+│  │  │  │        │  ├─ ContentShareRepository.class
 │  │  │  │        │  ├─ InvoiceItemRepository.class
 │  │  │  │        │  ├─ InvoiceRepository.class
 │  │  │  │        │  ├─ InvoiceTemplateRepository.class
@@ -220,13 +303,19 @@ PRMtool
 │  │  │  │        │  ├─ ProjectAssignmentRepository.class
 │  │  │  │        │  ├─ ProjectRepository.class
 │  │  │  │        │  ├─ ProjectTableDataRepository.class
+│  │  │  │        │  ├─ SenderEmailAddressRepository.class
 │  │  │  │        │  └─ UserRepository.class
 │  │  │  │        ├─ service
+│  │  │  │        │  ├─ impl
+│  │  │  │        │  │  └─ LocalFileStorageService.class
 │  │  │  │        │  ├─ AdminBootstrapService.class
 │  │  │  │        │  ├─ AuthService.class
 │  │  │  │        │  ├─ CommissionCalculationService.class
 │  │  │  │        │  ├─ CommissionCalculationService$1.class
 │  │  │  │        │  ├─ CommissionRuleService.class
+│  │  │  │        │  ├─ ContentManagementService.class
+│  │  │  │        │  ├─ ContentShareService.class
+│  │  │  │        │  ├─ FileStorageService.class
 │  │  │  │        │  ├─ InvoiceService.class
 │  │  │  │        │  ├─ InvoiceService$1.class
 │  │  │  │        │  ├─ InvoiceTemplateService.class
@@ -237,6 +326,7 @@ PRMtool
 │  │  │  │        │  ├─ ProjectCsvService.class
 │  │  │  │        │  ├─ ProjectCsvService$ProjectImportData.class
 │  │  │  │        │  ├─ ProjectService.class
+│  │  │  │        │  ├─ SenderEmailAddressService.class
 │  │  │  │        │  └─ UserService.class
 │  │  │  │        ├─ validator
 │  │  │  │        │  ├─ ContactInfoValidator.class
@@ -247,7 +337,11 @@ PRMtool
 │  │  │  │     ├─ V1__Create_initial_schema.sql
 │  │  │  │     ├─ V2__Add_canvas_layout_to_invoice_templates.sql
 │  │  │  │     ├─ V3__Add_template_id_to_invoices.sql
-│  │  │  │     └─ V4__Update_partner_schema.sql
+│  │  │  │     ├─ V4__Update_partner_schema.sql
+│  │  │  │     ├─ V5__make_partner_email_required.sql
+│  │  │  │     ├─ V6__Add_invoice_delivery_tables.sql
+│  │  │  │     ├─ V7__Add_sender_email_addresses.sql
+│  │  │  │     └─ V8__Add_content_management_tables.sql
 │  │  │  └─ application.yml
 │  │  ├─ generated-sources
 │  │  │  └─ annotations
@@ -272,9 +366,11 @@ PRMtool
 │  │  │  └─ com
 │  │  │     └─ example
 │  │  │        └─ prmtool
+│  │  │           ├─ application-test.yml
 │  │  │           └─ PrmtoolApplicationTests.class
 │  │  ├─ prmtool-0.0.1-SNAPSHOT.jar
 │  │  └─ prmtool-0.0.1-SNAPSHOT.jar.original
+│  ├─ uploads
 │  ├─ Dockerfile
 │  └─ pom.xml
 ├─ docker
@@ -311,6 +407,10 @@ PRMtool
 │  │  │  ├─ Auth.css
 │  │  │  ├─ CommissionRules.css
 │  │  │  ├─ CommissionRules.js
+│  │  │  ├─ Contents.css
+│  │  │  ├─ Contents.js
+│  │  │  ├─ ContentShares.css
+│  │  │  ├─ ContentShares.js
 │  │  │  ├─ Dashboard.css
 │  │  │  ├─ Dashboard.js
 │  │  │  ├─ Invoices.css
@@ -320,6 +420,8 @@ PRMtool
 │  │  │  ├─ InvoiceTemplates.js
 │  │  │  ├─ Login.css
 │  │  │  ├─ Login.js
+│  │  │  ├─ MailSettings.css
+│  │  │  ├─ MailSettings.js
 │  │  │  ├─ PartnerDashboard.css
 │  │  │  ├─ PartnerDashboard.js
 │  │  │  ├─ Partners.css
