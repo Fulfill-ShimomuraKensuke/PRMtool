@@ -1,6 +1,8 @@
 package com.example.prmtool.controller;
 
 import com.example.prmtool.dto.*;
+import com.example.prmtool.entity.User;
+import com.example.prmtool.repository.UserRepository;
 import com.example.prmtool.service.ContentManagementService;
 import com.example.prmtool.service.FileStorageService;
 import jakarta.validation.Valid;
@@ -17,7 +19,8 @@ import java.util.UUID;
 
 /**
  * コンテンツ管理コントローラ
- * ADMIN、ACCOUNTING、REPがアクセス可能（SYSTEMは制限）
+ * フォルダ、ファイル、ダウンロード履歴の管理を提供
+ * ADMIN、ACCOUNTINGがアクセス可能（REPは閲覧のみ）
  */
 @RestController
 @RequestMapping("/api/contents")
@@ -27,9 +30,10 @@ public class ContentManagementController {
 
   private final ContentManagementService service;
   private final FileStorageService fileStorageService;
+  private final UserRepository userRepository; // ユーザーリポジトリを追加
 
   // ========================================
-  // フォルダ管理（既存のコードはそのまま）
+  // フォルダ管理
   // ========================================
 
   /**
@@ -85,9 +89,13 @@ public class ContentManagementController {
   public ResponseEntity<ContentFolderResponse> createFolder(
       @Valid @RequestBody ContentFolderRequest request,
       Authentication authentication) {
-    // TODO: 認証情報からユーザーIDを正しく取得
-    UUID userId = UUID.fromString(authentication.getName());
-    ContentFolderResponse created = service.createFolder(request, userId);
+
+    // ログインIDからユーザーを取得
+    String loginId = authentication.getName();
+    User user = userRepository.findByLoginId(loginId)
+        .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + loginId));
+
+    ContentFolderResponse created = service.createFolder(request, user.getId());
     return ResponseEntity.status(HttpStatus.CREATED).body(created);
   }
 
@@ -169,6 +177,11 @@ public class ContentManagementController {
     // ファイルをストレージに保存
     String fileUrl = fileStorageService.storeFile(file);
 
+    // ログインIDからユーザーを取得
+    String loginId = authentication.getName();
+    User user = userRepository.findByLoginId(loginId)
+        .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + loginId));
+
     // ファイル情報をデータベースに保存
     ContentFileRequest request = ContentFileRequest.builder()
         .folderId(folderId)
@@ -181,9 +194,7 @@ public class ContentManagementController {
         .tags(tags)
         .build();
 
-    // TODO: 認証情報からユーザーIDを正しく取得
-    UUID userId = UUID.fromString(authentication.getName());
-    ContentFileResponse created = service.uploadFile(request, userId);
+    ContentFileResponse created = service.uploadFile(request, user.getId());
     return ResponseEntity.status(HttpStatus.CREATED).body(created);
   }
 
@@ -229,9 +240,13 @@ public class ContentManagementController {
       @PathVariable UUID id,
       Authentication authentication,
       @RequestParam(required = false) String ipAddress) {
-    // TODO: 認証情報からユーザーIDを正しく取得
-    UUID userId = UUID.fromString(authentication.getName());
-    service.recordDownload(id, userId, ipAddress);
+
+    // ログインIDからユーザーを取得
+    String loginId = authentication.getName();
+    User user = userRepository.findByLoginId(loginId)
+        .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + loginId));
+
+    service.recordDownload(id, user.getId(), ipAddress);
     return ResponseEntity.ok().build();
   }
 }

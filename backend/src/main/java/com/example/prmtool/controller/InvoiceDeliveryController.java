@@ -3,6 +3,8 @@ package com.example.prmtool.controller;
 import com.example.prmtool.dto.InvoiceDeliveryRequest;
 import com.example.prmtool.dto.InvoiceDeliveryResponse;
 import com.example.prmtool.entity.InvoiceDelivery;
+import com.example.prmtool.entity.User;
+import com.example.prmtool.repository.UserRepository;
 import com.example.prmtool.service.InvoiceDeliveryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ import java.util.UUID;
 public class InvoiceDeliveryController {
 
   private final InvoiceDeliveryService service;
+  private final UserRepository userRepository;  // UserRepositoryを追加
 
   /**
    * 請求書をメール送付
@@ -38,11 +41,12 @@ public class InvoiceDeliveryController {
       @Valid @RequestBody InvoiceDeliveryRequest request,
       Authentication authentication) {
 
-    // 認証情報からユーザーIDを取得
-    // TODO: 実際の実装に合わせて修正
-    UUID userId = UUID.fromString(authentication.getName());
+    // ログインIDからユーザーを取得
+    String loginId = authentication.getName();
+    User user = userRepository.findByLoginId(loginId)
+        .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + loginId));
 
-    InvoiceDeliveryResponse response = service.sendInvoice(request, userId);
+    InvoiceDeliveryResponse response = service.sendInvoice(request, user.getId());
 
     // 送信失敗の場合は400を返す
     if (response.getStatus() == InvoiceDelivery.DeliveryStatus.FAILED) {

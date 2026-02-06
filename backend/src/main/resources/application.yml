@@ -80,7 +80,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: shimomura-kensuke@fulfill-group.co.jp  # Gmailアドレス
-    password: qxmdykpyynuwlvyq      # Googleアプリパスワード
+    password: xlxhfndpzuyqhmom      # Googleアプリパスワード
     properties:
       mail:
         smtp:
