@@ -63,7 +63,7 @@ Thumbs.db
 api-tests.http
 
 ### アップロードファイル ###
-uploads
+uploads/
 
 ### その他 ###
 scripts/
