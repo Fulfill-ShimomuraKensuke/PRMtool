@@ -62,6 +62,9 @@ Thumbs.db
 ### APIテストファイル ###
 api-tests.http
 
+### アップロードファイル ###
+uploads
+
 ### その他 ###
 scripts/
 tree.txt
