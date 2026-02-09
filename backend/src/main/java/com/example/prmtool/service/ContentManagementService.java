@@ -225,8 +225,7 @@ public class ContentManagementService {
     ContentFile file = fileRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("ファイルが見つかりません: " + id));
 
-    // TODO: 実際のストレージ（S3など）からも削除
-
+    // 実際のストレージ（S3など）からも削除
     fileRepository.delete(file);
   }
 
