@@ -166,6 +166,9 @@ public class ContentFile {
    * ダウンロード回数を増やす
    */
   public void incrementDownloadCount() {
+    if (this.downloadCount == null) {
+      this.downloadCount = 0;
+    }
     this.downloadCount++;
   }
 }

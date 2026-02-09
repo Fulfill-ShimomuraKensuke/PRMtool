@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './ContentShares.css';
+import contentShareService from '../services/contentShareService';
+import contentService from '../services/contentService';
+import partnerService from '../services/partnerService';
 
 /**
  * コンテンツ共有管理画面
@@ -21,14 +24,20 @@ const ContentShares = () => {
   // フォームデータ
   const [formData, setFormData] = useState({
     fileId: '',
+    shareTarget: 'SPECIFIC_PARTNER',
     partnerId: '',
+    shareMethod: 'SYSTEM_LINK',
     expiresAt: '',
     downloadLimit: '',
-    message: ''
+    notifyOnDownload: false,
+    message: '',
   });
 
   // エラーメッセージ
   const [error, setError] = useState('');
+
+  // ローディング状態
+  const [loading, setLoading] = useState(false);
 
   // 初期データ取得
   useEffect(() => {
@@ -39,73 +48,51 @@ const ContentShares = () => {
 
   // 共有一覧を取得
   const fetchShares = async () => {
-    // TODO: APIから取得
-    // 仮データ
-    setShares([
-      {
-        id: '1',
-        fileName: '製品Aカタログ_v2.pdf',
-        partnerName: '株式会社サンプル',
-        sharedAt: '2026-02-01',
-        expiresAt: '2026-03-01',
-        downloadCount: 3,
-        downloadLimit: 10,
-        status: 'ACTIVE'
-      },
-      {
-        id: '2',
-        fileName: '提案書テンプレート.pptx',
-        partnerName: '株式会社テスト',
-        sharedAt: '2026-01-28',
-        expiresAt: '2026-02-28',
-        downloadCount: 1,
-        downloadLimit: 5,
-        status: 'ACTIVE'
-      },
-      {
-        id: '3',
-        fileName: '操作マニュアル_v3.pdf',
-        partnerName: '全パートナー',
-        sharedAt: '2026-01-25',
-        expiresAt: null,
-        downloadCount: 15,
-        downloadLimit: null,
-        status: 'ACTIVE'
-      }
-    ]);
+    try {
+      setLoading(true);
+      const data = await contentShareService.getAllShares();
+      setShares(data);
+    } catch (err) {
+      setError('共有の取得に失敗しました');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // パートナー一覧を取得
   const fetchPartners = async () => {
-    // TODO: APIから取得
-    // 仮データ
-    setPartners([
-      { id: '1', name: '株式会社サンプル' },
-      { id: '2', name: '株式会社テスト' },
-      { id: '3', name: '株式会社デモ' }
-    ]);
+    try {
+      const data = await partnerService.getPartners();
+      setPartners(data);
+    } catch (err) {
+      console.error('パートナーの取得に失敗しました', err);
+    }
   };
 
   // ファイル一覧を取得
   const fetchFiles = async () => {
-    // TODO: APIから取得
-    // 仮データ
-    setFiles([
-      { id: '1', name: '製品Aカタログ_v2.pdf' },
-      { id: '2', name: '提案書テンプレート.pptx' },
-      { id: '3', name: '操作マニュアル_v3.pdf' }
-    ]);
+    try {
+      const data = await contentService.getAllFiles();
+      setFiles(data);
+    } catch (err) {
+      console.error('ファイルの取得に失敗しました', err);
+    }
   };
 
   // 共有モーダルを開く
   const handleOpenShareModal = () => {
     setFormData({
       fileId: '',
+      shareTarget: 'SPECIFIC_PARTNER',
       partnerId: '',
+      shareMethod: 'SYSTEM_LINK',
       expiresAt: '',
       downloadLimit: '',
-      message: ''
+      notifyOnDownload: false,
+      message: '',
     });
+    setError('');
     setShowShareModal(true);
   };
 
@@ -117,99 +104,162 @@ const ContentShares = () => {
 
   // フォーム入力変更
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
   };
 
-  // 共有を作成
+  // 共有対象タイプ変更時の処理
+  const handleShareTargetChange = (e) => {
+    const value = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      shareTarget: value,
+      partnerId: value === 'ALL_PARTNERS' ? '' : prev.partnerId,
+    }));
+  };
+
+  // 共有作成
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
 
     try {
-      // TODO: 共有作成API呼び出し
-      console.log('共有作成:', formData);
+      setLoading(true);
+      setError('');
+
+      // バリデーション
+      if (formData.shareTarget === 'SPECIFIC_PARTNER' && !formData.partnerId) {
+        setError('パートナーを選択してください');
+        return;
+      }
+
+      // 日付形式の変換（YYYY-MM-DD → ISO DateTime）
+      const shareData = {
+        ...formData,
+        expiresAt: formData.expiresAt ? new Date(formData.expiresAt).toISOString() : null,
+        downloadLimit: formData.downloadLimit ? parseInt(formData.downloadLimit) : null,
+        partnerId: formData.shareTarget === 'ALL_PARTNERS' ? null : formData.partnerId,
+      };
+
+      await contentShareService.createShare(shareData);
+
+      // 共有リストを再取得
       await fetchShares();
+
       handleCloseModal();
     } catch (err) {
       setError(err.response?.data?.message || '共有の作成に失敗しました');
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   // 共有を無効化
   const handleRevoke = async (shareId) => {
-    if (!window.confirm('この共有を無効化しますか？')) return;
+    if (!window.confirm('この共有を無効化してもよろしいですか？')) {
+      return;
+    }
 
     try {
-      // TODO: 無効化API呼び出し
-      console.log('無効化:', shareId);
+      setLoading(true);
+      await contentShareService.revokeShare(shareId);
+
+      // 共有リストを再取得
       await fetchShares();
     } catch (err) {
-      setError(err.response?.data?.message || '無効化に失敗しました');
+      setError('共有の無効化に失敗しました');
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // ステータスのバッジを表示
+  // ステータスバッジを取得
   const getStatusBadge = (status) => {
-    const badges = {
-      ACTIVE: <span className="badge badge-success">有効</span>,
-      EXPIRED: <span className="badge badge-warning">期限切れ</span>,
-      REVOKED: <span className="badge badge-danger">無効化</span>,
-      EXHAUSTED: <span className="badge badge-secondary">上限到達</span>
-    };
-    return badges[status] || status;
+    const badgeClass = contentShareService.getStatusBadgeClass(status);
+    const label = contentShareService.getStatusLabel(status);
+    return <span className={`badge ${badgeClass}`}>{label}</span>;
+  };
+
+  // 日付をフォーマット
+  const formatDate = (dateString) => {
+    return contentShareService.formatDate(dateString);
   };
 
   return (
     <div className="content-shares-container">
+      {/* ヘッダー */}
       <div className="shares-header">
-        <h1>共有管理</h1>
+        <h1>コンテンツ共有</h1>
         <button className="btn btn-primary" onClick={handleOpenShareModal}>
-          + 新規共有
+          新規共有
         </button>
       </div>
 
+      {/* エラーメッセージ */}
       {error && <div className="error-message">{error}</div>}
 
-      {/* 共有一覧 */}
+      {/* ローディング */}
+      {loading && <div className="loading">読み込み中...</div>}
+
+      {/* 共有リスト */}
       <div className="shares-list">
-        {shares.map((share) => (
-          <div key={share.id} className="share-card">
-            <div className="share-info">
-              <div className="share-file">
-                <span className="file-icon">📄</span>
-                <span className="file-name">{share.fileName}</span>
-              </div>
-              <div className="share-partner">
-                <strong>共有先:</strong> {share.partnerName}
-              </div>
-              <div className="share-meta">
-                <span>共有日: {share.sharedAt}</span>
-                {share.expiresAt && <span> • 有効期限: {share.expiresAt}</span>}
-                {share.downloadLimit && (
-                  <span> • ダウンロード: {share.downloadCount}/{share.downloadLimit}</span>
-                )}
-                {!share.downloadLimit && (
-                  <span> • ダウンロード: {share.downloadCount}回</span>
-                )}
-              </div>
-            </div>
-            <div className="share-status">
-              {getStatusBadge(share.status)}
-              {share.status === 'ACTIVE' && (
-                <button
-                  className="btn btn-sm btn-danger"
-                  onClick={() => handleRevoke(share.id)}
-                >
-                  無効化
-                </button>
-              )}
-            </div>
+        {shares.length === 0 ? (
+          <div className="empty-state">
+            <p>共有がありません</p>
           </div>
-        ))}
+        ) : (
+          shares.map((share) => (
+            <div key={share.id} className="share-card">
+              <div className="share-info">
+                <div className="share-file">
+                  <span className="file-icon">
+                    {contentService.getFileIcon(share.fileType || 'application/pdf')}
+                  </span>
+                  <span className="file-name">{share.fileName}</span>
+                </div>
+                <div className="share-partner">
+                  <strong>共有先:</strong> {share.partnerName}
+                </div>
+                <div className="share-meta">
+                  <span>共有日: {formatDate(share.sharedAt)}</span>
+                  {share.expiresAt && (
+                    <span> • 有効期限: {formatDate(share.expiresAt)}</span>
+                  )}
+                  {share.downloadLimit ? (
+                    <span>
+                      {' '}
+                      • ダウンロード: {share.currentDownloadCount}/
+                      {share.downloadLimit}
+                    </span>
+                  ) : (
+                    <span> • ダウンロード: {share.currentDownloadCount}回</span>
+                  )}
+                </div>
+                {share.message && (
+                  <div className="share-message">
+                    <strong>メッセージ:</strong> {share.message}
+                  </div>
+                )}
+              </div>
+              <div className="share-status">
+                {getStatusBadge(share.status)}
+                {share.status === 'ACTIVE' && (
+                  <button
+                    className="btn btn-sm btn-danger"
+                    onClick={() => handleRevoke(share.id)}
+                    disabled={loading}
+                  >
+                    無効化
+                  </button>
+                )}
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {/* 共有作成モーダル */}
@@ -229,27 +279,55 @@ const ContentShares = () => {
                   <option value="">選択してください</option>
                   {files.map((file) => (
                     <option key={file.id} value={file.id}>
-                      {file.name}
+                      {file.fileName}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div className="form-group">
-                <label>共有先パートナー *</label>
+                <label>共有対象 *</label>
                 <select
-                  name="partnerId"
-                  value={formData.partnerId}
+                  name="shareTarget"
+                  value={formData.shareTarget}
+                  onChange={handleShareTargetChange}
+                  required
+                >
+                  <option value="SPECIFIC_PARTNER">特定のパートナー</option>
+                  <option value="ALL_PARTNERS">全パートナー</option>
+                </select>
+              </div>
+
+              {formData.shareTarget === 'SPECIFIC_PARTNER' && (
+                <div className="form-group">
+                  <label>共有先パートナー *</label>
+                  <select
+                    name="partnerId"
+                    value={formData.partnerId}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">選択してください</option>
+                    {partners.map((partner) => (
+                      <option key={partner.id} value={partner.id}>
+                        {partner.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div className="form-group">
+                <label>共有方法 *</label>
+                <select
+                  name="shareMethod"
+                  value={formData.shareMethod}
                   onChange={handleChange}
                   required
                 >
-                  <option value="">選択してください</option>
-                  <option value="all">全パートナー</option>
-                  {partners.map((partner) => (
-                    <option key={partner.id} value={partner.id}>
-                      {partner.name}
-                    </option>
-                  ))}
+                  <option value="SYSTEM_LINK">システム内リンク</option>
+                  <option value="EMAIL_LINK">メールでリンク送付</option>
+                  <option value="EMAIL_ATTACH">メールで添付</option>
                 </select>
               </div>
 
@@ -260,6 +338,7 @@ const ContentShares = () => {
                   name="expiresAt"
                   value={formData.expiresAt}
                   onChange={handleChange}
+                  min={new Date().toISOString().split('T')[0]}
                 />
                 <small>未設定の場合は無期限</small>
               </div>
@@ -274,6 +353,18 @@ const ContentShares = () => {
                   min="1"
                   placeholder="未設定の場合は無制限"
                 />
+              </div>
+
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="notifyOnDownload"
+                    checked={formData.notifyOnDownload}
+                    onChange={handleChange}
+                  />
+                  ダウンロード時に通知を受け取る
+                </label>
               </div>
 
               <div className="form-group">
@@ -293,8 +384,8 @@ const ContentShares = () => {
                 <button type="button" className="btn" onClick={handleCloseModal}>
                   キャンセル
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  共有する
+                <button type="submit" className="btn btn-primary" disabled={loading}>
+                  {loading ? '作成中...' : '共有する'}
                 </button>
               </div>
             </form>

@@ -7,7 +7,10 @@ import com.example.prmtool.service.ContentManagementService;
 import com.example.prmtool.service.FileStorageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -20,7 +23,6 @@ import java.util.UUID;
 /**
  * コンテンツ管理コントローラ
  * フォルダ、ファイル、ダウンロード履歴の管理を提供
- * ADMIN、ACCOUNTINGがアクセス可能（REPは閲覧のみ）
  */
 @RestController
 @RequestMapping("/api/contents")
@@ -30,7 +32,7 @@ public class ContentManagementController {
 
   private final ContentManagementService service;
   private final FileStorageService fileStorageService;
-  private final UserRepository userRepository; // ユーザーリポジトリを追加
+  private final UserRepository userRepository;
 
   // ========================================
   // フォルダ管理
@@ -90,7 +92,7 @@ public class ContentManagementController {
       @Valid @RequestBody ContentFolderRequest request,
       Authentication authentication) {
 
-    // ログインIDからユーザーを取得
+    // loginIdからUserエンティティを取得
     String loginId = authentication.getName();
     User user = userRepository.findByLoginId(loginId)
         .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + loginId));
@@ -177,7 +179,7 @@ public class ContentManagementController {
     // ファイルをストレージに保存
     String fileUrl = fileStorageService.storeFile(file);
 
-    // ログインIDからユーザーを取得
+    // loginIdからUserエンティティを取得
     String loginId = authentication.getName();
     User user = userRepository.findByLoginId(loginId)
         .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + loginId));
@@ -231,17 +233,50 @@ public class ContentManagementController {
   }
 
   /**
-   * ファイルダウンロード記録
+   * ファイルダウンロード
    * 権限: ADMIN, ACCOUNTING, REP
    */
-  @PostMapping("/files/{id}/download")
+  @GetMapping("/files/{id}/download")
+  @PreAuthorize("hasAnyRole('ADMIN', 'ACCOUNTING', 'REP')")
+  public ResponseEntity<Resource> downloadFile(
+      @PathVariable UUID id,
+      Authentication authentication,
+      @RequestParam(required = false) String ipAddress) {
+
+    // ファイル情報を取得
+    ContentFileResponse file = service.getFileById(id);
+
+    // loginIdからUserエンティティを取得
+    String loginId = authentication.getName();
+    User user = userRepository.findByLoginId(loginId)
+        .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + loginId));
+
+    // ダウンロード履歴を記録
+    service.recordDownload(id, user.getId(), ipAddress);
+
+    // ストレージからファイルを読み込み
+    String fileName = file.getFileUrl().substring(file.getFileUrl().lastIndexOf("/") + 1);
+    Resource resource = fileStorageService.loadFileAsResource(fileName);
+
+    // ダウンロード用のレスポンスヘッダーを設定
+    return ResponseEntity.ok()
+        .contentType(MediaType.parseMediaType(file.getFileType()))
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFileName() + "\"")
+        .body(resource);
+  }
+
+  /**
+   * ファイルダウンロード記録のみ（ダウンロード自体は別途実行）
+   * 権限: ADMIN, ACCOUNTING, REP
+   */
+  @PostMapping("/files/{id}/download-record")
   @PreAuthorize("hasAnyRole('ADMIN', 'ACCOUNTING', 'REP')")
   public ResponseEntity<Void> recordDownload(
       @PathVariable UUID id,
       Authentication authentication,
       @RequestParam(required = false) String ipAddress) {
 
-    // ログインIDからユーザーを取得
+    // loginIdからUserエンティティを取得
     String loginId = authentication.getName();
     User user = userRepository.findByLoginId(loginId)
         .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + loginId));

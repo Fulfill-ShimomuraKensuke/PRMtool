@@ -3,6 +3,8 @@ package com.example.prmtool.controller;
 import com.example.prmtool.dto.ContentShareRequest;
 import com.example.prmtool.dto.ContentShareResponse;
 import com.example.prmtool.entity.ContentShareAccessHistory;
+import com.example.prmtool.entity.User;
+import com.example.prmtool.repository.UserRepository;
 import com.example.prmtool.service.ContentShareService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +19,7 @@ import java.util.UUID;
 
 /**
  * コンテンツ共有コントローラ
- * ADMIN、ACCOUNTING、REPがアクセス可能（SYSTEMは制限）
+ * ファイル共有とアクセス履歴の管理を提供
  */
 @RestController
 @RequestMapping("/api/content-shares")
@@ -26,6 +28,7 @@ import java.util.UUID;
 public class ContentShareController {
 
   private final ContentShareService service;
+  private final UserRepository userRepository;
 
   /**
    * 全共有を取得
@@ -91,9 +94,13 @@ public class ContentShareController {
   public ResponseEntity<ContentShareResponse> createShare(
       @Valid @RequestBody ContentShareRequest request,
       Authentication authentication) {
-    // 認証情報からユーザーIDを取得（実際の実装に合わせて調整）
-    UUID userId = UUID.fromString(authentication.getName());
-    ContentShareResponse created = service.createShare(request, userId);
+
+    // loginIdからUserエンティティを取得
+    String loginId = authentication.getName();
+    User user = userRepository.findByLoginId(loginId)
+        .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + loginId));
+
+    ContentShareResponse created = service.createShare(request, user.getId());
     return ResponseEntity.status(HttpStatus.CREATED).body(created);
   }
 
@@ -132,9 +139,13 @@ public class ContentShareController {
       @RequestParam ContentShareAccessHistory.AccessType accessType,
       Authentication authentication,
       @RequestParam(required = false) String ipAddress) {
-    // 認証情報からユーザーIDを取得
-    UUID userId = UUID.fromString(authentication.getName());
-    service.recordAccess(id, userId, accessType, ipAddress);
+
+    // loginIdからUserエンティティを取得
+    String loginId = authentication.getName();
+    User user = userRepository.findByLoginId(loginId)
+        .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + loginId));
+
+    service.recordAccess(id, user.getId(), accessType, ipAddress);
     return ResponseEntity.ok().build();
   }
 

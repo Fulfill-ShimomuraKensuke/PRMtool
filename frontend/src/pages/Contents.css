@@ -1,4 +1,4 @@
-/* コンテンツ管理（ファイル倉庫）のスタイル */
+/* コンテンツ管理画面のスタイル */
 .contents-container {
   padding: 2rem;
   max-width: 1400px;
@@ -32,6 +32,13 @@
   cursor: pointer;
   transition: all 0.3s;
   font-weight: 500;
+  background-color: #ecf0f1;
+  color: #2c3e50;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn-primary {
@@ -39,17 +46,8 @@
   color: white;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   background-color: #2980b9;
-}
-
-.btn-secondary {
-  background-color: #95a5a6;
-  color: white;
-}
-
-.btn-secondary:hover {
-  background-color: #7f8c8d;
 }
 
 .btn-sm {
@@ -62,11 +60,24 @@
   color: white;
 }
 
-.btn-danger:hover {
+.btn-danger:hover:not(:disabled) {
   background-color: #c0392b;
 }
 
-/* エラーメッセージ */
+.btn-icon {
+  padding: 0.25rem 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover {
+  transform: scale(1.1);
+}
+
+/* メッセージ */
 .error-message {
   background-color: #ffebee;
   color: #c62828;
@@ -76,68 +87,114 @@
   border-left: 4px solid #c62828;
 }
 
-/* フォルダセクション */
-.folders-section {
-  margin-bottom: 3rem;
-}
-
-.folders-section h2 {
-  color: #2c3e50;
+.info-message {
+  background-color: #e3f2fd;
+  color: #1565c0;
+  padding: 1rem;
+  border-radius: 4px;
   margin-bottom: 1rem;
-  font-size: 1.5rem;
+  border-left: 4px solid #1565c0;
 }
 
-/* フォルダグリッド */
-.folder-grid {
+.warning-message {
+  background-color: #fff3e0;
+  color: #e65100;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  border-left: 4px solid #e65100;
+}
+
+/* ローディング */
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #7f8c8d;
+  font-size: 1.1rem;
+}
+
+/* コンテンツボディ */
+.contents-body {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: 300px 1fr;
+  gap: 2rem;
 }
 
-/* フォルダカード */
-.folder-card {
+/* フォルダツリー */
+.folder-tree {
   background: white;
-  border: 2px solid #e0e0e0;
+  border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 1.5rem;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  height: fit-content;
 }
 
-.folder-card:hover {
-  border-color: #3498db;
-  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
-  transform: translateY(-4px);
-}
-
-.folder-icon {
-  font-size: 4rem;
-  margin-bottom: 0.5rem;
-}
-
-.folder-name {
-  font-size: 1.1rem;
-  font-weight: bold;
+.folder-tree h2 {
+  margin: 0 0 1rem 0;
   color: #2c3e50;
-  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 0.5rem;
 }
 
-.folder-info {
+.folder-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.folder-item-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.folder-item {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #f8f9fa;
+}
+
+.folder-item:hover {
+  background-color: #e9ecef;
+}
+
+.folder-item.active {
+  background-color: #3498db;
+  color: white;
+  font-weight: bold;
+}
+
+.file-count {
+  margin-left: auto;
   font-size: 0.9rem;
   color: #7f8c8d;
 }
 
+.folder-item.active .file-count {
+  color: #ecf0f1;
+}
+
 /* ファイルセクション */
 .files-section {
-  margin-top: 3rem;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
 }
 
 .files-section h2 {
+  margin: 0 0 1.5rem 0;
   color: #2c3e50;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 0.5rem;
 }
 
 /* ファイルリスト */
@@ -152,12 +209,11 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: white;
+  background: #f8f9fa;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 1rem;
   transition: all 0.3s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .file-card:hover {
@@ -166,7 +222,7 @@
 }
 
 .file-icon {
-  font-size: 2.5rem;
+  font-size: 2rem;
   flex-shrink: 0;
 }
 
@@ -178,7 +234,7 @@
   font-size: 1.1rem;
   font-weight: bold;
   color: #2c3e50;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.25rem;
 }
 
 .file-meta {
@@ -186,10 +242,27 @@
   color: #7f8c8d;
 }
 
+.file-description {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  color: #555;
+}
+
 .file-actions {
   display: flex;
   gap: 0.5rem;
   flex-shrink: 0;
+}
+
+/* 空の状態 */
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #7f8c8d;
+}
+
+.empty-state p {
+  font-size: 1.1rem;
 }
 
 /* モーダル */
@@ -204,51 +277,26 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  animation: fadeIn 0.2s;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
 }
 
 .modal-content {
   background: white;
-  padding: 2rem;
   border-radius: 8px;
-  max-width: 500px;
+  padding: 2rem;
   width: 90%;
+  max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  animation: slideUp 0.3s;
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .modal-content h3 {
-  margin-top: 0;
-  margin-bottom: 1.5rem;
+  margin: 0 0 1.5rem 0;
   color: #2c3e50;
   font-size: 1.5rem;
 }
 
-/* フォームグループ */
+/* フォーム */
 .form-group {
   margin-bottom: 1.5rem;
 }
@@ -260,8 +308,7 @@
   font-weight: 500;
 }
 
-.form-group input[type="text"],
-.form-group input[type="file"],
+.form-group input,
 .form-group select,
 .form-group textarea {
   width: 100%;
@@ -270,6 +317,7 @@
   border-radius: 4px;
   font-size: 1rem;
   transition: border-color 0.3s;
+  font-family: inherit;
 }
 
 .form-group input:focus,
@@ -286,13 +334,17 @@
   font-size: 0.85rem;
 }
 
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
 /* 選択されたファイル */
 .selected-files {
   margin-top: 1rem;
   padding: 1rem;
   background-color: #f8f9fa;
   border-radius: 4px;
-  border: 1px solid #e0e0e0;
 }
 
 .selected-files p {
@@ -307,7 +359,7 @@
 }
 
 .selected-files li {
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.25rem;
   color: #555;
 }
 
@@ -320,6 +372,16 @@
 }
 
 /* レスポンシブ対応 */
+@media (max-width: 992px) {
+  .contents-body {
+    grid-template-columns: 1fr;
+  }
+
+  .folder-tree {
+    margin-bottom: 2rem;
+  }
+}
+
 @media (max-width: 768px) {
   .contents-container {
     padding: 1rem;
@@ -340,11 +402,6 @@
     width: 100%;
   }
 
-  .folder-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
-  }
-
   .file-card {
     flex-direction: column;
     align-items: flex-start;
@@ -352,28 +409,19 @@
 
   .file-actions {
     width: 100%;
-    justify-content: flex-end;
+    justify-content: space-between;
   }
 
   .modal-content {
     padding: 1.5rem;
     width: 95%;
   }
-}
 
-/* 空の状態 */
-.empty-state {
-  text-align: center;
-  padding: 3rem;
-  color: #7f8c8d;
-}
+  .modal-actions {
+    flex-direction: column;
+  }
 
-.empty-state-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-}
-
-.empty-state p {
-  font-size: 1.1rem;
-  margin-bottom: 1.5rem;
+  .modal-actions .btn {
+    width: 100%;
+  }
 }

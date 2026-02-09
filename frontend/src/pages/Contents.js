@@ -1,85 +1,102 @@
 import React, { useState, useEffect } from 'react';
 import './Contents.css';
+import contentService from '../services/contentService';
 
 /**
- * コンテンツ管理（ファイル倉庫）画面
- * ファイルのアップロード、管理、プレビュー機能
+ * コンテンツ管理画面
+ * フォルダ階層とファイルの管理を提供
  */
 const Contents = () => {
-  // フォルダとファイルのデータ
+  // フォルダリスト
   const [folders, setFolders] = useState([]);
+  
+  // ファイルリスト
   const [files, setFiles] = useState([]);
-  const [currentFolder, setCurrentFolder] = useState(null);
-
+  
+  // 現在選択されているフォルダ
+  const [selectedFolder, setSelectedFolder] = useState(null);
+  
   // モーダルの表示状態
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
-
-  // フォームデータ
+  
+  // フォルダ作成フォーム
   const [folderName, setFolderName] = useState('');
+  const [folderDescription, setFolderDescription] = useState('');
+  
+  // ファイルアップロード
   const [selectedFiles, setSelectedFiles] = useState([]);
-
+  
   // エラーメッセージ
   const [error, setError] = useState('');
+  
+  // ローディング状態
+  const [loading, setLoading] = useState(false);
 
   // 初期データ取得
   useEffect(() => {
-    fetchFolders();
-    fetchFiles();
-  }, [currentFolder]);
+    fetchRootFolders();
+    fetchAllFiles();
+  }, []);
 
-  // フォルダ一覧を取得
-  const fetchFolders = async () => {
-    // TODO: APIから取得
-    // 仮データ
-    setFolders([
-      { id: '1', name: '製品カタログ', fileCount: 5, createdAt: '2026-01-15' },
-      { id: '2', name: '営業資料', fileCount: 8, createdAt: '2026-01-20' },
-      { id: '3', name: 'マニュアル', fileCount: 3, createdAt: '2026-01-25' }
-    ]);
+  // ルートフォルダを取得
+  const fetchRootFolders = async () => {
+    try {
+      setLoading(true);
+      const data = await contentService.getRootFolders();
+      setFolders(data);
+    } catch (err) {
+      setError('フォルダの取得に失敗しました');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // ファイル一覧を取得
-  const fetchFiles = async () => {
-    // TODO: APIから取得
-    // 仮データ
-    setFiles([
-      {
-        id: '1',
-        name: '製品Aカタログ_v2.pdf',
-        type: 'application/pdf',
-        size: 2048576,
-        uploadedAt: '2026-02-01',
-        uploadedBy: '山田太郎'
-      },
-      {
-        id: '2',
-        name: '提案書テンプレート.pptx',
-        type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-        size: 1048576,
-        uploadedAt: '2026-02-02',
-        uploadedBy: '鈴木花子'
-      },
-      {
-        id: '3',
-        name: '操作マニュアル_v3.pdf',
-        type: 'application/pdf',
-        size: 3145728,
-        uploadedAt: '2026-01-30',
-        uploadedBy: '佐藤次郎'
-      }
-    ]);
+  // 全ファイルを取得
+  const fetchAllFiles = async () => {
+    try {
+      setLoading(true);
+      const data = await contentService.getAllFiles();
+      setFiles(data);
+    } catch (err) {
+      setError('ファイルの取得に失敗しました');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // フォルダをクリックした時の処理
+  const handleFolderClick = async (folder) => {
+    setSelectedFolder(folder);
+    try {
+      const data = await contentService.getFilesByFolder(folder.id);
+      setFiles(data);
+    } catch (err) {
+      setError('ファイルの取得に失敗しました');
+      console.error(err);
+    }
+  };
+
+  // 全ファイルボタンをクリック
+  const handleShowAllFiles = () => {
+    setSelectedFolder(null);
+    fetchAllFiles();
   };
 
   // フォルダ作成モーダルを開く
   const handleOpenFolderModal = () => {
     setFolderName('');
+    setFolderDescription('');
+    setError('');
     setShowFolderModal(true);
   };
 
-  // ファイルアップロードモーダルを開く
+  // アップロードモーダルを開く
   const handleOpenUploadModal = () => {
     setSelectedFiles([]);
+    setError('');
     setShowUploadModal(true);
   };
 
@@ -90,159 +107,250 @@ const Contents = () => {
     setError('');
   };
 
-  // フォルダを作成
+  // フォルダ作成
   const handleCreateFolder = async (e) => {
     e.preventDefault();
-    setError('');
-
-    if (!folderName.trim()) {
-      setError('フォルダ名を入力してください');
-      return;
-    }
-
+    
     try {
-      // TODO: フォルダ作成API呼び出し
-      console.log('フォルダ作成:', folderName);
-      await fetchFolders();
+      setLoading(true);
+      setError('');
+
+      const folderData = {
+        folderName: folderName,
+        description: folderDescription,
+        parentFolderId: selectedFolder ? selectedFolder.id : null,
+      };
+
+      await contentService.createFolder(folderData);
+      
+      // フォルダリストを再取得
+      if (selectedFolder) {
+        const data = await contentService.getSubFolders(selectedFolder.id);
+        setFolders(data);
+      } else {
+        await fetchRootFolders();
+      }
+
       handleCloseModal();
     } catch (err) {
       setError(err.response?.data?.message || 'フォルダの作成に失敗しました');
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // ファイルをアップロード
+  // ファイル選択
+  const handleFileChange = (e) => {
+    setSelectedFiles(Array.from(e.target.files));
+  };
+
+  // ファイルアップロード
   const handleUpload = async (e) => {
     e.preventDefault();
-    setError('');
 
     if (selectedFiles.length === 0) {
       setError('ファイルを選択してください');
       return;
     }
 
+    if (!selectedFolder) {
+      setError('アップロード先のフォルダを選択してください');
+      return;
+    }
+
     try {
-      // TODO: ファイルアップロードAPI呼び出し
-      console.log('ファイルアップロード:', selectedFiles);
-      await fetchFiles();
+      setLoading(true);
+      setError('');
+
+      // 複数ファイルをアップロード
+      await contentService.uploadMultipleFiles({
+        files: selectedFiles,
+        folderId: selectedFolder.id,
+      });
+
+      // ファイルリストを再取得
+      const data = await contentService.getFilesByFolder(selectedFolder.id);
+      setFiles(data);
+
       handleCloseModal();
     } catch (err) {
       setError(err.response?.data?.message || 'ファイルのアップロードに失敗しました');
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // ファイル選択時の処理
-  const handleFileChange = (e) => {
-    setSelectedFiles(Array.from(e.target.files));
+  // ファイルダウンロード
+  const handleDownload = async (file) => {
+    try {
+      await contentService.downloadFile(file.id, file.fileName);
+    } catch (err) {
+      setError('ファイルのダウンロードに失敗しました');
+      console.error(err);
+    }
   };
 
-  // フォルダをクリックした時
-  const handleFolderClick = (folderId) => {
-    setCurrentFolder(folderId);
-  };
-
-  // ファイルをダウンロード
-  const handleDownload = (fileId) => {
-    // TODO: ダウンロードAPI呼び出し
-    console.log('ダウンロード:', fileId);
-  };
-
-  // ファイルを削除
-  const handleDelete = async (fileId) => {
-    if (!window.confirm('本当に削除しますか？')) return;
+  // ファイル削除
+  const handleDeleteFile = async (fileId) => {
+    if (!window.confirm('このファイルを削除してもよろしいですか？')) {
+      return;
+    }
 
     try {
-      // TODO: 削除API呼び出し
-      console.log('削除:', fileId);
-      await fetchFiles();
+      setLoading(true);
+      await contentService.deleteFile(fileId);
+      
+      // ファイルリストを再取得
+      if (selectedFolder) {
+        const data = await contentService.getFilesByFolder(selectedFolder.id);
+        setFiles(data);
+      } else {
+        await fetchAllFiles();
+      }
     } catch (err) {
-      setError(err.response?.data?.message || '削除に失敗しました');
+      setError(err.response?.data?.message || 'ファイルの削除に失敗しました');
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // ファイルサイズをフォーマット
-  const formatFileSize = (bytes) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-    if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
-    return (bytes / 1073741824).toFixed(1) + ' GB';
-  };
+  // フォルダ削除
+  const handleDeleteFolder = async (folderId) => {
+    if (!window.confirm('このフォルダを削除してもよろしいですか？\n※フォルダ内にファイルがある場合は削除できません')) {
+      return;
+    }
 
-  // ファイルタイプからアイコンを取得
-  const getFileIcon = (type) => {
-    if (type.includes('pdf')) return '📄';
-    if (type.includes('word') || type.includes('document')) return '📝';
-    if (type.includes('excel') || type.includes('spreadsheet')) return '📊';
-    if (type.includes('powerpoint') || type.includes('presentation')) return '📊';
-    if (type.includes('image')) return '🖼️';
-    if (type.includes('video')) return '🎥';
-    return '📎';
+    try {
+      setLoading(true);
+      await contentService.deleteFolder(folderId);
+      
+      // フォルダリストを再取得
+      await fetchRootFolders();
+      
+      // 削除したフォルダが選択中だった場合はクリア
+      if (selectedFolder && selectedFolder.id === folderId) {
+        setSelectedFolder(null);
+        await fetchAllFiles();
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'フォルダの削除に失敗しました');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="contents-container">
+      {/* ヘッダー */}
       <div className="contents-header">
-        <h1>ファイル倉庫</h1>
+        <h1>コンテンツ管理</h1>
         <div className="header-actions">
-          <button className="btn btn-secondary" onClick={handleOpenFolderModal}>
-            + フォルダ作成
+          <button className="btn btn-primary" onClick={handleOpenFolderModal}>
+            フォルダ作成
           </button>
-          <button className="btn btn-primary" onClick={handleOpenUploadModal}>
-            + ファイルアップロード
+          <button 
+            className="btn btn-primary" 
+            onClick={handleOpenUploadModal}
+            disabled={!selectedFolder}
+          >
+            ファイルアップロード
           </button>
         </div>
       </div>
 
+      {/* エラーメッセージ */}
       {error && <div className="error-message">{error}</div>}
 
-      {/* フォルダ一覧 */}
-      <div className="folders-section">
-        <h2>フォルダ</h2>
-        <div className="folder-grid">
-          {folders.map((folder) => (
-            <div
-              key={folder.id}
-              className="folder-card"
-              onClick={() => handleFolderClick(folder.id)}
-            >
-              <div className="folder-icon">📁</div>
-              <div className="folder-name">{folder.name}</div>
-              <div className="folder-info">
-                {folder.fileCount}個のファイル
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* ローディング */}
+      {loading && <div className="loading">読み込み中...</div>}
 
-      {/* ファイル一覧 */}
-      <div className="files-section">
-        <h2>ファイル</h2>
-        <div className="file-list">
-          {files.map((file) => (
-            <div key={file.id} className="file-card">
-              <div className="file-icon">{getFileIcon(file.type)}</div>
-              <div className="file-details">
-                <div className="file-name">{file.name}</div>
-                <div className="file-meta">
-                  {formatFileSize(file.size)} • {file.uploadedAt} • {file.uploadedBy}
-                </div>
-              </div>
-              <div className="file-actions">
-                <button
-                  className="btn btn-sm"
-                  onClick={() => handleDownload(file.id)}
-                >
-                  ダウンロード
-                </button>
-                <button
-                  className="btn btn-sm btn-danger"
-                  onClick={() => handleDelete(file.id)}
-                >
-                  削除
-                </button>
-              </div>
+      <div className="contents-body">
+        {/* フォルダツリー */}
+        <div className="folder-tree">
+          <h2>フォルダ</h2>
+          <div className="folder-list">
+            <div 
+              className={`folder-item ${!selectedFolder ? 'active' : ''}`}
+              onClick={handleShowAllFiles}
+            >
+              📁 すべてのファイル
             </div>
-          ))}
+            {folders.map((folder) => (
+              <div key={folder.id} className="folder-item-container">
+                <div
+                  className={`folder-item ${selectedFolder?.id === folder.id ? 'active' : ''}`}
+                  onClick={() => handleFolderClick(folder)}
+                >
+                  📂 {folder.folderName}
+                  {folder.fileCount > 0 && (
+                    <span className="file-count">({folder.fileCount})</span>
+                  )}
+                </div>
+                <button
+                  className="btn-icon btn-danger"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteFolder(folder.id);
+                  }}
+                  title="削除"
+                >
+                  🗑️
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ファイル一覧 */}
+        <div className="files-section">
+          <h2>
+            {selectedFolder ? `${selectedFolder.folderName}のファイル` : 'すべてのファイル'}
+          </h2>
+          
+          {files.length === 0 ? (
+            <div className="empty-state">
+              <p>ファイルがありません</p>
+            </div>
+          ) : (
+            <div className="file-list">
+              {files.map((file) => (
+                <div key={file.id} className="file-card">
+                  <div className="file-icon">
+                    {contentService.getFileIcon(file.fileType)}
+                  </div>
+                  <div className="file-details">
+                    <div className="file-name">{file.fileName}</div>
+                    <div className="file-meta">
+                      {contentService.formatFileSize(file.fileSize)} • 
+                      {new Date(file.uploadedAt).toLocaleDateString('ja-JP')} • 
+                      {file.uploadedBy}
+                    </div>
+                    {file.description && (
+                      <div className="file-description">{file.description}</div>
+                    )}
+                  </div>
+                  <div className="file-actions">
+                    <button
+                      className="btn btn-sm"
+                      onClick={() => handleDownload(file)}
+                    >
+                      ダウンロード
+                    </button>
+                    <button
+                      className="btn btn-sm btn-danger"
+                      onClick={() => handleDeleteFile(file.id)}
+                    >
+                      削除
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -263,14 +371,30 @@ const Contents = () => {
                 />
               </div>
 
+              <div className="form-group">
+                <label>説明</label>
+                <textarea
+                  value={folderDescription}
+                  onChange={(e) => setFolderDescription(e.target.value)}
+                  placeholder="フォルダの説明を入力してください"
+                  rows="3"
+                />
+              </div>
+
+              {selectedFolder && (
+                <div className="info-message">
+                  作成先: {selectedFolder.folderName}
+                </div>
+              )}
+
               {error && <div className="error-message">{error}</div>}
 
               <div className="modal-actions">
                 <button type="button" className="btn" onClick={handleCloseModal}>
                   キャンセル
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  作成
+                <button type="submit" className="btn btn-primary" disabled={loading}>
+                  {loading ? '作成中...' : '作成'}
                 </button>
               </div>
             </form>
@@ -298,7 +422,7 @@ const Contents = () => {
                     <ul>
                       {selectedFiles.map((file, index) => (
                         <li key={index}>
-                          {file.name} ({formatFileSize(file.size)})
+                          {file.name} ({contentService.formatFileSize(file.size)})
                         </li>
                       ))}
                     </ul>
@@ -306,14 +430,26 @@ const Contents = () => {
                 )}
               </div>
 
+              {selectedFolder && (
+                <div className="info-message">
+                  アップロード先: {selectedFolder.folderName}
+                </div>
+              )}
+
+              {!selectedFolder && (
+                <div className="warning-message">
+                  ⚠️ フォルダを選択してください
+                </div>
+              )}
+
               {error && <div className="error-message">{error}</div>}
 
               <div className="modal-actions">
                 <button type="button" className="btn" onClick={handleCloseModal}>
                   キャンセル
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  アップロード
+                <button type="submit" className="btn btn-primary" disabled={loading}>
+                  {loading ? 'アップロード中...' : 'アップロード'}
                 </button>
               </div>
             </form>
