@@ -164,12 +164,13 @@ const Contents = () => {
 
       await contentService.createFolder(folderData);
 
-      // フォルダリストを再取得
+      // 左のフォルダツリーは常にルートフォルダーを表示
+      await fetchRootFolders();
+
+      // サブフォルダーを作成した場合は、サブフォルダーリストも更新
       if (selectedFolder) {
-        const data = await contentService.getSubFolders(selectedFolder.id);
-        setFolders(data);
-      } else {
-        await fetchRootFolders();
+        const subFoldersData = await contentService.getSubFolders(selectedFolder.id);
+        setSubFolders(subFoldersData);
       }
 
       handleCloseModal();
