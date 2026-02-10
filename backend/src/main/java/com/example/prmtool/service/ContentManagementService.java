@@ -24,6 +24,7 @@ public class ContentManagementService {
   private final ContentFileRepository fileRepository;
   private final ContentDownloadHistoryRepository downloadHistoryRepository;
   private final UserRepository userRepository;
+  private final FavoriteFolderRepository favoriteFolderRepository;
 
   // ========================================
   // フォルダ管理
@@ -258,10 +259,114 @@ public class ContentManagementService {
   }
 
   // ========================================
+  // お気に入りフォルダー管理
+  // ========================================
+
+  /**
+   * お気に入りフォルダー一覧を取得
+   * ユーザーごとのお気に入り登録されたフォルダーを取得
+   */
+  @Transactional(readOnly = true)
+  public List<ContentFolderResponse> getFavoriteFolders(UUID userId) {
+    List<FavoriteFolder> favorites = favoriteFolderRepository.findByUserIdOrderByCreatedAtDesc(userId);
+
+    return favorites.stream()
+        .map(fav -> convertFolderToResponse(fav.getFolder()))
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * お気に入りフォルダーを追加
+   * 最大10個まで登録可能
+   * 
+   * @param folderId お気に入りに追加するフォルダーID
+   * @param userId   ログイン中のユーザーID
+   * @throws RuntimeException 最大数を超えた場合、または既に登録済みの場合
+   */
+  @Transactional
+  public void addFavoriteFolder(UUID folderId, UUID userId) {
+    // 既に登録済みかチェック
+    if (favoriteFolderRepository.existsByUserIdAndFolderId(userId, folderId)) {
+      throw new RuntimeException("このフォルダーは既にお気に入りに登録されています");
+    }
+
+    // 最大10個制限チェック
+    long count = favoriteFolderRepository.countByUserId(userId);
+    if (count >= 10) {
+      throw new RuntimeException("お気に入りフォルダーは最大10個までです");
+    }
+
+    // ユーザーとフォルダーの存在チェック
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + userId));
+
+    ContentFolder folder = folderRepository.findById(folderId)
+        .orElseThrow(() -> new RuntimeException("フォルダーが見つかりません: " + folderId));
+
+    // お気に入り登録
+    FavoriteFolder favorite = FavoriteFolder.builder()
+        .user(user)
+        .folder(folder)
+        .build();
+
+    favoriteFolderRepository.save(favorite);
+  }
+
+  /**
+   * お気に入りフォルダーを削除
+   * 
+   * @param folderId お気に入りから削除するフォルダーID
+   * @param userId   ログイン中のユーザーID
+   * @throws RuntimeException お気に入りが見つからない場合
+   */
+  @Transactional
+  public void removeFavoriteFolder(UUID folderId, UUID userId) {
+    FavoriteFolder favorite = favoriteFolderRepository.findByUserIdAndFolderId(userId, folderId)
+        .orElseThrow(() -> new RuntimeException("お気に入りが見つかりません"));
+
+    favoriteFolderRepository.delete(favorite);
+  }
+
+  /**
+   * フォルダーがお気に入り登録されているか確認
+   * 
+   * @param folderId チェックするフォルダーID
+   * @param userId   ログイン中のユーザーID
+   * @return お気に入り登録されている場合true
+   */
+  @Transactional(readOnly = true)
+  public boolean isFavoriteFolder(UUID folderId, UUID userId) {
+    return favoriteFolderRepository.existsByUserIdAndFolderId(userId, folderId);
+  }
+
+  // ========================================
   // 変換メソッド
   // ========================================
 
+  /**
+   * フォルダーエンティティをレスポンスDTOに変換
+   * オーバーロード: お気に入りフラグを含めない場合
+   */
   private ContentFolderResponse convertFolderToResponse(ContentFolder folder) {
+    return convertFolderToResponse(folder, null);
+  }
+
+  /**
+   * フォルダーエンティティをレスポンスDTOに変換
+   * オーバーロード: お気に入りフラグを含める場合
+   * 
+   * @param folder フォルダーエンティティ
+   * @param userId ログイン中のユーザーID（nullの場合はisFavoriteをfalseに設定）
+   * @return フォルダーレスポンスDTO
+   */
+  private ContentFolderResponse convertFolderToResponse(ContentFolder folder, UUID userId) {
+    Boolean isFavorite = false;
+
+    // userIdが指定されている場合、お気に入りチェック
+    if (userId != null) {
+      isFavorite = favoriteFolderRepository.existsByUserIdAndFolderId(userId, folder.getId());
+    }
+
     return ContentFolderResponse.builder()
         .id(folder.getId())
         .folderName(folder.getFolderName())
@@ -271,6 +376,7 @@ public class ContentManagementService {
         .createdBy(folder.getCreatedBy().getName())
         .createdAt(folder.getCreatedAt())
         .updatedAt(folder.getUpdatedAt())
+        .isFavorite(isFavorite)
         .build();
   }
 

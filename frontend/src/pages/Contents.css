@@ -425,3 +425,217 @@
     width: 100%;
   }
 }
+
+/* ========================================
+   サブフォルダー表示エリア
+   ======================================== */
+
+.sub-folders-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.sub-folders-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.sub-folder-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.sub-folder-card {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.sub-folder-card:hover {
+  border-color: #3498db;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.sub-folder-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+.sub-folder-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.sub-folder-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.sub-folder-details h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sub-folder-description {
+  margin: 0.25rem 0;
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sub-folder-card .file-count {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background-color: #ecf0f1;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+.sub-folder-card .btn-icon {
+  flex-shrink: 0;
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+.sub-folder-card:hover .btn-icon {
+  opacity: 1;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .sub-folder-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========================================
+   パンくずリスト
+   ======================================== */
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0 1rem 0;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.breadcrumb-item {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.breadcrumb-item:not(.current):hover {
+  color: #3498db;
+  text-decoration: underline;
+}
+
+.breadcrumb-item.current {
+  font-weight: bold;
+  color: #2c3e50;
+  cursor: default;
+}
+
+.breadcrumb-separator {
+  color: #999;
+  font-weight: bold;
+}
+
+/* ========================================
+   ファイルヘッダー（お気に入りボタン含む）
+   ======================================== */
+
+.files-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.files-header h2 {
+  margin: 0;
+}
+
+/* お気に入りボタン */
+.btn-favorite {
+  padding: 0.6rem 1.2rem;
+  border: 2px solid #f39c12;
+  border-radius: 6px;
+  background-color: white;
+  color: #f39c12;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-favorite:hover {
+  background-color: #f39c12;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(243, 156, 18, 0.3);
+}
+
+.btn-favorite.active {
+  background-color: #f39c12;
+  color: white;
+  border-color: #e67e22;
+}
+
+.btn-favorite.active:hover {
+  background-color: #e67e22;
+  border-color: #d35400;
+}
+
+/* ========================================
+   フォルダーセクション区切り線
+   ======================================== */
+
+.folder-section-divider {
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 1rem 0;
+}
+
+.folder-section-title {
+  margin: 0.5rem 0;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #7f8c8d;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+/* お気に入りフォルダーのスタイル調整 */
+.folder-section-title+.folder-item-container {
+  margin-top: 0.5rem;
+}

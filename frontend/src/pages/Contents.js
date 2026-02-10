@@ -9,27 +9,36 @@ import contentService from '../services/contentService';
 const Contents = () => {
   // フォルダリスト
   const [folders, setFolders] = useState([]);
-  
+
   // ファイルリスト
   const [files, setFiles] = useState([]);
-  
+
   // 現在選択されているフォルダ
   const [selectedFolder, setSelectedFolder] = useState(null);
-  
+
+  // 現在選択中のフォルダーのサブフォルダー（1階層下）
+  const [subFolders, setSubFolders] = useState([]);
+
+  // お気に入りフォルダー一覧
+  const [favoriteFolders, setFavoriteFolders] = useState([]);
+
+  // パンくずリスト（フォルダー階層）
+  const [breadcrumbs, setBreadcrumbs] = useState([{ id: null, name: 'ホーム' }]);
+
   // モーダルの表示状態
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  
+
   // フォルダ作成フォーム
   const [folderName, setFolderName] = useState('');
   const [folderDescription, setFolderDescription] = useState('');
-  
+
   // ファイルアップロード
   const [selectedFiles, setSelectedFiles] = useState([]);
-  
+
   // エラーメッセージ
   const [error, setError] = useState('');
-  
+
   // ローディング状態
   const [loading, setLoading] = useState(false);
 
@@ -37,6 +46,7 @@ const Contents = () => {
   useEffect(() => {
     fetchRootFolders();
     fetchAllFiles();
+    fetchFavoriteFolders();
   }, []);
 
   // ルートフォルダを取得
@@ -67,21 +77,52 @@ const Contents = () => {
     }
   };
 
+  // お気に入りフォルダーを取得
+  const fetchFavoriteFolders = async () => {
+    try {
+      const data = await contentService.getFavoriteFolders();
+      setFavoriteFolders(data);
+    } catch (err) {
+      console.error('お気に入りフォルダーの取得に失敗しました', err);
+    }
+  };
+
   // フォルダをクリックした時の処理
+  // そのフォルダー内のファイルとサブフォルダーを取得
   const handleFolderClick = async (folder) => {
     setSelectedFolder(folder);
+    setLoading(true);
+
+    // パンくずリストを更新
+    // 現在は1階層のみ表示（APIに親フォルダー情報がないため）
+    setBreadcrumbs([
+      { id: null, name: 'ホーム' },
+      { id: folder.id, name: folder.folderName }
+    ]);
+
     try {
-      const data = await contentService.getFilesByFolder(folder.id);
-      setFiles(data);
+      // ファイル一覧を取得
+      const filesData = await contentService.getFilesByFolder(folder.id);
+      setFiles(filesData);
+
+      // サブフォルダー一覧を取得
+      const subFoldersData = await contentService.getSubFolders(folder.id);
+      setSubFolders(subFoldersData);
+
+      setError('');
     } catch (err) {
       setError('ファイルの取得に失敗しました');
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   // 全ファイルボタンをクリック
   const handleShowAllFiles = () => {
     setSelectedFolder(null);
+    setSubFolders([]);
+    setBreadcrumbs([{ id: null, name: 'ホーム' }]);
     fetchAllFiles();
   };
 
@@ -110,7 +151,7 @@ const Contents = () => {
   // フォルダ作成
   const handleCreateFolder = async (e) => {
     e.preventDefault();
-    
+
     try {
       setLoading(true);
       setError('');
@@ -122,7 +163,7 @@ const Contents = () => {
       };
 
       await contentService.createFolder(folderData);
-      
+
       // フォルダリストを再取得
       if (selectedFolder) {
         const data = await contentService.getSubFolders(selectedFolder.id);
@@ -201,7 +242,7 @@ const Contents = () => {
     try {
       setLoading(true);
       await contentService.deleteFile(fileId);
-      
+
       // ファイルリストを再取得
       if (selectedFolder) {
         const data = await contentService.getFilesByFolder(selectedFolder.id);
@@ -226,20 +267,87 @@ const Contents = () => {
     try {
       setLoading(true);
       await contentService.deleteFolder(folderId);
-      
+
       // フォルダリストを再取得
       await fetchRootFolders();
-      
+
       // 削除したフォルダが選択中だった場合はクリア
       if (selectedFolder && selectedFolder.id === folderId) {
         setSelectedFolder(null);
         await fetchAllFiles();
+      }
+
+      // サブフォルダーリストも再取得
+      if (selectedFolder) {
+        const subFoldersData = await contentService.getSubFolders(selectedFolder.id);
+        setSubFolders(subFoldersData);
       }
     } catch (err) {
       setError(err.response?.data?.message || 'フォルダの削除に失敗しました');
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // サブフォルダーをクリックした時の処理
+  // そのサブフォルダーに移動する
+  const handleSubFolderClick = async (subFolder) => {
+    await handleFolderClick(subFolder);
+  };
+
+  // お気に入り登録/解除
+  const handleToggleFavorite = async (folder) => {
+    try {
+      setLoading(true);
+
+      if (folder.isFavorite) {
+        // お気に入りから削除
+        await contentService.removeFavoriteFolder(folder.id);
+      } else {
+        // お気に入りに追加
+        // 最大10個チェック
+        if (favoriteFolders.length >= 10) {
+          setError('お気に入りフォルダーは最大10個までです');
+          setLoading(false);
+          return;
+        }
+        await contentService.addFavoriteFolder(folder.id);
+      }
+
+      // お気に入りリストを再取得
+      await fetchFavoriteFolders();
+
+      // 現在のフォルダーリストも再取得（isFavoriteフラグ更新のため）
+      if (selectedFolder) {
+        const subFoldersData = await contentService.getSubFolders(selectedFolder.id);
+        setSubFolders(subFoldersData);
+      } else {
+        await fetchRootFolders();
+      }
+
+      // 選択中のフォルダーのisFavoriteフラグも更新
+      if (selectedFolder && selectedFolder.id === folder.id) {
+        setSelectedFolder({ ...selectedFolder, isFavorite: !folder.isFavorite });
+      }
+
+      setError('');
+    } catch (err) {
+      setError(err.response?.data?.message || 'お気に入りの更新に失敗しました');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // パンくずリストのクリックハンドラー
+  const handleBreadcrumbClick = (crumb) => {
+    if (crumb.id === null) {
+      // ホームをクリック
+      handleShowAllFiles();
+    } else {
+      // 特定のフォルダーをクリック（現在は機能しない）
+      // 理由: APIに親フォルダー情報が含まれていないため、階層を遡れない
     }
   };
 
@@ -252,8 +360,8 @@ const Contents = () => {
           <button className="btn btn-primary" onClick={handleOpenFolderModal}>
             フォルダ作成
           </button>
-          <button 
-            className="btn btn-primary" 
+          <button
+            className="btn btn-primary"
             onClick={handleOpenUploadModal}
             disabled={!selectedFolder}
           >
@@ -273,7 +381,7 @@ const Contents = () => {
         <div className="folder-tree">
           <h2>フォルダ</h2>
           <div className="folder-list">
-            <div 
+            <div
               className={`folder-item ${!selectedFolder ? 'active' : ''}`}
               onClick={handleShowAllFiles}
             >
@@ -302,15 +410,101 @@ const Contents = () => {
                 </button>
               </div>
             ))}
+
+            {/* お気に入りフォルダーセクション */}
+            {favoriteFolders.length > 0 && (
+              <>
+                <div className="folder-section-divider"></div>
+                <h3 className="folder-section-title">⭐ お気に入り</h3>
+                {favoriteFolders.map((folder) => (
+                  <div key={folder.id} className="folder-item-container">
+                    <div
+                      className={`folder-item ${selectedFolder?.id === folder.id ? 'active' : ''}`}
+                      onClick={() => handleFolderClick(folder)}
+                    >
+                      📂 {folder.folderName}
+                      {folder.fileCount > 0 && (
+                        <span className="file-count">({folder.fileCount})</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         </div>
 
         {/* ファイル一覧 */}
         <div className="files-section">
-          <h2>
-            {selectedFolder ? `${selectedFolder.folderName}のファイル` : 'すべてのファイル'}
-          </h2>
-          
+          {/* パンくずリスト */}
+          <div className="breadcrumbs">
+            {breadcrumbs.map((crumb, index) => (
+              <React.Fragment key={crumb.id || 'home'}>
+                {index > 0 && <span className="breadcrumb-separator">›</span>}
+                <span
+                  className={`breadcrumb-item ${index === breadcrumbs.length - 1 ? 'current' : ''
+                    }`}
+                  onClick={() => index < breadcrumbs.length - 1 && handleBreadcrumbClick(crumb)}
+                >
+                  {crumb.name}
+                </span>
+              </React.Fragment>
+            ))}
+          </div>
+
+          <div className="files-header">
+            <h2>
+              {selectedFolder ? `${selectedFolder.folderName}のファイル` : 'すべてのファイル'}
+            </h2>
+
+            {/* お気に入りボタン */}
+            {selectedFolder && (
+              <button
+                className={`btn-favorite ${selectedFolder.isFavorite ? 'active' : ''}`}
+                onClick={() => handleToggleFavorite(selectedFolder)}
+                title={selectedFolder.isFavorite ? 'お気に入りから削除' : 'お気に入りに追加'}
+              >
+                {selectedFolder.isFavorite ? '⭐ お気に入り解除' : '☆ お気に入りに追加'}
+              </button>
+            )}
+          </div>
+
+          {/* サブフォルダー表示エリア */}
+          {selectedFolder && subFolders.length > 0 && (
+            <div className="sub-folders-section">
+              <h3>📂 サブフォルダー</h3>
+              <div className="sub-folder-grid">
+                {subFolders.map((subFolder) => (
+                  <div key={subFolder.id} className="sub-folder-card">
+                    <div
+                      className="sub-folder-info"
+                      onClick={() => handleSubFolderClick(subFolder)}
+                    >
+                      <div className="sub-folder-icon">📂</div>
+                      <div className="sub-folder-details">
+                        <h4>{subFolder.folderName}</h4>
+                        {subFolder.description && (
+                          <p className="sub-folder-description">{subFolder.description}</p>
+                        )}
+                        <span className="file-count">{subFolder.fileCount} ファイル</span>
+                      </div>
+                    </div>
+                    <button
+                      className="btn-icon btn-danger"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteFolder(subFolder.id);
+                      }}
+                      title="削除"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {files.length === 0 ? (
             <div className="empty-state">
               <p>ファイルがありません</p>
@@ -325,8 +519,8 @@ const Contents = () => {
                   <div className="file-details">
                     <div className="file-name">{file.fileName}</div>
                     <div className="file-meta">
-                      {contentService.formatFileSize(file.fileSize)} • 
-                      {new Date(file.uploadedAt).toLocaleDateString('ja-JP')} • 
+                      {contentService.formatFileSize(file.fileSize)} •
+                      {new Date(file.uploadedAt).toLocaleDateString('ja-JP')} •
                       {file.uploadedBy}
                     </div>
                     {file.description && (

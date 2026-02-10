@@ -284,4 +284,62 @@ public class ContentManagementController {
     service.recordDownload(id, user.getId(), ipAddress);
     return ResponseEntity.ok().build();
   }
+
+  // ========================================
+  // お気に入りフォルダー管理
+  // ========================================
+
+  /**
+   * お気に入りフォルダー一覧を取得
+   * 権限: ADMIN, ACCOUNTING, REP
+   */
+  @GetMapping("/folders/favorites")
+  @PreAuthorize("hasAnyRole('ADMIN', 'ACCOUNTING', 'REP')")
+  public ResponseEntity<List<ContentFolderResponse>> getFavoriteFolders(Authentication authentication) {
+    // ログインIDからユーザーを取得
+    String loginId = authentication.getName();
+    User user = userRepository.findByLoginId(loginId)
+        .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + loginId));
+
+    List<ContentFolderResponse> folders = service.getFavoriteFolders(user.getId());
+    return ResponseEntity.ok(folders);
+  }
+
+  /**
+   * お気に入りフォルダーに追加
+   * 権限: ADMIN, ACCOUNTING, REP
+   */
+  @PostMapping("/folders/{id}/favorite")
+  @PreAuthorize("hasAnyRole('ADMIN', 'ACCOUNTING', 'REP')")
+  public ResponseEntity<Void> addFavoriteFolder(
+      @PathVariable UUID id,
+      Authentication authentication) {
+
+    // ログインIDからユーザーを取得
+    String loginId = authentication.getName();
+    User user = userRepository.findByLoginId(loginId)
+        .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + loginId));
+
+    service.addFavoriteFolder(id, user.getId());
+    return ResponseEntity.status(HttpStatus.CREATED).build();
+  }
+
+  /**
+   * お気に入りフォルダーから削除
+   * 権限: ADMIN, ACCOUNTING, REP
+   */
+  @DeleteMapping("/folders/{id}/favorite")
+  @PreAuthorize("hasAnyRole('ADMIN', 'ACCOUNTING', 'REP')")
+  public ResponseEntity<Void> removeFavoriteFolder(
+      @PathVariable UUID id,
+      Authentication authentication) {
+
+    // ログインIDからユーザーを取得
+    String loginId = authentication.getName();
+    User user = userRepository.findByLoginId(loginId)
+        .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + loginId));
+
+    service.removeFavoriteFolder(id, user.getId());
+    return ResponseEntity.noContent().build();
+  }
 }

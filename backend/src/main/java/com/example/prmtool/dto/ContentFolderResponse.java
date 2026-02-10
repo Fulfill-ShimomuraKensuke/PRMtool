@@ -9,8 +9,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * コンテンツフォルダレスポンスDTO
- * フォルダ情報を返却する際に使用
+ * コンテンツフォルダーレスポンスDTO
  */
 @Data
 @NoArgsConstructor
@@ -18,43 +17,18 @@ import java.util.UUID;
 @Builder
 public class ContentFolderResponse {
 
-  /**
-   * フォルダID
-   */
   private UUID id;
-
-  /**
-   * フォルダ名
-   */
   private String folderName;
-
-  /**
-   * フォルダの説明
-   */
   private String description;
-
-  /**
-   * 親フォルダID
-   */
   private UUID parentFolderId;
-
-  /**
-   * フォルダ内のファイル数
-   */
   private Integer fileCount;
-
-  /**
-   * 作成者名
-   */
   private String createdBy;
-
-  /**
-   * 作成日時
-   */
   private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
 
   /**
-   * 更新日時
+   * お気に入りフラグ
+   * ログイン中のユーザーがこのフォルダーをお気に入り登録しているかどうか
    */
-  private LocalDateTime updatedAt;
+  private Boolean isFavorite;
 }

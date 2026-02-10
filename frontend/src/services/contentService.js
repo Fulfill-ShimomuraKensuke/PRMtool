@@ -98,13 +98,13 @@ export const getFileById = async (fileId) => {
  */
 export const uploadFile = async (fileData) => {
   const formData = new FormData();
-  
+
   // ファイルを追加
   formData.append('file', fileData.file);
-  
+
   // フォルダIDを追加（必須）
   formData.append('folderId', fileData.folderId);
-  
+
   // オプション項目を追加
   if (fileData.title) {
     formData.append('title', fileData.title);
@@ -137,7 +137,7 @@ export const uploadMultipleFiles = async (filesData) => {
       tags: filesData.tags,
     });
   });
-  
+
   return await Promise.all(uploadPromises);
 };
 
@@ -192,11 +192,11 @@ export const recordDownload = async (fileId, ipAddress = null) => {
  */
 export const formatFileSize = (bytes) => {
   if (!bytes) return '0 Bytes';
-  
+
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 };
 
@@ -205,9 +205,9 @@ export const formatFileSize = (bytes) => {
  */
 export const getFileIcon = (fileType) => {
   if (!fileType) return '📄';
-  
+
   const type = fileType.toLowerCase();
-  
+
   if (type.includes('pdf')) return '📕';
   if (type.includes('word') || type.includes('document')) return '📘';
   if (type.includes('excel') || type.includes('spreadsheet')) return '📗';
@@ -217,8 +217,30 @@ export const getFileIcon = (fileType) => {
   if (type.includes('audio')) return '🎵';
   if (type.includes('zip') || type.includes('rar') || type.includes('7z')) return '📦';
   if (type.includes('text')) return '📝';
-  
+
   return '📄';
+};
+
+/**
+ * お気に入りフォルダー一覧を取得
+ */
+export const getFavoriteFolders = async () => {
+  const response = await api.get('/api/contents/folders/favorites');
+  return response.data;
+};
+
+/**
+ * フォルダーをお気に入りに追加
+ */
+export const addFavoriteFolder = async (folderId) => {
+  await api.post(`/api/contents/folders/${folderId}/favorite`);
+};
+
+/**
+ * フォルダーをお気に入りから削除
+ */
+export const removeFavoriteFolder = async (folderId) => {
+  await api.delete(`/api/contents/folders/${folderId}/favorite`);
 };
 
 const contentService = {
@@ -240,6 +262,10 @@ const contentService = {
   deleteFile,
   downloadFile,
   recordDownload,
+  // お気に入り管理
+  getFavoriteFolders,
+  addFavoriteFolder,
+  removeFavoriteFolder,
   // ユーティリティ
   formatFileSize,
   getFileIcon,
