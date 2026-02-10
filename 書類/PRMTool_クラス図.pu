@@ -10,7 +10,7 @@ skinparam class {
     ArrowColor #1976D2
 }
 
-title PRM Tool システム 完全クラス図
+title PRM Tool システム 完全クラス図\n（コンテンツ管理機能を含む最新版）
 
 ' ========================================
 ' ユーザー管理エンティティ
@@ -378,6 +378,139 @@ package "請求書管理" {
 }
 
 ' ========================================
+' コンテンツ管理エンティティ（NEW!）
+' パートナーとの情報共有・ファイル管理を実現
+' ========================================
+package "コンテンツ管理" {
+    class ContentFolder <<Entity>> {
+        ' フォルダーの一意識別子
+        +id : UUID
+        ' フォルダー名
+        +folderName : String
+        ' フォルダーの説明
+        +description : String
+        ' 親フォルダー（階層構造を実現）
+        +parentFolder : ContentFolder
+        ' サブフォルダー（階層構造）
+        +subFolders : List<ContentFolder>
+        ' フォルダー内のファイル
+        +files : List<ContentFile>
+        ' 作成者
+        +createdBy : User
+        ' 作成日時
+        +createdAt : LocalDateTime
+        ' 更新日時
+        +updatedAt : LocalDateTime
+    }
+
+    class ContentFile <<Entity>> {
+        ' ファイルの一意識別子
+        +id : UUID
+        ' 所属フォルダー
+        +folder : ContentFolder
+        ' ファイル名
+        +fileName : String
+        ' ファイルパス（ストレージ上の実際のパス）
+        +filePath : String
+        ' ファイルサイズ（バイト）
+        +fileSize : Long
+        ' MIMEタイプ
+        +mimeType : String
+        ' ダウンロード回数
+        +downloadCount : Integer
+        ' 作成者
+        +createdBy : User
+        ' 作成日時
+        +createdAt : LocalDateTime
+        ' 更新日時
+        +updatedAt : LocalDateTime
+        ..
+        ' ダウンロード回数をインクリメント
+        +incrementDownloadCount() : void
+    }
+
+    class ContentShare <<Entity>> {
+        ' コンテンツ共有の一意識別子
+        +id : UUID
+        ' 共有対象のコンテンツ（ファイル）
+        +contentFile : ContentFile
+        ' 共有先パートナー（nullの場合は全パートナーに共有）
+        +sharedPartner : Partner
+        ' 共有メッセージ
+        +message : String
+        ' 有効期限
+        +expiresAt : LocalDateTime
+        ' ダウンロード制限回数（null=無制限）
+        +downloadLimit : Integer
+        ' 現在のダウンロード回数
+        +currentDownloadCount : Integer
+        ' 共有が有効かどうか
+        +isActive : Boolean
+        ' 作成者（共有したユーザー）
+        +createdBy : User
+        ' 作成日時
+        +createdAt : LocalDateTime
+        ' 更新日時
+        +updatedAt : LocalDateTime
+        ..
+        ' 共有が有効期限内かチェック
+        +isValid() : Boolean
+        ' ダウンロード可能かチェック
+        +canDownload() : Boolean
+        ' ダウンロード回数をインクリメント
+        +incrementDownloadCount() : void
+    }
+
+    class FavoriteFolder <<Entity>> {
+        ' お気に入りの一意識別子
+        +id : UUID
+        ' ユーザー
+        +user : User
+        ' お気に入りフォルダー
+        +folder : ContentFolder
+        ' お気に入り登録日時
+        +createdAt : LocalDateTime
+    }
+
+    class ContentDownloadHistory <<Entity>> {
+        ' ダウンロード履歴の一意識別子
+        +id : UUID
+        ' ダウンロードされたファイル
+        +contentFile : ContentFile
+        ' ダウンロードしたユーザー
+        +downloadedBy : User
+        ' ダウンロード日時
+        +downloadedAt : LocalDateTime
+    }
+
+    class ContentShareAccessHistory <<Entity>> {
+        ' アクセス履歴の一意識別子
+        +id : UUID
+        ' アクセスされた共有コンテンツ
+        +contentShare : ContentShare
+        ' アクセスしたパートナー
+        +accessedPartner : Partner
+        ' アクセス日時
+        +accessedAt : LocalDateTime
+    }
+
+    class SenderEmailAddress <<Entity>> {
+        ' 送信元メールアドレスの一意識別子
+        +id : UUID
+        ' メールアドレス
+        +emailAddress : String
+        ' 表示名
+        +displayName : String
+        ' デフォルトメールアドレスかどうか
+        +isDefault : Boolean
+        ' 作成日時
+        +createdAt : LocalDateTime
+        ' 更新日時
+        +updatedAt : LocalDateTime
+    }
+}
+
+' ========================================
 ' エンティティ間のリレーションシップ
 ' ========================================
 
@@ -437,6 +570,35 @@ InvoiceItem --> CommissionType : "applied type\n適用タイプ"
 
 ' テンプレートと作成者の関連（多対1）
 InvoiceTemplate "*" --> "1" User : "created by\n作成者"
+
+' コンテンツフォルダーの階層構造（自己参照）
+ContentFolder "0..1" <-- "0..*" ContentFolder : "parent folder\n親フォルダー"
+
+' フォルダーとファイルの関連（1対多、カスケード削除）
+ContentFolder "1" *-- "0..*" ContentFile : "contains files\nファイルを含む"
+
+' ファイルと共有の関連（1対多、カスケード削除）
+ContentFile "1" *-- "0..*" ContentShare : "shared as\n共有される"
+
+' 共有とパートナーの関連（多対1、オプショナル）
+ContentShare "*" --> "0..1" Partner : "shared with\n共有先パートナー"
+
+' ファイル・フォルダーと作成者の関連
+ContentFolder "*" --> "1" User : "created by\n作成者"
+ContentFile "*" --> "1" User : "created by\n作成者"
+ContentShare "*" --> "1" User : "created by\n作成者"
+
+' お気に入りフォルダーの関連
+FavoriteFolder "*" --> "1" User : "belongs to\nユーザー"
+FavoriteFolder "*" --> "1" ContentFolder : "favorites\nお気に入り"
+
+' ダウンロード履歴の関連
+ContentDownloadHistory "*" --> "1" ContentFile : "downloaded file\nダウンロードファイル"
+ContentDownloadHistory "*" --> "1" User : "downloaded by\nダウンロードユーザー"
+
+' アクセス履歴の関連
+ContentShareAccessHistory "*" --> "1" ContentShare : "accessed share\nアクセス共有"
+ContentShareAccessHistory "*" --> "1" Partner : "accessed by\nアクセスパートナー"
 
 ' ========================================
 ' 重要な注釈
@@ -506,6 +668,18 @@ note right of InvoiceTemplate
     下位互換性のため保持
 end note
 
+note right of ContentFolder
+  【コンテンツ管理】
+  パートナーとの情報共有機能
+  
+  - 階層構造のフォルダー管理
+  - ファイルのアップロード・ダウンロード
+  - パートナー別の共有設定
+  - 有効期限・ダウンロード制限
+  - お気に入り機能（最大10件）
+  - ダウンロード履歴・アクセス履歴
+end note
+
 ' ========================================
 ' データ型とアノテーション情報
 ' ========================================
@@ -533,6 +707,18 @@ note bottom of Partner
   
   カスケード:
   - contacts: CascadeType.ALL, orphanRemoval = true
+end note
+
+note bottom of ContentFolder
+  【コンテンツ管理の制約】
+  - お気に入りは1ユーザーあたり最大10件
+  - フォルダー削除時、サブフォルダーとファイルも削除
+  - ファイル削除時、関連する共有も削除
+  - 共有の有効期限チェックは自動実行
+  
+  カスケード:
+  - files: CascadeType.ALL, orphanRemoval = true
+  - subFolders: CascadeType.ALL, orphanRemoval = true
 end note
 
 @enduml
