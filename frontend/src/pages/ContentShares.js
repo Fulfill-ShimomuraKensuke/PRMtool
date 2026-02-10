@@ -63,7 +63,7 @@ const ContentShares = () => {
   // パートナー一覧を取得
   const fetchPartners = async () => {
     try {
-      const data = await partnerService.getPartners();
+      const data = await partnerService.getAll();
       setPartners(data);
     } catch (err) {
       console.error('パートナーの取得に失敗しました', err);
