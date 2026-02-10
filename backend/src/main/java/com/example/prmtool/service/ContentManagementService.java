@@ -367,6 +367,12 @@ public class ContentManagementService {
       isFavorite = favoriteFolderRepository.existsByUserIdAndFolderId(userId, folder.getId());
     }
 
+    // 親フォルダー情報を再帰的に構築
+    ContentFolderResponse.ParentFolderSummary parentFolderSummary = null;
+    if (folder.getParentFolder() != null) {
+      parentFolderSummary = buildParentFolderSummary(folder.getParentFolder());
+    }
+
     return ContentFolderResponse.builder()
         .id(folder.getId())
         .folderName(folder.getFolderName())
@@ -377,6 +383,31 @@ public class ContentManagementService {
         .createdAt(folder.getCreatedAt())
         .updatedAt(folder.getUpdatedAt())
         .isFavorite(isFavorite)
+        .parentFolder(parentFolderSummary)
+        .build();
+  }
+
+  /**
+   * 親フォルダー情報を再帰的に構築
+   * パンくずリスト用
+   * 
+   * @param folder 親フォルダー
+   * @return 親フォルダーの要約情報
+   */
+  private ContentFolderResponse.ParentFolderSummary buildParentFolderSummary(ContentFolder folder) {
+    if (folder == null) {
+      return null;
+    }
+
+    ContentFolderResponse.ParentFolderSummary parentOfParent = null;
+    if (folder.getParentFolder() != null) {
+      parentOfParent = buildParentFolderSummary(folder.getParentFolder());
+    }
+
+    return ContentFolderResponse.ParentFolderSummary.builder()
+        .id(folder.getId())
+        .folderName(folder.getFolderName())
+        .parentFolder(parentOfParent)
         .build();
   }
 

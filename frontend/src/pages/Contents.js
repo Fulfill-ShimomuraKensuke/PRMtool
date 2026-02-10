@@ -93,12 +93,9 @@ const Contents = () => {
     setSelectedFolder(folder);
     setLoading(true);
 
-    // パンくずリストを更新
-    // 現在は1階層のみ表示（APIに親フォルダー情報がないため）
-    setBreadcrumbs([
-      { id: null, name: 'ホーム' },
-      { id: folder.id, name: folder.folderName }
-    ]);
+    // パンくずリストを構築（親フォルダー情報から階層を遡る）
+    const crumbs = buildBreadcrumbs(folder);
+    setBreadcrumbs(crumbs);
 
     try {
       // ファイル一覧を取得
@@ -297,6 +294,48 @@ const Contents = () => {
     await handleFolderClick(subFolder);
   };
 
+  /**
+   * パンくずリストを構築
+   * 親フォルダー情報から階層を遡って完全なパンくずリストを作成
+   * 深い階層の場合は省略表示（最上位 + ... + 現在から2つ上まで）
+   * 
+   * @param {Object} folder - 現在のフォルダー
+   * @returns {Array} パンくずリストの配列
+   */
+  const buildBreadcrumbs = (folder) => {
+    if (!folder) {
+      return [{ id: null, name: 'ホーム' }];
+    }
+
+    const crumbs = [];
+    let current = folder;
+
+    // 親フォルダーを遡って階層を構築
+    while (current) {
+      crumbs.unshift({
+        id: current.id,
+        name: current.folderName
+      });
+      current = current.parentFolder;
+    }
+
+    // 最上位に「ホーム」を追加
+    crumbs.unshift({ id: null, name: 'ホーム' });
+
+    // 階層が深い場合は省略表示
+    // 表示ルール: ホーム + ... + 現在から2つ上まで
+    // 例: ホーム > ... > 東京 > 23区 > 港区
+    if (crumbs.length > 4) {
+      return [
+        crumbs[0],                    // ホーム
+        { id: '...', name: '...' },   // 省略記号
+        ...crumbs.slice(-3)           // 最後の3つ（現在から2つ上まで）
+      ];
+    }
+
+    return crumbs;
+  };
+
   // お気に入り登録/解除
   const handleToggleFavorite = async (folder) => {
     try {
@@ -342,13 +381,28 @@ const Contents = () => {
   };
 
   // パンくずリストのクリックハンドラー
-  const handleBreadcrumbClick = (crumb) => {
+  const handleBreadcrumbClick = async (crumb) => {
+    // 省略記号（...）はクリック不可
+    if (crumb.id === '...') {
+      return;
+    }
+
     if (crumb.id === null) {
       // ホームをクリック
       handleShowAllFiles();
     } else {
-      // 特定のフォルダーをクリック（現在は機能しない）
-      // 理由: APIに親フォルダー情報が含まれていないため、階層を遡れない
+      // 特定のフォルダーをクリック
+      // フォルダー情報をAPIから取得してから移動
+      try {
+        setLoading(true);
+        const folderData = await contentService.getFolderById(crumb.id);
+        await handleFolderClick(folderData);
+      } catch (err) {
+        setError('フォルダーの取得に失敗しました');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -443,9 +497,10 @@ const Contents = () => {
               <React.Fragment key={crumb.id || 'home'}>
                 {index > 0 && <span className="breadcrumb-separator">›</span>}
                 <span
-                  className={`breadcrumb-item ${index === breadcrumbs.length - 1 ? 'current' : ''
+                  className={`breadcrumb-item ${crumb.id === '...' ? 'ellipsis' : ''
+                    } ${index === breadcrumbs.length - 1 ? 'current' : ''
                     }`}
-                  onClick={() => index < breadcrumbs.length - 1 && handleBreadcrumbClick(crumb)}
+                  onClick={() => crumb.id !== '...' && index < breadcrumbs.length - 1 && handleBreadcrumbClick(crumb)}
                 >
                   {crumb.name}
                 </span>

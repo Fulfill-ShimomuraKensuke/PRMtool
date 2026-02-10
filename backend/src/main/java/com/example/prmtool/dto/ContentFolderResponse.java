@@ -31,4 +31,23 @@ public class ContentFolderResponse {
    * ログイン中のユーザーがこのフォルダーをお気に入り登録しているかどうか
    */
   private Boolean isFavorite;
+
+  /**
+   * 親フォルダー情報（階層構造のナビゲーション用）
+   */
+  private ParentFolderSummary parentFolder;
+
+  /**
+   * 親フォルダーの要約情報
+   * パンくずリスト構築用
+   */
+  @Data
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  public static class ParentFolderSummary {
+    private UUID id;
+    private String folderName;
+    private ParentFolderSummary parentFolder;
+  }
 }
