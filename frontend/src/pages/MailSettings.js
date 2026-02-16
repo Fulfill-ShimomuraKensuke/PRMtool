@@ -322,7 +322,7 @@ const MailSettings = () => {
 
       {/* 送信元アドレス追加/編集モーダル */}
       {showModal && (
-        <div className="modal-overlay" onClick={handleCloseModal}>
+        <div className="modal-overlay">
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h3>{editingEmail ? '送信元アドレス編集' : '送信元アドレス追加'}</h3>
 
