@@ -79,8 +79,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: shimomura-kensuke@fulfill-group.co.jp  # Gmailアドレス
-    password: xlxhfndpzuyqhmom      # Googleアプリパスワード
+    username: simomura3109@gmail.com  # Gmailアドレス
+    password: jxfietvnurzlcvtq    # Googleアプリパスワード
     properties:
       mail:
         smtp:

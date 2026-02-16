@@ -2,81 +2,69 @@
 
 .invoices-container {
   padding: 2rem;
-  max-width: 1400px;
+  max-width: 100%;
   margin: 0 auto;
 }
 
-.invoices-header {
+.page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
 }
 
-.invoices-header h1 {
+.page-header h1 {
   font-size: 2rem;
   color: #333;
   margin: 0;
 }
 
-/* フィルターセクション */
-.filter-section {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
-}
-
-.filters {
+.header-actions {
   display: flex;
   gap: 1rem;
-  flex-wrap: wrap;
-  align-items: center;
 }
 
-.filter-select {
+/* フィルターセクション */
+.filters {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  align-items: center;
+  background: #f8f9fa;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-group label {
+  font-weight: 500;
+  color: #555;
+  white-space: nowrap;
+}
+
+.filter-group select {
   padding: 0.5rem 1rem;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 0.95rem;
   background: white;
   cursor: pointer;
-  min-width: 200px;
-}
-
-.filter-select:focus {
-  outline: none;
-  border-color: #007bff;
-}
-
-.btn-clear-filters {
-  padding: 0.5rem 1rem;
-  background: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  transition: background 0.2s;
-}
-
-.btn-clear-filters:hover {
-  background: #5a6268;
-}
-
-.search-results-info {
-  margin-top: 1rem;
-  color: #666;
-  font-size: 0.9rem;
+  min-width: 180px;
 }
 
 /* ステータスバッジ */
 .status-badge {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
+  padding: 0.35rem 0.75rem;
   border-radius: 12px;
   font-size: 0.875rem;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .status-draft {
@@ -100,118 +88,171 @@
 }
 
 /* テーブルスタイル */
-.invoices-table {
-  width: 100% !important;
-  border-collapse: collapse !important;
-  background: white !important;
-  border-radius: 8px !important;
-  overflow: hidden !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  table-layout: auto;
 }
 
-.invoices-table thead {
+.data-table thead {
   background-color: #f9fafb;
 }
 
-.invoices-table th {
-  padding: 1rem;
+.data-table th {
+  padding: 1rem 0.75rem;
   text-align: left;
   font-weight: 600;
   color: #374151;
   font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  white-space: nowrap;
 }
 
-.invoices-table td {
-  padding: 1rem;
+.data-table td {
+  padding: 0.75rem;
   border-top: 1px solid #e5e7eb;
   color: #1f2937;
+  vertical-align: middle;
 }
 
-.invoices-table tbody tr:hover {
+.data-table tbody tr:hover {
   background-color: #f9fafb;
 }
 
-/* ===== PDF列のスタイル（青系） ===== */
-.pdf-actions {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 8px !important;
-  padding: 8px !important;
-  align-items: stretch !important;
-  vertical-align: middle !important;
+/* 列幅の調整 */
+.data-table th:nth-child(1),
+.data-table td:nth-child(1) {
+  width: 10%;
+  min-width: 120px;
 }
 
-/* PDFプレビューボタン */
-.btn-pdf-preview {
-  padding: 6px 12px;
-  background: #3498db;
-  color: white;
+.data-table th:nth-child(2),
+.data-table td:nth-child(2) {
+  width: 12%;
+  min-width: 100px;
+}
+
+.data-table th:nth-child(3),
+.data-table td:nth-child(3),
+.data-table th:nth-child(4),
+.data-table td:nth-child(4) {
+  width: 8%;
+  min-width: 95px;
+}
+
+.data-table th:nth-child(5),
+.data-table td:nth-child(5) {
+  width: 10%;
+  min-width: 100px;
+  text-align: right;
+}
+
+.data-table th:nth-child(6),
+.data-table td:nth-child(6) {
+  width: 8%;
+  min-width: 85px;
+}
+
+.data-table th:nth-child(7),
+.data-table td:nth-child(7),
+.data-table th:nth-child(8),
+.data-table td:nth-child(8) {
+  width: 10%;
+  min-width: 120px;
+}
+
+.data-table th:nth-child(9),
+.data-table td:nth-child(9) {
+  width: 12%;
+  min-width: 140px;
+}
+
+/* PDF・メール操作ボタン共通スタイル */
+.table-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 0.35rem;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+/* 小さいボタン共通スタイル */
+.btn-preview,
+.btn-download,
+.btn-email,
+.btn-history,
+.btn-edit,
+.btn-delete {
+  padding: 0.4rem 0.7rem;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 13px;
-  transition: background 0.3s;
+  font-size: 0.8rem;
+  transition: all 0.2s;
   white-space: nowrap;
-  display: block;
-  width: 100%;
-  text-align: center;
+  display: inline-block;
+  font-weight: 500;
 }
 
-.btn-pdf-preview:hover {
+/* PDFプレビューボタン */
+.btn-preview {
+  background: #3498db;
+  color: white;
+}
+
+.btn-preview:hover {
   background: #2980b9;
 }
 
 /* PDFダウンロードボタン */
-.btn-pdf-download {
-  padding: 6px 12px;
+.btn-download {
   background: #27ae60;
   color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
-  transition: background 0.3s;
-  white-space: nowrap;
-  display: block;
-  width: 100%;
-  text-align: center;
 }
 
-.btn-pdf-download:hover:not(:disabled) {
+.btn-download:hover:not(:disabled) {
   background: #229954;
 }
 
-.btn-pdf-download:disabled {
+.btn-download:disabled {
   background: #95a5a6;
   cursor: not-allowed;
 }
 
-/* ===== 操作列のスタイル（赤青系） ===== */
-.table-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 8px;
-  align-items: stretch;
-  vertical-align: middle;
+/* メール送信ボタン */
+.btn-email {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-email:hover:not(:disabled) {
+  background-color: #2980b9;
+}
+
+.btn-email:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* 履歴ボタン */
+.btn-history {
+  background-color: #95a5a6;
+  color: white;
+}
+
+.btn-history:hover {
+  background-color: #7f8c8d;
 }
 
 /* 編集ボタン */
 .btn-edit {
-  padding: 6px 12px;
   background: #007bff;
   color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
-  transition: all 0.2s;
-  white-space: nowrap;
-  display: block;
-  width: 100%;
-  text-align: center;
 }
 
 .btn-edit:hover {
@@ -220,18 +261,8 @@
 
 /* 削除ボタン */
 .btn-delete {
-  padding: 6px 12px;
   background: #dc3545;
   color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
-  transition: all 0.2s;
-  white-space: nowrap;
-  display: block;
-  width: 100%;
-  text-align: center;
 }
 
 .btn-delete:hover {
@@ -250,6 +281,41 @@
   color: #999;
   font-style: italic;
   text-align: center;
+  font-size: 0.875rem;
+}
+
+/* プライマリボタン（支払済に変更など） */
+.btn-primary {
+  padding: 0.4rem 0.7rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.2s;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.btn-primary:hover {
+  background: #0056b3;
+}
+
+/* セカンダリボタン */
+.btn-secondary {
+  background-color: #41cdd7;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.btn-secondary:hover {
+  background-color: #34b4bd;
 }
 
 /* ===== モーダル - 通常のモーダル ===== */
@@ -276,7 +342,7 @@
 }
 
 .modal-large {
-  max-width: 800px;
+  max-width: 900px;
 }
 
 /* ===== PDFプレビュー専用スタイル（フルスクリーン） ===== */
@@ -307,7 +373,7 @@
 /* PDFプレビューモーダルのヘッダー */
 .pdf-preview-modal .modal-header {
   margin: 0px;
-  padding: 5px;
+  padding: 1rem 1.5rem;
   border-bottom: 1px solid #ddd;
   display: flex;
   justify-content: space-between;
@@ -319,7 +385,7 @@
 
 .pdf-preview-modal .modal-header h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: 1.25rem;
   color: #333;
 }
 
@@ -330,7 +396,7 @@
   font-size: 32px;
   color: #999;
   cursor: pointer;
-  padding-right: 10px;
+  padding: 0;
   width: 40px;
   height: 40px;
   display: flex;
@@ -371,27 +437,47 @@
   border-bottom: 1px solid #dee2e6;
 }
 
-.modal-header h2 {
+.modal-header h2,
+.modal-header h3 {
   margin: 0;
   font-size: 1.5rem;
   color: #333;
 }
 
 /* フォームスタイル */
-.invoices-form {
-  margin-bottom: 1.5rem;
+.form-section {
+  padding: 1.5rem;
 }
 
-.invoices-form label {
+.form-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  color: #333;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
   color: #333;
 }
 
-.invoices-form input,
-.invoices-form select,
-.invoices-form textarea {
+.form-group input,
+.form-group select,
+.form-group textarea {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid #ddd;
@@ -399,37 +485,16 @@
   font-size: 1rem;
 }
 
-.invoices-form input:focus,
-.invoices-form select:focus,
-.invoices-form textarea:focus {
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
   outline: none;
   border-color: #007bff;
 }
 
-.invoices-form textarea {
+.form-group textarea {
   resize: vertical;
   min-height: 100px;
-}
-
-.invoices-form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  padding: 1.5rem;
-}
-
-.invoices-form-group {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  align-items: end;
-}
-
-.invoices-form-hint {
-  display: block;
-  color: #666;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
 }
 
 .required {
@@ -437,24 +502,25 @@
   margin-left: 0.25rem;
 }
 
-/* 明細セクション */
-.items-section {
-  margin-top: 2rem;
-  padding: 1.5rem;
-  border-top: 2px solid #e5e7eb;
+/* チェックボックスラベル */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
 }
 
-.items-header {
+.checkbox-label input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+/* 明細セクション */
+.section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-}
-
-.items-header h3 {
-  margin: 0;
-  font-size: 1.25rem;
-  color: #333;
 }
 
 .btn-add-item {
@@ -493,14 +559,29 @@
 }
 
 .item-fields {
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
-  align-items: end;
 }
 
-.item-fields .invoices-form {
+.invoices-form {
   margin-bottom: 0;
+}
+
+.invoices-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.invoices-form input,
+.invoices-form select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
 }
 
 .btn-remove-item {
@@ -512,7 +593,8 @@
   font-size: 0.875rem;
   cursor: pointer;
   transition: background-color 0.2s;
-  height: fit-content;
+  margin-top: 0.5rem;
+  align-self: flex-start;
 }
 
 .btn-remove-item:hover {
@@ -549,28 +631,13 @@
   background: #5a6268;
 }
 
-.btn-primary {
-  padding: 0.75rem 1.5rem;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background 0.2s;
-}
-
-.btn-primary:hover {
-  background: #0056b3;
-}
-
 /* エラーメッセージ */
 .error-message {
   background: #f8d7da;
   color: #721c24;
   padding: 1rem;
   border-radius: 4px;
-  margin: 1rem 1.5rem;
+  margin-bottom: 1rem;
   border: 1px solid #f5c6cb;
 }
 
@@ -593,35 +660,59 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* ヘッダーのボタングループ */
-.header-buttons {
-  display: flex;
-  gap: 1rem;
-}
-
-/* セカンダリボタン（テンプレート管理用） */
-.btn-template1 {
-  background-color: #41cdd7;
+/* 配信ステータスバッジ */
+.delivery-status-sent {
+  background-color: #27ae60;
   color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
+  padding: 0.35rem 0.65rem;
   border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s;
+  font-size: 0.875rem;
+  display: inline-block;
 }
 
-.btn-template1:hover {
-  background-color: #7f8c8d;
+.delivery-status-failed {
+  background-color: #e74c3c;
+  color: white;
+  padding: 0.35rem 0.65rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  display: inline-block;
+}
+
+.delivery-status-pending {
+  background-color: #f39c12;
+  color: white;
+  padding: 0.35rem 0.65rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  display: inline-block;
+}
+
+/* エラー詳細 */
+.error-detail {
+  font-size: 0.75rem;
+  color: #e74c3c;
+  margin-top: 0.25rem;
 }
 
 /* レスポンシブ対応 */
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .invoices-container {
     padding: 1rem;
   }
 
-  .invoices-header {
+  .data-table {
+    font-size: 0.85rem;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
@@ -629,14 +720,18 @@
 
   .filters {
     flex-direction: column;
+    align-items: stretch;
   }
 
-  .filter-select {
+  .filter-group {
     width: 100%;
-    min-width: auto;
   }
 
-  .invoices-table {
+  .filter-group select {
+    width: 100%;
+  }
+
+  .data-table {
     display: block;
     overflow-x: auto;
   }
@@ -645,12 +740,7 @@
     max-width: 95%;
   }
 
-  .invoices-form-grid {
-    grid-template-columns: 1fr;
-    padding: 1rem;
-  }
-
-  .item-fields {
+  .form-row {
     grid-template-columns: 1fr;
   }
 
@@ -663,17 +753,8 @@
     width: 100%;
   }
 
-  .pdf-actions,
   .table-actions {
-    flex-direction: row;
-    justify-content: center;
-  }
-
-  .btn-pdf-preview,
-  .btn-pdf-download,
-  .btn-edit,
-  .btn-delete {
-    font-size: 11px;
-    padding: 5px 10px;
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

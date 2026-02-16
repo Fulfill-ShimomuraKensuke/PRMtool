@@ -4,16 +4,19 @@ import invoiceService from '../services/invoiceService';
 import partnerService from '../services/partnerService';
 import commissionRuleService from '../services/commissionRuleService';
 import invoiceTemplateService from '../services/invoiceTemplateService';
+import invoiceDeliveryService from '../services/invoiceDeliveryService';
 import './Invoices.css';
 
 /**
  * 請求書管理ページコンポーネント
  * 手数料ルールを選択して請求書を作成
  * 
- * 更新:
+ * 機能:
  * - テンプレート選択機能
  * - PDFダウンロード機能
  * - PDFプレビュー機能（フルスクリーン対応）
+ * - メール送信機能
+ * - 送付履歴表示機能
  * - 編集・削除ボタン縦並び
  */
 const Invoices = () => {
@@ -34,6 +37,24 @@ const Invoices = () => {
   const [previewInvoiceNumber, setPreviewInvoiceNumber] = useState('');
   const [downloadingPdf, setDownloadingPdf] = useState(null);
 
+  // メール送信用のstate
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailFormData, setEmailFormData] = useState({
+    invoiceId: '',
+    recipientEmail: '',
+    senderEmailId: '',
+    subject: '',
+    body: '',
+    attachPdf: true,
+  });
+  const [senderEmails, setSenderEmails] = useState([]);
+
+  // 送付履歴表示用のstate
+  const [showDeliveryHistory, setShowDeliveryHistory] = useState(false);
+  const [selectedInvoiceDeliveries, setSelectedInvoiceDeliveries] = useState([]);
+  const [loadingDeliveries, setLoadingDeliveries] = useState(false);
+
   const [formData, setFormData] = useState({
     partnerId: '',
     issueDate: '',
@@ -52,6 +73,7 @@ const Invoices = () => {
   useEffect(() => {
     document.title = '請求書管理 - PRM Tool';
     fetchData();
+    fetchSenderEmails();
   }, []);
 
   // フィルター処理
@@ -94,6 +116,18 @@ const Invoices = () => {
     }
   };
 
+  /**
+   * 送信元メールアドレス一覧を取得
+   */
+  const fetchSenderEmails = async () => {
+    try {
+      const data = await invoiceDeliveryService.getAllSenderEmails();
+      setSenderEmails(data);
+    } catch (err) {
+      console.error('送信元メールアドレスの取得に失敗:', err);
+    }
+  };
+
   // テンプレート管理画面へ遷移
   const handleNavigateToTemplates = () => {
     navigate('/invoice-templates');
@@ -129,13 +163,11 @@ const Invoices = () => {
     try {
       setError('');
 
-      // PDFをBlobとして取得
       const blob = await invoiceService.downloadPdf(
         invoice.id,
         invoice.templateId
       );
 
-      // BlobからURLを作成
       const url = URL.createObjectURL(blob);
 
       setPreviewPdfUrl(url);
@@ -158,6 +190,141 @@ const Invoices = () => {
     setPreviewPdfUrl(null);
     setPreviewInvoiceNumber('');
     setShowPdfPreview(false);
+  };
+
+  /**
+   * メール送信モーダルを開く
+   * 請求書とパートナー情報から初期値を設定
+   */
+  const handleOpenEmailModal = (invoice) => {
+    const partner = partners.find(p => p.id === invoice.partnerId);
+    const defaultSender = senderEmails.find(s => s.isDefault);
+
+    setEmailFormData({
+      invoiceId: invoice.id,
+      recipientEmail: partner?.email || '',
+      senderEmailId: defaultSender?.id || '',
+      subject: `【請求書送付】${partner?.name || ''}（請求書番号: ${invoice.invoiceNumber}）`,
+      body: generateDefaultEmailBody(invoice, partner),
+      attachPdf: true,
+    });
+
+    setShowEmailModal(true);
+  };
+
+  /**
+   * デフォルトのメール本文を生成
+   * パートナー名、請求書番号、金額などを含む
+   */
+  const generateDefaultEmailBody = (invoice, partner) => {
+    return `${partner?.name || ''} 御中
+
+いつもお世話になっております。
+
+下記の通り、請求書を送付いたします。
+
+━━━━━━━━━━━━━━━━━━━━━━
+請求書番号: ${invoice.invoiceNumber}
+発行日: ${invoice.issueDate}
+支払期限: ${invoice.dueDate}
+合計金額: ${formatCurrency(invoice.totalAmount)}
+━━━━━━━━━━━━━━━━━━━━━━
+
+ご確認のほど、よろしくお願いいたします。
+
+※本メールは自動送信されています。`;
+  };
+
+  /**
+   * メール送信モーダルを閉じる
+   */
+  const handleCloseEmailModal = () => {
+    setShowEmailModal(false);
+    setSendingEmail(false);
+    setEmailFormData({
+      invoiceId: '',
+      recipientEmail: '',
+      senderEmailId: '',
+      subject: '',
+      body: '',
+      attachPdf: true,
+    });
+  };
+
+  /**
+   * メール送信フォームの入力変更処理
+   */
+  const handleEmailFormChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setEmailFormData({
+      ...emailFormData,
+      [name]: type === 'checkbox' ? checked : value,
+    });
+  };
+
+  /**
+   * メール送信処理
+   * バックエンドAPIを呼び出して請求書をメール送信
+   */
+  const handleSendEmail = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    // バリデーション
+    if (!emailFormData.recipientEmail) {
+      setError('宛先メールアドレスを入力してください');
+      return;
+    }
+
+    if (!emailFormData.subject) {
+      setError('件名を入力してください');
+      return;
+    }
+
+    try {
+      setSendingEmail(true);
+
+      const response = await invoiceDeliveryService.sendInvoice(emailFormData);
+
+      if (response.status === 'SENT') {
+        alert('請求書を送信しました');
+        handleCloseEmailModal();
+      } else if (response.status === 'FAILED') {
+        setError(`メール送信に失敗しました: ${response.errorMessage || '不明なエラー'}`);
+      }
+    } catch (err) {
+      console.error('メール送信エラー:', err);
+      setError('メール送信に失敗しました: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
+  /**
+   * 送付履歴を表示
+   * 指定した請求書の送付履歴を取得して表示
+   */
+  const handleShowDeliveryHistory = async (invoice) => {
+    try {
+      setLoadingDeliveries(true);
+      setShowDeliveryHistory(true);
+
+      const deliveries = await invoiceDeliveryService.getDeliveriesByInvoice(invoice.id);
+      setSelectedInvoiceDeliveries(deliveries);
+    } catch (err) {
+      console.error('送付履歴取得エラー:', err);
+      setError('送付履歴の取得に失敗しました');
+    } finally {
+      setLoadingDeliveries(false);
+    }
+  };
+
+  /**
+   * 送付履歴モーダルを閉じる
+   */
+  const handleCloseDeliveryHistory = () => {
+    setShowDeliveryHistory(false);
+    setSelectedInvoiceDeliveries([]);
   };
 
   /**
@@ -317,132 +484,132 @@ const Invoices = () => {
       await invoiceService.delete(id);
       await fetchData();
     } catch (err) {
-      setError('請求書の削除に失敗しました');
+      setError(err.response?.data?.message || '削除に失敗しました');
       console.error(err);
     }
   };
 
-  const getStatusLabel = (status) => {
-    switch (status) {
-      case 'DRAFT':
-        return '下書き';
-      case 'ISSUED':
-        return '発行済';
-      case 'PAID':
-        return '支払済';
-      case 'CANCELLED':
-        return 'キャンセル';
-      default:
-        return status;
-    }
-  };
-
-  const getTaxCategoryLabel = (taxCategory) => {
-    switch (taxCategory) {
-      case 'TAX_INCLUDED':
-        return 'あり（商品＋手数料に課税）';
-      case 'TAX_ON_PRODUCT_ONLY':
-        return '手数料抜き（商品のみ課税）';
-      case 'TAX_EXEMPT':
-        return 'なし（非課税）';
-      default:
-        return taxCategory;
-    }
-  };
-
+  /**
+   * 通貨形式で金額を表示
+   */
   const formatCurrency = (amount) => {
+    if (!amount) return '¥0';
     return new Intl.NumberFormat('ja-JP', {
       style: 'currency',
       currency: 'JPY',
     }).format(amount);
   };
 
-  const handleClearFilters = () => {
-    setStatusFilter('ALL');
-    setPartnerFilter('ALL');
+  /**
+   * ステータス表示ラベル
+   */
+  const getStatusLabel = (status) => {
+    const statusMap = {
+      DRAFT: '下書き',
+      ISSUED: '発行済',
+      PAID: '支払済',
+      CANCELLED: 'キャンセル',
+    };
+    return statusMap[status] || status;
   };
 
-  const hasActiveFilters = statusFilter !== 'ALL' || partnerFilter !== 'ALL';
+  /**
+   * ステータスに応じたCSSクラス
+   */
+  const getStatusClass = (status) => {
+    const classMap = {
+      DRAFT: 'status-draft',
+      ISSUED: 'status-issued',
+      PAID: 'status-paid',
+      CANCELLED: 'status-cancelled',
+    };
+    return classMap[status] || '';
+  };
+
+  /**
+   * 配信ステータス表示ラベル
+   */
+  const getDeliveryStatusLabel = (status) => {
+    const statusMap = {
+      SENT: '送信成功',
+      FAILED: '送信失敗',
+      PENDING: '送信待ち',
+    };
+    return statusMap[status] || status;
+  };
+
+  /**
+   * 配信ステータスに応じたCSSクラス
+   */
+  const getDeliveryStatusClass = (status) => {
+    const classMap = {
+      SENT: 'delivery-status-sent',
+      FAILED: 'delivery-status-failed',
+      PENDING: 'delivery-status-pending',
+    };
+    return classMap[status] || '';
+  };
+
+  if (loading) {
+    return <div className="loading">読み込み中...</div>;
+  }
 
   return (
     <>
       <div className="invoices-container">
-        <div className="invoices-header">
-          <h1>📄 請求書管理</h1>
-          <div className="header-buttons">
-            <button className="btn-template1" onClick={handleNavigateToTemplates}>
-              📋 テンプレート管理
+        <div className="page-header">
+          <h1>請求書管理</h1>
+          <div className="header-actions">
+            <button onClick={handleNavigateToTemplates} className="btn-secondary">
+              テンプレート管理
             </button>
-            <button className="btn-primary" onClick={() => handleOpenModal()}>
-              + 新規請求書作成
+            <button onClick={() => handleOpenModal()} className="btn-primary">
+              新規請求書作成
             </button>
           </div>
         </div>
 
-        {/* フィルターエリア */}
-        <div className="filter-section">
-          <div className="filters">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="filter-select"
-            >
-              <option value="ALL">全てのステータス</option>
+        {error && <div className="error-message">{error}</div>}
+
+        {/* フィルターセクション */}
+        <div className="filters">
+          <div className="filter-group">
+            <label>ステータス:</label>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <option value="ALL">すべて</option>
               <option value="DRAFT">下書き</option>
               <option value="ISSUED">発行済</option>
               <option value="PAID">支払済</option>
               <option value="CANCELLED">キャンセル</option>
             </select>
-
-            <select
-              value={partnerFilter}
-              onChange={(e) => setPartnerFilter(e.target.value)}
-              className="filter-select"
-            >
-              <option value="ALL">全てのパートナー</option>
-              {partners.map((partner) => (
-                <option key={partner.id} value={partner.id}>
-                  {partner.name}
-                </option>
-              ))}
-            </select>
-
-            {hasActiveFilters && (
-              <button onClick={handleClearFilters} className="btn-clear-filters">
-                フィルターをクリア
-              </button>
-            )}
           </div>
 
-          {hasActiveFilters && (
-            <div className="search-results-info">
-              {filteredInvoices.length}件の請求書が見つかりました
-            </div>
-          )}
+          <div className="filter-group">
+            <label>パートナー:</label>
+            <select value={partnerFilter} onChange={(e) => setPartnerFilter(e.target.value)}>
+              <option value="ALL">すべて</option>
+              {partners.map(partner => (
+                <option key={partner.id} value={partner.id}>{partner.name}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        {error && <div className="error-message">{error}</div>}
-
-        {loading ? (
-          <div className="loading">読み込み中...</div>
-        ) : filteredInvoices.length === 0 ? (
-          <p className="no-data">
-            {hasActiveFilters
-              ? 'フィルター条件に一致する請求書がありません'
-              : '請求書がまだありません。新規作成してください。'}
-          </p>
+        {/* 請求書一覧テーブル */}
+        {filteredInvoices.length === 0 ? (
+          <div className="no-data">請求書がありません</div>
         ) : (
-          <table className="invoices-table">
+          <table className="data-table">
             <thead>
               <tr>
                 <th>請求書番号</th>
-                <th>パートナー名</th>
+                <th>パートナー</th>
                 <th>発行日</th>
                 <th>支払期限</th>
-                <th>消費税区分</th>
                 <th>合計金額</th>
                 <th>ステータス</th>
                 <th>PDF</th>
+                <th>メール</th>
                 <th>操作</th>
               </tr>
             </thead>
@@ -453,31 +620,51 @@ const Invoices = () => {
                   <td>{invoice.partnerName}</td>
                   <td>{invoice.issueDate}</td>
                   <td>{invoice.dueDate}</td>
-                  <td>{getTaxCategoryLabel(invoice.taxCategory)}</td>
-                  <td>{formatCurrency(invoice.totalAmount)}</td>
+                  <td className="text-right">{formatCurrency(invoice.totalAmount)}</td>
                   <td>
-                    <span className={`status-badge status-${invoice.status.toLowerCase()}`}>
+                    <span className={`status-badge ${getStatusClass(invoice.status)}`}>
                       {getStatusLabel(invoice.status)}
                     </span>
                   </td>
 
-                  {/* PDFダウンロード&プレビューボタン */}
+                  {/* PDF操作ボタン */}
                   <td>
-                    <div className="pdf-actions">
+                    <div className="table-actions">
                       <button
                         onClick={() => handlePreviewPdf(invoice)}
-                        className="btn-pdf-preview"
+                        className="btn-preview"
                         title="PDFプレビュー"
                       >
                         👁️ プレビュー
                       </button>
                       <button
                         onClick={() => handleDownloadPdf(invoice)}
-                        className="btn-pdf-download"
+                        className="btn-download"
                         disabled={downloadingPdf === invoice.id}
                         title="PDFダウンロード"
                       >
                         {downloadingPdf === invoice.id ? '⏳' : '📥'} ダウンロード
+                      </button>
+                    </div>
+                  </td>
+
+                  {/* メール操作ボタン */}
+                  <td>
+                    <div className="table-actions">
+                      <button
+                        onClick={() => handleOpenEmailModal(invoice)}
+                        className="btn-email"
+                        disabled={invoice.status === 'DRAFT'}
+                        title="メールで送付"
+                      >
+                        📧 送付
+                      </button>
+                      <button
+                        onClick={() => handleShowDeliveryHistory(invoice)}
+                        className="btn-history"
+                        title="送付履歴"
+                      >
+                        📋 履歴
                       </button>
                     </div>
                   </td>
@@ -529,182 +716,145 @@ const Invoices = () => {
           <div className="modal-content modal-large">
             <div className="modal-header">
               <h2>{editingInvoice ? '請求書編集' : '請求書作成'}</h2>
+              <button onClick={handleCloseModal} className="close-button">×</button>
             </div>
 
-            {error && <div className="error-message">{error}</div>}
-
             <form onSubmit={handleSubmit}>
-              <div className="invoices-form-grid">
-                <div className="invoices-form">
-                  <label>
-                    パートナー <span className="required">*</span>
-                  </label>
-                  <select
-                    name="partnerId"
-                    value={formData.partnerId}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="">選択してください</option>
-                    {partners.map((partner) => (
-                      <option key={partner.id} value={partner.id}>
-                        {partner.name}
-                      </option>
-                    ))}
-                  </select>
+              {/* 基本情報セクション */}
+              <div className="form-section">
+                <h3>基本情報</h3>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>
+                      パートナー <span className="required">*</span>
+                    </label>
+                    <select
+                      name="partnerId"
+                      value={formData.partnerId}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="">選択してください</option>
+                      {partners.map(partner => (
+                        <option key={partner.id} value={partner.id}>{partner.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>
+                      テンプレート <span className="required">*</span>
+                    </label>
+                    <select
+                      name="templateId"
+                      value={formData.templateId}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="">選択してください</option>
+                      {templates.map(template => (
+                        <option key={template.id} value={template.id}>
+                          {template.templateName} {template.isDefault && '(デフォルト)'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
-                <div className="invoices-form">
-                  <label>
-                    発行日 <span className="required">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    name="issueDate"
-                    value={formData.issueDate}
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>
+                      発行日 <span className="required">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      name="issueDate"
+                      value={formData.issueDate}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>
+                      支払期限 <span className="required">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      name="dueDate"
+                      value={formData.dueDate}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>税区分</label>
+                    <select
+                      name="taxCategory"
+                      value={formData.taxCategory}
+                      onChange={handleChange}
+                    >
+                      <option value="TAX_INCLUDED">税込</option>
+                      <option value="TAX_EXCLUDED">税抜</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>ステータス</label>
+                    <select
+                      name="status"
+                      value={formData.status}
+                      onChange={handleChange}
+                    >
+                      <option value="DRAFT">下書き</option>
+                      <option value="ISSUED">発行済</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>備考</label>
+                  <textarea
+                    name="notes"
+                    value={formData.notes}
                     onChange={handleChange}
-                    required
+                    rows="3"
+                    placeholder="特記事項があれば入力してください"
                   />
                 </div>
-
-                <div className="invoices-form">
-                  <label>
-                    支払期限 <span className="required">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    name="dueDate"
-                    value={formData.dueDate}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="invoices-form">
-                  <label>
-                    消費税区分 <span className="required">*</span>
-                  </label>
-                  <select
-                    name="taxCategory"
-                    value={formData.taxCategory}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="TAX_INCLUDED">あり（商品＋手数料に課税）</option>
-                    <option value="TAX_ON_PRODUCT_ONLY">手数料抜き（商品のみ課税）</option>
-                    <option value="TAX_EXEMPT">なし（非課税）</option>
-                  </select>
-                </div>
-
-                <div className="invoices-form">
-                  <label>
-                    ステータス <span className="required">*</span>
-                  </label>
-                  <select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleChange}
-                    required
-                    disabled={editingInvoice?.status === 'ISSUED' || editingInvoice?.status === 'PAID'}
-                  >
-                    <option value="DRAFT">下書き</option>
-                    <option value="ISSUED">発行済</option>
-                    <option value="PAID">支払済</option>
-                    <option value="CANCELLED">キャンセル</option>
-                  </select>
-                  {(editingInvoice?.status === 'ISSUED' || editingInvoice?.status === 'PAID') && (
-                    <small className="invoices-form-hint">
-                      発行済・支払済のステータスは「支払済に変更」ボタンから変更してください
-                    </small>
-                  )}
-                </div>
-
-                <div className="invoices-form">
-                  <label>
-                    請求書テンプレート <span className="required">*</span>
-                  </label>
-                  <select
-                    name="templateId"
-                    value={formData.templateId}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="">選択してください</option>
-                    {templates.map((template) => (
-                      <option key={template.id} value={template.id}>
-                        {template.templateName} {template.isDefault && '（デフォルト）'}
-                      </option>
-                    ))}
-                  </select>
-                  <small className="invoices-form-hint">
-                    PDF生成時に使用するテンプレートを選択してください
-                  </small>
-                </div>
-              </div>
-
-              <div className="invoices-form" style={{ padding: '0 1.5rem' }}>
-                <label>備考</label>
-                <textarea
-                  name="notes"
-                  value={formData.notes}
-                  onChange={handleChange}
-                  rows="3"
-                  placeholder="備考を入力してください"
-                />
               </div>
 
               {/* 明細セクション */}
-              <div className="items-section">
-                <div className="items-header">
+              <div className="form-section">
+                <div className="section-header">
                   <h3>明細</h3>
-                  <button type="button" onClick={handleAddItem} className="btn-add-item">
+                  <button
+                    type="button"
+                    onClick={handleAddItem}
+                    className="btn-add-item"
+                  >
                     + 明細を追加
                   </button>
                 </div>
 
                 {formData.items.map((item, index) => (
                   <div key={index} className="item-row">
-                    <div className="item-number">明細 {index + 1}</div>
+                    <div className="item-number">{index + 1}</div>
                     <div className="item-fields">
-                      <div className='invoices-form-group'>
-                        <div className="invoices-form">
-                          <label>
-                            数量 <span className="required">*</span>
-                          </label>
-                          <input
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) =>
-                              handleItemChange(index, 'quantity', parseInt(e.target.value))
-                            }
-                            min="1"
-                            required
-                          />
-                        </div>
-
-                        <div className="invoices-form">
-                          <label>
-                            単価 <span className="required">*</span>
-                          </label>
-                          <input
-                            type="number"
-                            value={item.unitPrice}
-                            onChange={(e) => handleItemChange(index, 'unitPrice', e.target.value)}
-                            placeholder="0"
-                            step="1"
-                            min="1"
-                            required
-                          />
-                        </div>
-                      </div>
                       <div className="invoices-form">
-                        <label>手数料ルール</label>
+                        <label>
+                          手数料ルール <span className="required">*</span>
+                        </label>
                         <select
                           value={item.commissionRuleId}
                           onChange={(e) => handleItemChange(index, 'commissionRuleId', e.target.value)}
-                          disabled={!formData.partnerId}
+                          required
                         >
-                          <option value="">手数料ルールなし</option>
+                          <option value="">選択してください</option>
                           {formData.partnerId ? (
                             getAvailableCommissionRules().map((rule) => (
                               <option key={rule.id} value={rule.id}>
@@ -738,6 +888,32 @@ const Invoices = () => {
                           value={item.description}
                           onChange={(e) => handleItemChange(index, 'description', e.target.value)}
                           placeholder="商品・サービスの説明"
+                          required
+                        />
+                      </div>
+
+                      <div className="invoices-form">
+                        <label>
+                          数量 <span className="required">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          value={item.quantity}
+                          onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
+                          min="1"
+                          required
+                        />
+                      </div>
+
+                      <div className="invoices-form">
+                        <label>
+                          単価 <span className="required">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          value={item.unitPrice}
+                          onChange={(e) => handleItemChange(index, 'unitPrice', e.target.value)}
+                          min="0"
                           required
                         />
                       </div>
@@ -793,6 +969,161 @@ const Invoices = () => {
                   title="Invoice PDF Preview"
                 />
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* メール送信モーダル */}
+      {showEmailModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>📧 請求書をメールで送付</h2>
+              <button onClick={handleCloseEmailModal} className="close-button">×</button>
+            </div>
+
+            <form onSubmit={handleSendEmail}>
+              <div className="form-group">
+                <label>
+                  宛先メールアドレス <span className="required">*</span>
+                </label>
+                <input
+                  type="email"
+                  name="recipientEmail"
+                  value={emailFormData.recipientEmail}
+                  onChange={handleEmailFormChange}
+                  placeholder="partner@example.com"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>送信元メールアドレス</label>
+                <select
+                  name="senderEmailId"
+                  value={emailFormData.senderEmailId}
+                  onChange={handleEmailFormChange}
+                >
+                  <option value="">デフォルトを使用</option>
+                  {senderEmails.map(sender => (
+                    <option key={sender.id} value={sender.id}>
+                      {sender.displayName} &lt;{sender.email}&gt;
+                      {sender.isDefault && ' (デフォルト)'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>
+                  件名 <span className="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="subject"
+                  value={emailFormData.subject}
+                  onChange={handleEmailFormChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>本文</label>
+                <textarea
+                  name="body"
+                  value={emailFormData.body}
+                  onChange={handleEmailFormChange}
+                  rows="10"
+                  placeholder="メール本文を入力してください"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="attachPdf"
+                    checked={emailFormData.attachPdf}
+                    onChange={handleEmailFormChange}
+                  />
+                  PDFを添付する
+                </label>
+              </div>
+
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  onClick={handleCloseEmailModal}
+                  className="btn-cancel"
+                  disabled={sendingEmail}
+                >
+                  キャンセル
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={sendingEmail}
+                >
+                  {sendingEmail ? '送信中...' : '📧 送信'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 送付履歴モーダル */}
+      {showDeliveryHistory && (
+        <div className="modal-overlay">
+          <div className="modal-content modal-large">
+            <div className="modal-header">
+              <h2>📋 送付履歴</h2>
+              <button onClick={handleCloseDeliveryHistory} className="close-button">×</button>
+            </div>
+
+            {loadingDeliveries ? (
+              <div className="loading">読み込み中...</div>
+            ) : selectedInvoiceDeliveries.length === 0 ? (
+              <div className="no-data">送付履歴がありません</div>
+            ) : (
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>送信日時</th>
+                    <th>宛先</th>
+                    <th>送信元</th>
+                    <th>件名</th>
+                    <th>ステータス</th>
+                    <th>送信者</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedInvoiceDeliveries.map((delivery) => (
+                    <tr key={delivery.id}>
+                      <td>{new Date(delivery.sentAt).toLocaleString('ja-JP')}</td>
+                      <td>{delivery.recipientEmail}</td>
+                      <td>{delivery.senderEmail}</td>
+                      <td>{delivery.subject}</td>
+                      <td>
+                        <span className={`status-badge ${getDeliveryStatusClass(delivery.status)}`}>
+                          {getDeliveryStatusLabel(delivery.status)}
+                        </span>
+                        {delivery.status === 'FAILED' && delivery.errorMessage && (
+                          <div className="error-detail">{delivery.errorMessage}</div>
+                        )}
+                      </td>
+                      <td>{delivery.sentBy}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            <div className="modal-actions">
+              <button onClick={handleCloseDeliveryHistory} className="btn-cancel">
+                閉じる
+              </button>
             </div>
           </div>
         </div>
