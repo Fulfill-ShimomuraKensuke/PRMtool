@@ -80,7 +80,8 @@ spring:
     host: sv8915.xserver.jp
     port: 465
     username: shimomura-kensuke@fulfill-group.co.jp
-    password: ${XSERVER_MAIL_PASSWORD}
+    # パスワードは直接記載（.envから読めない問題の回避）
+    password: simomura3109
     properties:
       mail:
         smtp:
@@ -251,8 +252,9 @@ logging:
 # ========================================
 mail:
   from:
+    # GmailのSMTP認証ユーザーと必ず同じアドレスを指定する
     email: ${MAIL_FROM_EMAIL:shimomura-kensuke@fulfill-group.co.jp}
-    name: ${MAIL_FROM_NAME:株式会社フルフィル}
+    name: ${MAIL_FROM_NAME:PRM Tool}
 
 # ========================================
 # ファイルストレージ設定（現在: ローカル）
