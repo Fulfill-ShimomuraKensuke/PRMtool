@@ -43,7 +43,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      # ddl-autoをnoneに変更（Flywayに任せる）
+      # Flywayに任せるためnoneに設定
       ddl-auto: none
     show-sql: true
     properties:
@@ -74,20 +74,22 @@ spring:
     placeholder-replacement: true
 
   # ==========================================
-  # メール送信設定（開発環境: Gmail）
+  # メール送信設定（開発環境: Xサーバー）
   # ==========================================
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: simomura3109@gmail.com  # Gmailアドレス
-    password: jxfietvnurzlcvtq    # Googleアプリパスワード
+    host: sv8915.xserver.jp
+    port: 465
+    username: shimomura-kensuke@fulfill-group.co.jp
+    password: ${XSERVER_MAIL_PASSWORD}
     properties:
       mail:
         smtp:
           auth: true
-          starttls:
+          ssl:
             enable: true
-            required: true
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
@@ -147,20 +149,22 @@ spring:
     out-of-order: false
 
   # ==========================================
-  # メール送信設定（本番環境: AWS SES）
+  # メール送信設定（本番環境: Xサーバー）
   # ==========================================
   mail:
-    host: email-smtp.ap-northeast-1.amazonaws.com  # AWS SESのSMTPエンドポイント（東京リージョン）
-    port: 587
-    username: ${AWS_SES_SMTP_USERNAME}  # AWS SES SMTPユーザー名
-    password: ${AWS_SES_SMTP_PASSWORD}  # AWS SES SMTPパスワード
+    host: sv8915.xserver.jp
+    port: 465
+    username: shimomura-kensuke@fulfill-group.co.jp
+    password: simomura3109
     properties:
       mail:
         smtp:
           auth: true
-          starttls:
+          ssl:
             enable: true
-            required: true
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
@@ -247,30 +251,30 @@ logging:
 # ========================================
 mail:
   from:
-    email: ${MAIL_FROM_EMAIL:noreply@prmtool.com}  # デフォルト送信元
-    name: ${MAIL_FROM_NAME:PRM Tool}                # デフォルト送信元名
+    email: ${MAIL_FROM_EMAIL:shimomura-kensuke@fulfill-group.co.jp}
+    name: ${MAIL_FROM_NAME:株式会社フルフィル}
 
 # ========================================
 # ファイルストレージ設定（現在: ローカル）
 # ========================================
 file:
   storage:
-    type: local  # local または s3
+    type: local
     local:
-      upload-dir: ./uploads  # ローカルストレージのディレクトリ
-    max-file-size: 10MB  # 最大ファイルサイズ
-    allowed-extensions: pdf,doc,docx,xls,xlsx,ppt,pptx,txt,png,jpg,jpeg,gif  # 許可する拡張子
+      upload-dir: ./uploads
+    max-file-size: 10MB
+    allowed-extensions: pdf,doc,docx,xls,xlsx,ppt,pptx,txt,png,jpg,jpeg,gif
 
 # ========================================
 # S3移行時の設定例（現在はコメントアウト）
 # ========================================
 # file:
 #   storage:
-#     type: s3  # localからs3に変更
+#     type: s3
 #     s3:
-#       bucket-name: your-bucket-name  # S3バケット名
-#       region: ap-northeast-1  # AWSリージョン（東京）
-#       access-key: ${AWS_ACCESS_KEY}  # 環境変数から取得
-#       secret-key: ${AWS_SECRET_KEY}  # 環境変数から取得
+#       bucket-name: your-bucket-name
+#       region: ap-northeast-1
+#       access-key: ${AWS_ACCESS_KEY}
+#       secret-key: ${AWS_SECRET_KEY}
 #     max-file-size: 10MB
 #     allowed-extensions: pdf,doc,docx,xls,xlsx,ppt,pptx,txt,png,jpg,jpeg,gif
